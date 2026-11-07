@@ -1,0 +1,2691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>MathQuest Ghana — Think. Solve. Conquer.</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&family=Righteous&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/js-confetti@0.12.0/dist/js-confetti.browser.js"></script>
+<style>
+/* ============================================================
+   ROOT VARIABLES & AGE THEMES
+   ============================================================ */
+:root {
+  --bg: #0b0e1b;
+  --surface: #111827;
+  --surface2: #1a2235;
+  --surface3: #1e2a40;
+  --border: rgba(255,255,255,0.08);
+  --border2: rgba(255,255,255,0.14);
+  --text: #eef2ff;
+  --text-muted: #7a8bb3;
+  --text-dim: #4a5878;
+  --card-shadow: 0 20px 60px rgba(0,0,0,0.6);
+
+  /* Age-theme colours (default = senior / 16+) */
+  --ap: #F59E0B;   /* primary */
+  --as: #F97316;   /* secondary */
+  --at: #FDE68A;   /* tertiary/light */
+
+  --green: #10b981;
+  --red: #ef4444;
+  --purple: #a855f7;
+  --cyan: #06b6d4;
+  --pink: #ec4899;
+
+  --btn-radius: 16px;
+  --card-radius: 28px;
+}
+
+/* Age-specific themes */
+body[data-age="tiny"]   { --ap:#FF6B6B; --as:#FF9F43; --at:#FFE66D; }
+body[data-age="junior"] { --ap:#4ECDC4; --as:#45B7D1; --at:#A8EDEA; }
+body[data-age="middle"] { --ap:#9B5DE5; --as:#F15BB5; --at:#D4ABFF; }
+body[data-age="teen"]   { --ap:#E76F51; --as:#2A9D8F; --at:#F4A261; }
+body[data-age="senior"] { --ap:#F59E0B; --as:#F97316; --at:#FDE68A; }
+
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  font-family: 'Nunito', sans-serif;
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  transition: background 0.4s;
+}
+
+/* Kente-stripe accent bar */
+body::before {
+  content: '';
+  position: fixed; top:0; left:0; right:0; height:3px;
+  background: repeating-linear-gradient(90deg,
+    #D62828 0%,#D62828 20%,
+    #F4A261 20%,#F4A261 40%,
+    #2A9D8F 40%,#2A9D8F 60%,
+    #F59E0B 60%,#F59E0B 80%,
+    #264653 80%,#264653 100%);
+  z-index: 9999;
+}
+
+/* ============================================================
+   BACKGROUND CANVAS
+   ============================================================ */
+#bg-canvas {
+  position: fixed; inset:0;
+  pointer-events: none; z-index: 0;
+}
+
+/* ============================================================
+   SCREEN SYSTEM
+   ============================================================ */
+.screen {
+  position: fixed; inset:0;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 10; padding: 1rem;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.4s ease, transform 0.4s cubic-bezier(.16,1,.3,1);
+  transform: translateY(16px) scale(0.99);
+  overflow-y: auto;
+}
+.screen.active {
+  opacity:1; pointer-events:all;
+  transform: translateY(0) scale(1);
+}
+
+/* ============================================================
+   CARD
+   ============================================================ */
+.card {
+  background: linear-gradient(160deg, rgba(17,24,39,0.97) 0%, rgba(20,30,50,0.97) 100%);
+  border: 1px solid var(--border2);
+  border-radius: var(--card-radius);
+  padding: 2.4rem 2rem;
+  width: 100%; max-width: 540px;
+  box-shadow: var(--card-shadow),
+              inset 0 1px 0 rgba(255,255,255,0.06),
+              0 0 0 1px rgba(255,255,255,0.03);
+  position: relative; overflow: hidden;
+}
+.card::before {
+  content:''; position:absolute; inset:0; pointer-events:none;
+  background:
+    radial-gradient(circle at 10% 0%, color-mix(in srgb, var(--ap) 12%, transparent) 0%, transparent 50%),
+    radial-gradient(circle at 90% 100%, color-mix(in srgb, var(--as) 8%, transparent) 0%, transparent 50%);
+}
+
+/* ============================================================
+   TYPOGRAPHY
+   ============================================================ */
+.logo {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(2.4rem, 7vw, 3.4rem);
+  background: linear-gradient(135deg, var(--ap), var(--as), var(--at));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.1; letter-spacing: -0.5px;
+}
+.logo-sub {
+  font-family: 'Righteous', cursive;
+  font-size: 0.8rem; color: var(--ap);
+  letter-spacing: 0.22em; margin-top: 0.15rem;
+}
+.tagline {
+  font-size: 0.9rem; color: var(--text-muted);
+  margin-top: 0.5rem; font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+/* ============================================================
+   NAME INPUT
+   ============================================================ */
+.name-input-wrap {
+  position: relative; margin: 0.8rem 0;
+}
+.name-input-wrap .ni-icon {
+  position:absolute; left:1rem; top:50%; transform:translateY(-50%);
+  font-size:1.1rem; pointer-events:none;
+}
+.name-input {
+  width:100%;
+  background: var(--surface2); border: 1.5px solid var(--border);
+  border-radius: 14px; padding: 0.85rem 1rem 0.85rem 2.8rem;
+  color: var(--text); font-size: 1rem;
+  font-family: 'Nunito', sans-serif; font-weight: 700;
+  outline: none; transition: border-color 0.2s;
+}
+.name-input::placeholder { color: var(--text-dim); font-weight: 600; }
+.name-input:focus { border-color: var(--ap); }
+
+/* ============================================================
+   SECTION DIVIDER
+   ============================================================ */
+.divider {
+  height: 1px; background: var(--border);
+  margin: 1.1rem 0; position: relative;
+}
+.divider span {
+  position:absolute; left:50%; transform:translateX(-50%) translateY(-50%);
+  background: var(--surface); padding: 0 0.7rem;
+  color: var(--text-muted); font-size: 0.7rem; font-weight: 800;
+  letter-spacing: 0.12em; text-transform: uppercase;
+}
+
+/* ============================================================
+   AGE SELECTOR
+   ============================================================ */
+.age-grid {
+  display: grid; grid-template-columns: repeat(5, 1fr);
+  gap: 0.45rem; margin-top: 0.7rem;
+}
+.age-btn {
+  background: var(--surface2); border: 1.5px solid var(--border);
+  border-radius: 14px; padding: 0.65rem 0.2rem;
+  color: var(--text-muted); font-size: 0.75rem;
+  cursor: pointer; transition: all 0.2s;
+  font-family: 'Nunito', sans-serif; font-weight: 800;
+  text-align: center;
+}
+.age-btn .age-icon { font-size: 1.3rem; display:block; margin-bottom: 0.2rem; }
+.age-btn:hover { border-color: var(--ap); color: var(--ap); }
+.age-btn.selected {
+  background: color-mix(in srgb, var(--ap) 15%, transparent);
+  border-color: var(--ap); color: var(--ap);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--ap) 20%, transparent);
+}
+
+/* ============================================================
+   MODE GRID
+   ============================================================ */
+.mode-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 0.6rem; margin: 0.7rem 0;
+}
+.mode-card {
+  background: var(--surface2); border: 1.5px solid var(--border);
+  border-radius: 16px; padding: 0.9rem 0.5rem;
+  cursor: pointer; transition: all 0.25s;
+  text-align: center; position:relative; overflow:hidden;
+}
+.mode-card:hover { transform: translateY(-2px); border-color: var(--border2); }
+.mode-card.selected {
+  border-color: var(--ap);
+  background: color-mix(in srgb, var(--ap) 10%, var(--surface2));
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--ap) 18%, transparent);
+}
+.mode-card.selected .mode-name { color: var(--ap); }
+.mode-icon { font-size: 1.6rem; margin-bottom: 0.3rem; display:block; }
+.mode-name { font-weight: 900; font-size: 0.85rem; color: var(--text); }
+.mode-desc { font-size: 0.68rem; color: var(--text-muted); margin-top: 0.2rem; font-weight: 600; }
+.mode-badge {
+  position:absolute; top:5px; right:5px;
+  background: var(--ap); color: #000;
+  font-size: 0.55rem; font-weight: 900; padding: 0.1rem 0.35rem;
+  border-radius: 999px; text-transform:uppercase; letter-spacing: 0.08em;
+}
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+.btn-primary {
+  width:100%; padding: 1rem;
+  background: linear-gradient(135deg, var(--ap), var(--as));
+  border: none; border-radius: var(--btn-radius);
+  color: #0b0e1b; font-weight: 900;
+  font-size: 1.05rem; cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Nunito', sans-serif;
+  box-shadow: 0 4px 24px color-mix(in srgb, var(--ap) 40%, transparent);
+}
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px color-mix(in srgb, var(--ap) 55%, transparent);
+}
+.btn-primary:active { transform: translateY(0); }
+
+.btn-secondary {
+  width:100%; padding: 0.8rem;
+  background: transparent; border: 1.5px solid var(--border2);
+  border-radius: var(--btn-radius); color: var(--text-muted);
+  font-size: 0.9rem; cursor: pointer;
+  transition: all 0.2s; margin-top: 0.6rem;
+  font-family: 'Nunito', sans-serif; font-weight: 700;
+}
+.btn-secondary:hover { border-color: var(--text-muted); color: var(--text); }
+
+.btn-icon {
+  display: inline-flex; align-items:center; justify-content:center;
+  gap: 0.4rem; padding: 0.55rem 1rem;
+  background: var(--surface2); border: 1.5px solid var(--border);
+  border-radius: 12px; color: var(--text-muted);
+  font-size: 0.82rem; cursor:pointer;
+  font-family: 'Nunito', sans-serif; font-weight: 700;
+  transition: all 0.2s;
+}
+.btn-icon:hover { border-color: var(--ap); color: var(--ap); }
+
+/* ============================================================
+   GAME SCREEN
+   ============================================================ */
+#game-screen .card { max-width: 600px; padding: 1.8rem 1.6rem; }
+
+/* HUD */
+.game-hud {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 1.2rem; gap: 0.4rem; flex-wrap: wrap;
+}
+.stat-pill {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 999px; padding: 0.35rem 0.8rem;
+  font-size: 0.8rem; font-weight: 800;
+  display: flex; align-items: center; gap: 0.35rem;
+  white-space: nowrap;
+}
+.stat-pill .val { color: var(--ap); font-family:'Righteous',cursive; font-size:0.9rem; }
+.stat-pill.streak .val { color: #fbbf24; }
+.stat-pill.lives .val { color: #ef4444; }
+
+/* Timer Ring */
+.timer-ring-wrap {
+  position:relative; width:54px; height:54px; flex-shrink:0;
+}
+.timer-ring-wrap svg { transform: rotate(-90deg); }
+.timer-track { fill:none; stroke:var(--surface2); stroke-width:4.5; }
+.timer-fill {
+  fill:none; stroke:var(--ap); stroke-width:4.5;
+  stroke-linecap:round;
+  transition: stroke-dashoffset 1s linear, stroke 0.3s;
+}
+.timer-num {
+  position:absolute; inset:0;
+  display:flex; align-items:center; justify-content:center;
+  font-weight:900; font-size:1rem; color:var(--ap);
+  font-family:'Righteous',cursive;
+}
+
+/* Lives row */
+.lives-row { display:flex; gap:0.2rem; align-items:center; }
+.heart { font-size:0.85rem; transition: all 0.3s; display:inline-block; }
+.heart.lost { filter:grayscale(1); opacity:0.28; transform:scale(0.8); }
+
+/* Power-ups */
+.powerups-row {
+  display:flex; gap:0.4rem; align-items:center;
+  margin-bottom: 0.6rem;
+}
+.pu-btn {
+  background: var(--surface2); border: 1.5px solid var(--border);
+  border-radius: 10px; padding: 0.3rem 0.65rem;
+  font-size: 0.8rem; cursor:pointer; font-weight:800;
+  transition: all 0.2s; font-family:'Nunito',sans-serif;
+  display:flex; align-items:center; gap:0.3rem;
+  position:relative;
+}
+.pu-btn .pu-icon { font-size:1rem; }
+.pu-btn .pu-label { font-size:0.68rem; color:var(--text-muted); }
+.pu-btn:not(:disabled):hover { border-color:var(--ap); }
+.pu-btn:disabled { opacity:0.3; cursor:not-allowed; }
+.pu-btn.active {
+  border-color:var(--ap);
+  background:color-mix(in srgb,var(--ap) 15%,var(--surface2));
+  animation: puPulse 1.5s ease infinite;
+}
+@keyframes puPulse {
+  0%,100%{ box-shadow:0 0 0 0 color-mix(in srgb,var(--ap) 30%,transparent); }
+  50%{ box-shadow:0 0 0 5px color-mix(in srgb,var(--ap) 0%,transparent); }
+}
+.pu-count {
+  position:absolute; top:-5px; right:-5px;
+  background:var(--ap); color:#000;
+  font-size:0.65rem; font-weight:900;
+  width:16px; height:16px;
+  border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+}
+
+/* Progress */
+.progress-wrap { margin-bottom: 1rem; }
+.progress-meta {
+  display:flex; justify-content:space-between;
+  font-size:0.73rem; color:var(--text-muted);
+  margin-bottom:0.35rem; font-weight:700;
+}
+.progress-track {
+  height: 7px; background: var(--surface2);
+  border-radius:999px; overflow:hidden;
+}
+.progress-fill {
+  height:100%;
+  background: linear-gradient(90deg, var(--ap), var(--as));
+  border-radius:999px; transition: width 0.6s cubic-bezier(.16,1,.3,1);
+}
+
+/* Story scene */
+.story-scene {
+  background: linear-gradient(135deg, rgba(236,72,153,0.07), rgba(245,158,11,0.04));
+  border: 1px solid rgba(236,72,153,0.18);
+  border-radius: 16px; padding: 0.9rem 1rem;
+  margin-bottom: 0.9rem; display:none;
+  font-size: 0.85rem; line-height:1.6;
+}
+.story-scene.show { display:block; animation: fadeUp 0.3s ease; }
+.ss-speaker { font-size:0.7rem; color:var(--pink); font-weight:800; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:0.3rem; }
+.ss-body { display:flex; gap:0.7rem; align-items:flex-start; }
+.ss-avatar { font-size:1.7rem; flex-shrink:0; }
+
+/* Think panel */
+.think-panel {
+  background: rgba(168,85,247,0.06); border: 1px solid rgba(168,85,247,0.2);
+  border-radius: 14px; padding: 0.9rem 1rem;
+  margin-bottom: 0.9rem; display:none;
+}
+.think-panel.show { display:block; animation: fadeUp 0.3s ease; }
+.tp-title { font-size:0.72rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--purple); font-weight:800; margin-bottom:0.5rem; }
+.tp-step {
+  display:flex; gap:0.6rem; align-items:baseline;
+  padding: 0.25rem 0; font-size:0.85rem;
+}
+.tp-num { color:var(--purple); font-weight:900; font-size:0.8rem; min-width:20px; }
+
+/* Visual box (tiny tots) */
+.visual-box {
+  display:none; background:var(--surface2);
+  border:1px solid var(--border); border-radius:18px;
+  padding: 1rem; margin-bottom:0.9rem; text-align:center;
+}
+.visual-box.show { display:block; animation: fadeUp 0.3s ease; }
+.visual-emoji-grid {
+  display:flex; flex-wrap:wrap; gap:0.5rem;
+  justify-content:center; max-width:340px; margin:0 auto;
+}
+.visual-emoji { font-size:2rem; transition: transform 0.15s; cursor:default; }
+.visual-emoji:hover { transform: scale(1.2); }
+
+/* Comparison visual */
+.visual-compare {
+  display:flex; gap:1.5rem; align-items:center; justify-content:center;
+}
+.compare-box {
+  background:var(--surface); border:2px solid var(--border2);
+  border-radius:14px; padding:0.8rem 1.5rem;
+  font-family:'Fredoka One',cursive; font-size:2.5rem;
+  color:var(--text); min-width:90px; text-align:center;
+}
+.compare-vs { font-size:1rem; color:var(--text-muted); font-weight:800; }
+
+/* Category badge */
+.q-badge {
+  display:inline-block; padding:0.25rem 0.85rem;
+  background:color-mix(in srgb,var(--ap) 12%,transparent);
+  border:1px solid color-mix(in srgb,var(--ap) 28%,transparent);
+  border-radius:999px; font-size:0.72rem;
+  color:var(--ap); margin-bottom:0.8rem;
+  font-weight:800; letter-spacing:0.06em; text-transform:uppercase;
+}
+
+/* Question box */
+.question-box {
+  background: linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+  border:1px solid var(--border2); border-radius:18px;
+  padding:1.3rem 1.4rem; margin-bottom:1rem;
+  min-height:78px; display:flex; align-items:center;
+  justify-content:center; text-align:center;
+  font-size:clamp(1rem, 3.2vw, 1.25rem);
+  font-weight:800; line-height:1.5;
+  position:relative;
+}
+.question-box.streak-glow {
+  box-shadow: 0 0 20px color-mix(in srgb,var(--ap) 25%,transparent),
+              inset 0 0 15px color-mix(in srgb,var(--ap) 6%,transparent);
+}
+.hint-chip {
+  position:absolute; bottom:-12px; right:14px;
+  background:var(--surface); border:1px solid var(--border2);
+  border-radius:999px; padding:0.2rem 0.8rem;
+  font-size:0.7rem; color:var(--cyan); font-weight:800;
+  cursor:pointer; transition:all 0.2s; white-space:nowrap;
+}
+.hint-chip:hover { background:rgba(6,182,212,0.1); }
+.hint-chip.empty { opacity:0.3; pointer-events:none; }
+
+/* Step display brain mode */
+.step-display {
+  font-family:'Courier New',monospace; font-size:0.85rem;
+  background:rgba(168,85,247,0.07); border:1px dashed rgba(168,85,247,0.25);
+  border-radius:12px; padding:0.9rem 1rem;
+  margin-bottom:0.9rem; display:none; line-height:1.9;
+}
+.step-display.show { display:block; }
+.sd-line { display:flex; gap:0.5rem; align-items:baseline; }
+.sd-n { color:var(--purple); font-size:0.75rem; font-weight:700; }
+
+/* Options */
+.options-grid {
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:0.65rem; margin-bottom:0.8rem;
+}
+.opt-btn {
+  background:var(--surface2); border:1.5px solid var(--border);
+  border-radius:14px; padding:0.85rem 0.5rem;
+  color:var(--text); font-size:clamp(0.9rem,2.4vw,1.05rem);
+  font-weight:800; cursor:pointer;
+  transition: all 0.18s cubic-bezier(.16,1,.3,1);
+  font-family:'Nunito',sans-serif;
+  position:relative; overflow:hidden;
+  display:flex; align-items:center; justify-content:center; gap:0.4rem;
+}
+.opt-btn .opt-key {
+  font-size:0.65rem; color:var(--text-dim);
+  font-weight:900; min-width:14px;
+}
+.opt-btn:hover:not(:disabled) {
+  border-color:var(--ap); color:var(--ap);
+  transform:translateY(-2px);
+  box-shadow:0 6px 18px color-mix(in srgb,var(--ap) 18%,transparent);
+}
+.opt-btn.correct {
+  border-color:var(--green)!important;
+  background:rgba(16,185,129,0.14)!important;
+  color:var(--green)!important;
+  animation: correctPop 0.4s cubic-bezier(.16,1,.3,1);
+}
+.opt-btn.wrong {
+  border-color:var(--red)!important;
+  background:rgba(239,68,68,0.12)!important;
+  color:var(--red)!important;
+  animation: shake 0.4s ease;
+}
+.opt-btn.dimmed { opacity:0.3; pointer-events:none; }
+
+/* Big option buttons for tiny tots */
+.opt-btn--big {
+  border-radius:18px; padding:1rem 0.5rem;
+  font-size:clamp(1.4rem, 4vw, 2rem);
+  font-family:'Fredoka One',cursive;
+  border:3px solid transparent!important;
+  color:#fff!important;
+  text-shadow:0 2px 4px rgba(0,0,0,0.3);
+}
+.opt-btn--big.correct {
+  background: #10b981!important;
+  border-color:#10b981!important;
+  color:#fff!important;
+}
+.opt-btn--big.wrong {
+  background: rgba(239,68,68,0.8)!important;
+  border-color:var(--red)!important;
+  color:#fff!important;
+}
+
+/* True/False big buttons */
+.tf-grid { grid-template-columns:1fr 1fr; }
+.opt-btn--tf {
+  font-size:1.1rem; padding:1rem;
+  font-family:'Fredoka One',cursive;
+}
+
+@keyframes correctPop {
+  0%{transform:scale(1)} 40%{transform:scale(1.08)} 100%{transform:scale(1)}
+}
+@keyframes shake {
+  0%,100%{transform:translateX(0)} 25%{transform:translateX(-7px)} 75%{transform:translateX(7px)}
+}
+
+/* Difficulty badge */
+.diff-badge {
+  display:inline-flex; align-items:center; gap:0.25rem;
+  padding:0.18rem 0.65rem; border-radius:999px;
+  font-size:0.68rem; font-weight:800; text-transform:uppercase; letter-spacing:0.07em;
+}
+.diff-badge.easy   {background:rgba(16,185,129,0.12);color:var(--green);border:1px solid rgba(16,185,129,0.2);}
+.diff-badge.medium {background:rgba(245,158,11,0.12);color:var(--ap);border:1px solid rgba(245,158,11,0.2);}
+.diff-badge.hard   {background:rgba(239,68,68,0.12);color:var(--red);border:1px solid rgba(239,68,68,0.2);}
+.diff-badge.expert {background:rgba(168,85,247,0.12);color:var(--purple);border:1px solid rgba(168,85,247,0.2);}
+
+/* Explanation panel */
+.explanation-panel {
+  background:rgba(6,182,212,0.06); border:1px solid rgba(6,182,212,0.2);
+  border-radius:14px; padding:0.9rem 1.1rem;
+  margin-top:0.7rem; display:none; animation:fadeUp 0.3s ease;
+}
+.explanation-panel.show { display:block; }
+.exp-title { font-size:0.7rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--cyan); font-weight:800; margin-bottom:0.4rem; }
+.exp-text { font-size:0.85rem; color:var(--text); line-height:1.65; }
+
+/* Math tip panel */
+.math-tip-panel {
+  background:rgba(168,85,247,0.06); border:1px solid rgba(168,85,247,0.2);
+  border-radius:14px; padding:0.85rem 1.1rem;
+  margin-top:0.6rem; display:none; animation:fadeUp 0.3s ease;
+}
+.math-tip-panel.show { display:block; }
+.mt-title { font-size:0.7rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--purple); font-weight:800; margin-bottom:0.35rem; }
+.mt-body { font-size:0.82rem; line-height:1.65; color:var(--text); }
+.mt-body strong { color:var(--ap); }
+
+/* Feedback toast */
+.feedback-toast {
+  text-align:center; min-height:2rem; padding:0.3rem;
+  font-size:0.88rem; font-weight:800; transition:all 0.3s;
+}
+.feedback-toast.correct-msg { color:var(--green); }
+.feedback-toast.wrong-msg   { color:var(--red); }
+.feedback-toast.hint-msg    { color:var(--cyan); }
+.feedback-toast .pts-chip {
+  display:inline-block; background:color-mix(in srgb,var(--green) 15%,transparent);
+  border:1px solid color-mix(in srgb,var(--green) 30%,transparent);
+  border-radius:999px; padding:0.1rem 0.6rem;
+  font-size:0.75rem; margin-left:0.5rem; color:var(--green);
+}
+.feedback-toast .sub-msg {
+  display:block; font-size:0.76rem; color:var(--text-muted);
+  font-weight:600; margin-top:0.1rem;
+}
+
+/* Keyboard hint */
+.kb-hint {
+  text-align:center; font-size:0.68rem; color:var(--text-dim);
+  margin-top:0.4rem;
+}
+.kbd {
+  display:inline-block; background:var(--surface2);
+  border:1px solid var(--border); border-radius:4px;
+  padding:0.08rem 0.38rem; font-size:0.65rem; font-family:monospace;
+}
+
+/* ============================================================
+   RESULT SCREEN
+   ============================================================ */
+#result-screen .card { text-align:center; max-width:540px; }
+.result-grade {
+  font-family:'Fredoka One',cursive; font-size:1.9rem;
+  margin-bottom:0.4rem;
+}
+.score-ring-wrap {
+  position:relative; width:130px; height:130px;
+  margin:0 auto 1.4rem;
+}
+.score-ring-wrap svg { transform:rotate(-90deg); }
+.sr-track { fill:none; stroke:var(--surface2); stroke-width:10; }
+.sr-fill {
+  fill:none; stroke:url(#scoreGrad); stroke-width:10;
+  stroke-linecap:round;
+  transition: stroke-dashoffset 1.2s cubic-bezier(.16,1,.3,1) 0.3s;
+}
+.sr-inner {
+  position:absolute; inset:0;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+}
+.sr-num { font-family:'Fredoka One',cursive; font-size:2rem; color:var(--ap); line-height:1; }
+.sr-label { font-size:0.65rem; color:var(--text-muted); font-weight:800; text-transform:uppercase; letter-spacing:0.07em; }
+
+.result-msg { color:var(--text-muted); font-size:0.9rem; margin-bottom:1.4rem; font-weight:600; }
+
+.stats-grid {
+  display:grid; grid-template-columns:repeat(3,1fr);
+  gap:0.6rem; margin-bottom:1.2rem;
+}
+.stat-block {
+  background:var(--surface2); border:1px solid var(--border);
+  border-radius:14px; padding:0.85rem 0.4rem; text-align:center;
+}
+.sb-val { font-family:'Fredoka One',cursive; font-size:1.5rem; line-height:1.1; }
+.sb-key { font-size:0.65rem; color:var(--text-muted); font-weight:800; text-transform:uppercase; letter-spacing:0.06em; margin-top:0.2rem; }
+
+.mastery-section { text-align:left; margin-bottom:1.2rem; }
+.mastery-title {
+  font-size:0.72rem; text-transform:uppercase; letter-spacing:0.1em;
+  color:var(--text-muted); font-weight:800; margin-bottom:0.6rem;
+}
+.mastery-row {
+  display:flex; justify-content:space-between; align-items:center;
+  background:var(--surface2); border:1px solid var(--border);
+  border-radius:10px; padding:0.5rem 0.8rem; margin-bottom:0.4rem;
+  font-size:0.82rem;
+}
+.mastery-name { font-weight:700; }
+.mastery-bar-wrap {
+  flex:1; max-width:100px; height:4px;
+  background:var(--surface); border-radius:999px; overflow:hidden; margin:0 0.6rem;
+}
+.mastery-bar { height:100%; border-radius:999px; transition:width 0.8s ease 0.5s; }
+.mastery-pct { font-weight:800; font-size:0.82rem; }
+
+.recommend-box {
+  background: color-mix(in srgb,var(--ap) 8%,transparent);
+  border:1px solid color-mix(in srgb,var(--ap) 22%,transparent);
+  border-radius:14px; padding:0.9rem 1rem;
+  text-align:left; margin-bottom:1.2rem;
+}
+.rb-title { font-size:0.72rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--ap); font-weight:800; margin-bottom:0.5rem; }
+.rb-item { font-size:0.84rem; color:var(--text); font-weight:600; padding:0.2rem 0; display:flex; gap:0.5rem; align-items:center; }
+
+.new-achievements {
+  margin-bottom:1rem;
+}
+.na-title { font-size:0.72rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-muted); font-weight:800; margin-bottom:0.5rem; text-align:left; }
+.na-row { display:flex; gap:0.5rem; flex-wrap:wrap; }
+.na-badge {
+  background:color-mix(in srgb,var(--ap) 12%,transparent);
+  border:1px solid color-mix(in srgb,var(--ap) 25%,transparent);
+  border-radius:999px; padding:0.35rem 0.8rem;
+  font-size:0.8rem; font-weight:700; color:var(--ap);
+  animation: popIn 0.4s cubic-bezier(.16,1,.3,1);
+}
+@keyframes popIn { from{transform:scale(0.6);opacity:0} to{transform:scale(1);opacity:1} }
+
+/* ============================================================
+   ACHIEVEMENTS SCREEN
+   ============================================================ */
+#achievements-screen .card { max-height:88vh; overflow-y:auto; }
+#achievements-screen .card::-webkit-scrollbar { width:4px; }
+#achievements-screen .card::-webkit-scrollbar-thumb { background:var(--border); border-radius:99px; }
+
+.ach-grid {
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:0.6rem; margin-top:0.8rem;
+}
+.ach-item {
+  background:var(--surface2); border:1px solid var(--border);
+  border-radius:14px; padding:0.8rem 0.9rem;
+  display:flex; gap:0.7rem; align-items:center;
+  transition: all 0.2s;
+}
+.ach-item.unlocked {
+  border-color:color-mix(in srgb,var(--ap) 30%,transparent);
+  background:color-mix(in srgb,var(--ap) 7%,var(--surface2));
+}
+.ach-item.locked { opacity:0.42; filter:grayscale(0.6); }
+.ai-icon { font-size:1.6rem; flex-shrink:0; }
+.ai-info .ai-title { font-size:0.82rem; font-weight:800; }
+.ai-info .ai-desc { font-size:0.7rem; color:var(--text-muted); font-weight:600; }
+
+/* ============================================================
+   HIGH SCORES SCREEN
+   ============================================================ */
+#scores-screen .card { max-height:85vh; overflow-y:auto; }
+.score-entry {
+  display:flex; align-items:center; gap:0.7rem;
+  background:var(--surface2); border:1px solid var(--border);
+  border-radius:14px; padding:0.75rem 0.9rem; margin-bottom:0.5rem;
+}
+.score-rank {
+  width:28px; height:28px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-weight:900; font-size:0.82rem; flex-shrink:0;
+}
+.score-rank.gold   { background:rgba(245,158,11,0.2); color:#F59E0B; }
+.score-rank.silver { background:rgba(148,163,184,0.2); color:#94a3b8; }
+.score-rank.bronze { background:rgba(180,120,80,0.2); color:#c47b4a; }
+.score-rank.other  { background:var(--surface); color:var(--text-muted); }
+.score-info { flex:1; }
+.si-val { font-weight:800; font-size:0.9rem; }
+.si-meta { font-size:0.72rem; color:var(--text-muted); }
+.score-pts { font-family:'Fredoka One',cursive; font-size:1.3rem; color:var(--ap); }
+
+/* ============================================================
+   MASCOT — KOFI THE OWL
+   ============================================================ */
+#mascot {
+  position:fixed; bottom:1.2rem; right:1rem; z-index:200;
+  display:flex; flex-direction:column; align-items:flex-end;
+  pointer-events:none; opacity:0; transition:opacity 0.4s;
+}
+#mascot.show { opacity:1; }
+.mascot-body {
+  font-size:2.6rem; animation: mascotBob 2.5s ease-in-out infinite;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
+  cursor:default;
+}
+@keyframes mascotBob {
+  0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)}
+}
+.mascot-bubble {
+  background:var(--surface); border:1.5px solid var(--ap);
+  border-radius:14px 14px 4px 14px;
+  padding:0.6rem 0.9rem; margin-bottom:0.5rem;
+  font-size:0.78rem; font-weight:700; color:var(--text);
+  max-width:200px; text-align:center;
+  box-shadow:0 4px 16px rgba(0,0,0,0.3);
+  animation: bubblePop 0.4s cubic-bezier(.16,1,.3,1);
+}
+@keyframes bubblePop { from{transform:scale(0.7) translateY(10px);opacity:0} }
+
+/* ============================================================
+   LEVEL BANNER
+   ============================================================ */
+.level-banner {
+  position:fixed; top:1.5rem; left:50%; z-index:9990;
+  transform:translateX(-50%) translateY(-90px);
+  background:linear-gradient(135deg, var(--ap), var(--as));
+  color:#0b0e1b; padding:0.65rem 1.8rem; border-radius:999px;
+  font-weight:900; font-size:1rem; font-family:'Fredoka One',cursive;
+  box-shadow:0 8px 28px color-mix(in srgb,var(--ap) 45%,transparent);
+  transition:transform 0.5s cubic-bezier(.16,1,.3,1);
+  white-space:nowrap; pointer-events:none;
+}
+.level-banner.show { transform:translateX(-50%) translateY(0); }
+
+/* ============================================================
+   ACHIEVEMENT TOAST
+   ============================================================ */
+.ach-toast {
+  position:fixed; bottom:1.5rem; left:1rem; z-index:9990;
+  background:var(--surface); border:1.5px solid color-mix(in srgb,var(--ap) 35%,transparent);
+  border-radius:18px; padding:0.85rem 1.1rem;
+  display:flex; align-items:center; gap:0.7rem;
+  box-shadow:0 8px 28px rgba(0,0,0,0.5);
+  transform:translateX(-120%);
+  transition:transform 0.4s cubic-bezier(.16,1,.3,1);
+  max-width:260px; pointer-events:none;
+}
+.ach-toast.show { transform:translateX(0); }
+.at-icon { font-size:1.8rem; flex-shrink:0; }
+.at-title { font-weight:900; font-size:0.88rem; color:var(--ap); }
+.at-desc  { font-size:0.74rem; color:var(--text-muted); font-weight:600; }
+
+/* ============================================================
+   POWER-UP ACTIVATION FLASH
+   ============================================================ */
+.pu-flash {
+  position:fixed; inset:0; z-index:9980; pointer-events:none;
+  background:color-mix(in srgb,var(--ap) 15%,transparent);
+  opacity:0; transition:opacity 0.1s;
+}
+.pu-flash.show { opacity:1; }
+
+/* ============================================================
+   STREAK FIRE
+   ============================================================ */
+.streak-fire {
+  position:absolute; top:-10px; right:8px; font-size:1.4rem;
+  animation: fireFlicker 0.5s ease-in-out infinite alternate;
+  pointer-events:none; display:none;
+}
+.streak-fire.show { display:block; }
+@keyframes fireFlicker { from{transform:scale(1) rotate(-5deg)} to{transform:scale(1.15) rotate(5deg)} }
+
+/* ============================================================
+   SECTION HEADERS
+   ============================================================ */
+.section-hdr {
+  display:flex; align-items:center; gap:0.8rem; margin-bottom:1.3rem;
+}
+.section-hdr h2 {
+  font-family:'Fredoka One',cursive; font-size:1.7rem;
+  background:linear-gradient(135deg,var(--ap),var(--as));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.back-btn {
+  background:var(--surface2); border:1.5px solid var(--border);
+  border-radius:10px; padding:0.4rem 0.8rem;
+  color:var(--text-muted); font-size:0.78rem; cursor:pointer;
+  transition:all 0.2s; font-family:'Nunito',sans-serif; font-weight:700;
+}
+.back-btn:hover { color:var(--text); border-color:var(--border2); }
+
+/* ============================================================
+   MENU BOTTOM ROW
+   ============================================================ */
+.menu-bottom {
+  display:flex; gap:0.5rem; margin-top:0.6rem;
+}
+.menu-bottom .btn-icon { flex:1; justify-content:center; }
+
+/* ============================================================
+   UTIL
+   ============================================================ */
+.text-center { text-align:center; }
+.mt-sm{margin-top:0.5rem;} .mt-md{margin-top:1rem;} .mt-lg{margin-top:1.5rem;}
+.mb-sm{margin-bottom:0.5rem;} .mb-md{margin-bottom:1rem;}
+.hidden{display:none!important;}
+.flex{display:flex;} .items-center{align-items:center;} .gap-sm{gap:0.5rem;}
+
+@keyframes fadeUp {
+  from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)}
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media(max-width:480px){
+  .card{padding:1.6rem 1.1rem;}
+  .age-grid{grid-template-columns:repeat(5,1fr);}
+  .mode-grid{grid-template-columns:repeat(3,1fr);}
+  .stats-grid{grid-template-columns:repeat(3,1fr);}
+  .ach-grid{grid-template-columns:1fr;}
+  .game-hud{gap:0.3rem;}
+  #mascot{bottom:0.5rem; right:0.5rem;}
+}
+
+/* Daily challenge gold theme */
+body.daily-mode .card::before {
+  background:radial-gradient(circle at 50% 0%,rgba(245,158,11,0.14) 0%,transparent 60%);
+}
+body.daily-mode .progress-fill {
+  background:linear-gradient(90deg,#F59E0B,#FDE68A,#F59E0B);
+}
+
+/* Settings overlay */
+#settings-panel {
+  position:fixed; inset:0; z-index:9998;
+  background:rgba(0,0,0,0.7); backdrop-filter:blur(4px);
+  display:flex; align-items:center; justify-content:center;
+  padding:1rem; opacity:0; pointer-events:none; transition:opacity 0.3s;
+}
+#settings-panel.show{opacity:1;pointer-events:all;}
+#settings-panel .card{max-width:360px;}
+.setting-row {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:0.7rem 0; border-bottom:1px solid var(--border);
+  font-size:0.9rem; font-weight:700;
+}
+.toggle-btn {
+  background:var(--surface2); border:1.5px solid var(--border);
+  border-radius:999px; width:48px; height:26px;
+  cursor:pointer; position:relative; transition:all 0.2s;
+}
+.toggle-btn.on { background:var(--ap); border-color:var(--ap); }
+.toggle-btn::after {
+  content:''; position:absolute; top:3px; left:3px;
+  width:18px; height:18px; border-radius:50%;
+  background:#fff; transition: transform 0.2s;
+}
+.toggle-btn.on::after { transform:translateX(22px); }
+</style>
+</head>
+<body data-age="senior">
+
+<canvas id="bg-canvas"></canvas>
+
+<!-- ============================================================
+     MENU SCREEN
+============================================================ -->
+<div class="screen active" id="menu-screen">
+  <div class="card">
+    <div class="text-center mb-sm">
+      <div class="logo">MathQuest</div>
+      <div class="logo-sub">GHANA EDITION</div>
+      <div class="tagline">Think deeper. Solve smarter. Grow stronger.</div>
+    </div>
+
+    <div class="divider mt-md"><span>YOUR NAME</span></div>
+    <div class="name-input-wrap">
+      <span class="ni-icon">✏️</span>
+      <input type="text" class="name-input" id="player-name" placeholder="Enter your name…" maxlength="20" autocomplete="off">
+    </div>
+
+    <div class="divider mt-md"><span>AGE GROUP</span></div>
+    <div class="age-grid">
+      <button class="age-btn" data-age="tiny"   onclick="selectAge(this)"><span class="age-icon">🌱</span>5–6</button>
+      <button class="age-btn" data-age="junior" onclick="selectAge(this)"><span class="age-icon">⚡</span>7–9</button>
+      <button class="age-btn" data-age="middle" onclick="selectAge(this)"><span class="age-icon">🔥</span>10–12</button>
+      <button class="age-btn" data-age="teen"   onclick="selectAge(this)"><span class="age-icon">🚀</span>13–15</button>
+      <button class="age-btn selected" data-age="senior" onclick="selectAge(this)"><span class="age-icon">🏆</span>16+</button>
+    </div>
+
+    <div class="divider mt-md"><span>GAME MODE</span></div>
+    <div class="mode-grid">
+      <div class="mode-card selected" data-mode="classic" onclick="selectMode(this)">
+        <span class="mode-icon">🏆</span>
+        <div class="mode-name">Classic</div>
+        <div class="mode-desc">Score &amp; levels</div>
+      </div>
+      <div class="mode-card" data-mode="story" onclick="selectMode(this)">
+        <span class="mode-icon">📖</span>
+        <div class="mode-name">Story</div>
+        <div class="mode-desc">Market tales</div>
+      </div>
+      <div class="mode-card" data-mode="blitz" onclick="selectMode(this)">
+        <span class="mode-icon">⚡</span>
+        <div class="mode-name">Blitz</div>
+        <div class="mode-desc">60s speed rush</div>
+      </div>
+      <div class="mode-card" data-mode="brain" onclick="selectMode(this)">
+        <span class="mode-icon">🧠</span>
+        <div class="mode-name">Brain Train</div>
+        <div class="mode-desc">Step-by-step</div>
+      </div>
+      <div class="mode-card" data-mode="visual" onclick="selectMode(this)">
+        <span class="mode-icon">👁️</span>
+        <div class="mode-name">Visual</div>
+        <div class="mode-desc">See &amp; count</div>
+      </div>
+      <div class="mode-card" data-mode="daily" onclick="selectMode(this)">
+        <span class="mode-icon">📅</span>
+        <div class="mode-name">Daily</div>
+        <div class="mode-desc">Challenge of day</div>
+        <div class="mode-badge">NEW</div>
+      </div>
+    </div>
+
+    <button class="btn-primary mt-md" onclick="startGame()">Begin Adventure →</button>
+    <div class="menu-bottom mt-sm">
+      <button class="btn-icon" onclick="showScreen('achievements-screen')">🏅 Achievements</button>
+      <button class="btn-icon" onclick="showScreen('scores-screen'); loadHighScores()">🌟 Hall of Fame</button>
+      <button class="btn-icon" onclick="showSettings()">⚙️ Settings</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     GAME SCREEN
+============================================================ -->
+<div class="screen" id="game-screen">
+  <div class="card" id="game-card">
+    <!-- HUD -->
+    <div class="game-hud">
+      <div class="stat-pill"><span>Lv</span><span class="val" id="hud-level">1</span></div>
+      <div class="timer-ring-wrap">
+        <svg width="54" height="54" viewBox="0 0 54 54">
+          <circle class="timer-track" cx="27" cy="27" r="22.5"/>
+          <circle class="timer-fill" id="timer-circle" cx="27" cy="27" r="22.5"
+            stroke-dasharray="141.4" stroke-dashoffset="0"/>
+        </svg>
+        <div class="timer-num" id="hud-timer">10</div>
+      </div>
+      <div class="stat-pill streak">🔥<span class="val" id="hud-streak">0</span></div>
+      <div class="stat-pill">⭐<span class="val" id="hud-score">0</span></div>
+      <div class="stat-pill lives"><div class="lives-row" id="hud-lives"></div></div>
+    </div>
+
+    <!-- Power-ups -->
+    <div class="powerups-row" id="powerups-row">
+      <div class="pu-btn" id="pu-freeze" onclick="usePowerUp('freeze')" title="Freeze timer for 5s">
+        <span class="pu-icon">⏸</span><span class="pu-label">Freeze</span>
+        <span class="pu-count" id="pu-freeze-count">0</span>
+      </div>
+      <div class="pu-btn" id="pu-double" onclick="usePowerUp('double')" title="Double points next answer">
+        <span class="pu-icon">✨</span><span class="pu-label">×2 Pts</span>
+        <span class="pu-count" id="pu-double-count">0</span>
+      </div>
+      <div class="pu-btn" id="pu-shield" onclick="usePowerUp('shield')" title="Shield: ignore next wrong answer">
+        <span class="pu-icon">🛡</span><span class="pu-label">Shield</span>
+        <span class="pu-count" id="pu-shield-count">0</span>
+      </div>
+      <div style="margin-left:auto;font-size:0.72rem;color:var(--text-dim);font-weight:700;" id="pu-hint-label"></div>
+    </div>
+
+    <!-- Progress bar -->
+    <div class="progress-wrap">
+      <div class="progress-meta">
+        <span id="prog-label">Question 1 of 10</span>
+        <span id="prog-diff"></span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="prog-bar" style="width:0%"></div></div>
+    </div>
+
+    <!-- Story scene -->
+    <div class="story-scene" id="story-scene">
+      <div class="ss-speaker" id="ss-speaker"></div>
+      <div class="ss-body">
+        <span class="ss-avatar" id="ss-avatar">🛒</span>
+        <span id="ss-text"></span>
+      </div>
+    </div>
+
+    <!-- Think panel (brain mode) -->
+    <div class="think-panel" id="think-panel">
+      <div class="tp-title">💡 Think It Through</div>
+      <div id="think-steps"></div>
+    </div>
+
+    <!-- Visual box (tiny / visual mode) -->
+    <div class="visual-box" id="visual-box"></div>
+
+    <!-- Category badge -->
+    <div class="q-badge" id="q-badge">Maths</div>
+
+    <!-- Question box -->
+    <div class="question-box" id="question-box">
+      <span id="question-text">Loading…</span>
+      <span class="streak-fire" id="streak-fire">🔥</span>
+      <span class="hint-chip" id="hint-chip" onclick="useHint()">💡 Hint (<span id="hint-count">3</span>)</span>
+    </div>
+
+    <!-- Step display (brain mode) -->
+    <div class="step-display" id="step-display"></div>
+
+    <!-- Options grid -->
+    <div class="options-grid" id="options-grid"></div>
+
+    <!-- Explanation -->
+    <div class="explanation-panel" id="explanation-panel">
+      <div class="exp-title">📐 Here's How</div>
+      <div class="exp-text" id="exp-text"></div>
+    </div>
+
+    <!-- Math tip -->
+    <div class="math-tip-panel" id="math-tip-panel">
+      <div class="mt-title" id="mt-title">💡 Math Tip</div>
+      <div class="mt-body" id="mt-body"></div>
+    </div>
+
+    <!-- Feedback -->
+    <div class="feedback-toast" id="feedback-toast"></div>
+
+    <div class="kb-hint">Press <span class="kbd">1</span><span class="kbd">2</span><span class="kbd">3</span><span class="kbd">4</span> to answer</div>
+    <button class="btn-secondary mt-sm" onclick="confirmQuit()">✕ Quit Game</button>
+  </div>
+</div>
+
+<!-- ============================================================
+     RESULT SCREEN
+============================================================ -->
+<div class="screen" id="result-screen">
+  <div class="card text-center">
+    <div class="result-grade" id="result-grade">🏆</div>
+    <div class="score-ring-wrap">
+      <svg width="130" height="130" viewBox="0 0 130 130">
+        <defs>
+          <linearGradient id="scoreGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" style="stop-color:#F59E0B"/>
+            <stop offset="100%" style="stop-color:#EC4899"/>
+          </linearGradient>
+        </defs>
+        <circle class="sr-track" cx="65" cy="65" r="55"/>
+        <circle class="sr-fill" id="sr-fill" cx="65" cy="65" r="55"
+          stroke-dasharray="345.4" stroke-dashoffset="345.4"/>
+      </svg>
+      <div class="sr-inner">
+        <div class="sr-num" id="rc-score">0</div>
+        <div class="sr-label">Points</div>
+      </div>
+    </div>
+
+    <div class="result-msg" id="result-msg">Great effort!</div>
+
+    <div class="stats-grid">
+      <div class="stat-block">
+        <div class="sb-val" style="color:var(--green)" id="rs-correct">0</div>
+        <div class="sb-key">Correct</div>
+      </div>
+      <div class="stat-block">
+        <div class="sb-val" style="color:var(--ap)" id="rs-accuracy">0%</div>
+        <div class="sb-key">Accuracy</div>
+      </div>
+      <div class="stat-block">
+        <div class="sb-val" style="color:#fbbf24" id="rs-streak">0</div>
+        <div class="sb-key">Best Streak</div>
+      </div>
+    </div>
+
+    <!-- New achievements earned this game -->
+    <div class="new-achievements hidden" id="new-achievements-wrap">
+      <div class="na-title">🏅 New Achievements!</div>
+      <div class="na-row" id="na-row"></div>
+    </div>
+
+    <!-- Topic mastery -->
+    <div class="mastery-section" id="mastery-section"></div>
+
+    <!-- Recommendations -->
+    <div class="recommend-box" id="recommend-box"></div>
+
+    <button class="btn-primary" onclick="startGame()">Play Again</button>
+    <button class="btn-secondary" onclick="showScreen('menu-screen')">← Main Menu</button>
+  </div>
+</div>
+
+<!-- ============================================================
+     ACHIEVEMENTS SCREEN
+============================================================ -->
+<div class="screen" id="achievements-screen">
+  <div class="card">
+    <div class="section-hdr">
+      <button class="back-btn" onclick="showScreen('menu-screen')">← Back</button>
+      <h2>Achievements</h2>
+    </div>
+    <p style="font-size:0.8rem;color:var(--text-muted);font-weight:600;margin-bottom:0.6rem;" id="ach-count-label">0/20 unlocked</p>
+    <div class="ach-grid" id="ach-grid"></div>
+  </div>
+</div>
+
+<!-- ============================================================
+     HIGH SCORES SCREEN
+============================================================ -->
+<div class="screen" id="scores-screen">
+  <div class="card">
+    <div class="section-hdr">
+      <button class="back-btn" onclick="showScreen('menu-screen')">← Back</button>
+      <h2>Hall of Fame</h2>
+    </div>
+    <div id="scores-list"></div>
+    <button class="btn-secondary mt-md" onclick="clearScores()">🗑 Clear Scores</button>
+  </div>
+</div>
+
+<!-- ============================================================
+     SETTINGS PANEL (overlay)
+============================================================ -->
+<div id="settings-panel">
+  <div class="card" style="max-width:340px;">
+    <div class="section-hdr">
+      <h2 style="font-size:1.4rem;">Settings</h2>
+    </div>
+    <div class="setting-row">
+      <span>🔊 Sound Effects</span>
+      <div class="toggle-btn on" id="toggle-sound" onclick="toggleSetting('sound')"></div>
+    </div>
+    <div class="setting-row">
+      <span>🦉 Kofi Mascot</span>
+      <div class="toggle-btn on" id="toggle-mascot" onclick="toggleSetting('mascot')"></div>
+    </div>
+    <div class="setting-row">
+      <span>💡 Math Tips</span>
+      <div class="toggle-btn on" id="toggle-tips" onclick="toggleSetting('tips')"></div>
+    </div>
+    <button class="btn-primary mt-md" onclick="closeSettings()">Save &amp; Close</button>
+  </div>
+</div>
+
+<!-- ============================================================
+     OVERLAYS
+============================================================ -->
+<div class="level-banner" id="level-banner">🎉 Level Up!</div>
+
+<div class="ach-toast" id="ach-toast">
+  <div class="at-icon" id="at-icon">🏅</div>
+  <div>
+    <div class="at-title" id="at-title">Achievement!</div>
+    <div class="at-desc"  id="at-desc">You earned a badge.</div>
+  </div>
+</div>
+
+<div class="pu-flash" id="pu-flash"></div>
+
+<!-- MASCOT -->
+<div id="mascot">
+  <div class="mascot-bubble" id="mascot-bubble">Let's go! 🦉</div>
+  <div class="mascot-body">🦉</div>
+</div>
+
+<script>
+/* ============================================================
+   MATHQUEST GHANA — COMPLETE GAME ENGINE v2.0
+   ============================================================ */
+
+const jsConfetti = new JSConfetti();
+
+/* ============================================================
+   SETTINGS
+   ============================================================ */
+let settings = JSON.parse(localStorage.getItem('mqSettings') || '{}');
+settings = Object.assign({ sound: true, mascot: true, tips: true }, settings);
+
+function saveSettings(){ localStorage.setItem('mqSettings', JSON.stringify(settings)); }
+function showSettings(){
+  document.getElementById('toggle-sound').className  = 'toggle-btn' + (settings.sound   ? ' on' : '');
+  document.getElementById('toggle-mascot').className = 'toggle-btn' + (settings.mascot  ? ' on' : '');
+  document.getElementById('toggle-tips').className   = 'toggle-btn' + (settings.tips    ? ' on' : '');
+  document.getElementById('settings-panel').classList.add('show');
+}
+function closeSettings(){
+  document.getElementById('settings-panel').classList.remove('show');
+  saveSettings();
+}
+function toggleSetting(key){
+  settings[key] = !settings[key];
+  document.getElementById('toggle-' + key).className = 'toggle-btn' + (settings[key] ? ' on' : '');
+}
+
+/* ============================================================
+   SOUND SYSTEM (Web Audio API)
+   ============================================================ */
+let audioCtx = null;
+function getCtx(){
+  if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+function playTone(freq, dur, type='sine', vol=0.18){
+  if(!settings.sound) return;
+  try {
+    const ctx = getCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = type; osc.frequency.value = freq;
+    gain.gain.setValueAtTime(vol, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+    osc.start(ctx.currentTime); osc.stop(ctx.currentTime + dur);
+  } catch(e){}
+}
+function playChime(freqs){
+  if(!settings.sound) return;
+  freqs.forEach((f, i) => setTimeout(() => playTone(f, 0.25, 'sine', 0.15), i * 120));
+}
+const SFX = {
+  correct:     ()=> playChime([523, 659, 784]),
+  wrong:       ()=> playTone(220, 0.35, 'sawtooth', 0.12),
+  levelUp:     ()=> playChime([523, 659, 784, 1047, 1318]),
+  hint:        ()=> playTone(440, 0.15, 'triangle'),
+  tick:        ()=> playTone(900, 0.04, 'square', 0.08),
+  achievement: ()=> playChime([784, 988, 1175, 1568]),
+  powerUp:     ()=> playChime([659, 784, 988]),
+  timeout:     ()=> playTone(200, 0.5, 'sine', 0.12),
+};
+
+/* ============================================================
+   GHANA CONTEXT
+   ============================================================ */
+const NAMES = ['Kofi','Ama','Kwame','Akosua','Yaw','Abena','Kojo','Adwoa','Kweku','Yaa','Kwabena','Afia','Kwasi','Aba','Nana','Mawuli','Sefah','Adzo','Dela','Kafui','Edem','Sena','Yayra','Senam'];
+const ITEMS = ['mangoes','oranges','bananas','plantains','coconuts','pineapples','tomatoes','avocados','pawpaws','yams','garden eggs','kontomire','groundnuts','cocoa pods'];
+const MARKETS = ['Kejetia Market','Makola Market','Kumasi Central Market','Tema Market','Ashaiman Market','Cape Coast Market'];
+const STORY_CHARS = [
+  {name:'Kofi',avatar:'👦🏿',role:'young trader'},
+  {name:'Ama', avatar:'👧🏿',role:'market seller'},
+  {name:'Nana',avatar:'👴🏿',role:'wise farmer'},
+  {name:'Akosua',avatar:'👩🏿',role:'businesswoman'},
+  {name:'Kwame',avatar:'🧑🏿',role:'student'},
+];
+const FRUIT_EMOJIS  = ['🍎','🍊','🍋','🍇','🍓','🫐','🍉','🍑','🍒','🥝','🍍','🥭','🍌','🍏'];
+const ANIMAL_EMOJIS = ['🐘','🦁','🐆','🦒','🐦','🦅','🐢','🐠','🦋','🐾','🐔','🦜'];
+
+/* ============================================================
+   MATH FACTS
+   ============================================================ */
+const MATH_FACTS = [
+  {icon:'🌍', text:'African mathematicians developed counting systems thousands of years before ancient Greece!'},
+  {icon:'π',  text:'The number π (pi) goes on forever: 3.14159265358979… — it never repeats!'},
+  {icon:'0️⃣', text:'The concept of zero was a revolutionary invention — ancient mathematicians debated it for centuries!'},
+  {icon:'⏰', text:'A million seconds is about 11.5 days. A billion seconds is about 31.7 years!'},
+  {icon:'9️⃣', text:'Any number multiplied by 9: add the digits of the answer — they always sum to 9!'},
+  {icon:'🔢', text:'1+2+3+…+100 = 5050. Young Gauss solved this in seconds — can you spot the pattern?'},
+  {icon:'🌻', text:'The Fibonacci sequence (1,1,2,3,5,8,13…) appears in sunflowers, shells, and spiral galaxies!'},
+  {icon:'🇬🇭', text:'Ghana has produced many brilliant mathematicians who study at top universities worldwide!'},
+  {icon:'💯', text:'"%"  literally means "per hundred" — 75% = 75 out of every 100!'},
+  {icon:'📜', text:'Ancient Egyptians used fractions to divide bread and land equally among workers.'},
+  {icon:'♾️', text:'There are different "sizes" of infinity in mathematics — some infinities are bigger than others!'},
+  {icon:'🎲', text:'Probability is the maths of chance — it tells you how likely something is to happen.'},
+  {icon:'🔺', text:'Pythagoras proved that in a right triangle: a² + b² = c². This still holds for EVERY right triangle!'},
+  {icon:'🧮', text:'The word "Algorithm" comes from Al-Khwarizmi, a brilliant mathematician from 9th century Baghdad.'},
+  {icon:'💡', text:'Mental maths is like push-ups for your brain — the more you practice, the stronger you get!'},
+  {icon:'🌐', text:'A "googol" is 10^100 — a 1 followed by 100 zeros. It inspired the name "Google"!'},
+  {icon:'📐', text:'Geometry was used to re-measure land in ancient Egypt after the Nile River flooded it each year.'},
+  {icon:'🏗️', text:'Engineers use mathematics every day to build bridges, design phones, and make medicines!'},
+  {icon:'🎵', text:'Music is deeply mathematical — rhythms, scales, and frequencies all follow mathematical patterns.'},
+  {icon:'🤖', text:'Artificial intelligence is built almost entirely from mathematics — algebra, statistics, and calculus!'},
+];
+
+const MENTAL_TRICKS = [
+  {icon:'⚡', title:'Multiply by 11', body:'For 2-digit numbers, split the digits apart and place their <strong>sum in the middle</strong>.<br>E.g. 23×11: 2_3 → 2(2+3)3 = <strong>253</strong>'},
+  {icon:'5️⃣', title:'Multiply by 5', body:'Divide by 2, then multiply by 10.<br>E.g. 86×5 = 43×10 = <strong>430</strong>'},
+  {icon:'🎯', title:'Find 15% quickly', body:'Find 10% (shift decimal), then <strong>add half of that</strong>.<br>E.g. 15% of 80 = 8 + 4 = <strong>12</strong>'},
+  {icon:'4️⃣', title:'Multiply by 4', body:'<strong>Double it, then double again!</strong><br>E.g. 23×4 = 46×2 = <strong>92</strong>'},
+  {icon:'✓',  title:'Divisible by 9?', body:'Add all the digits. If they sum to 9 (or a multiple), it divides by 9!<br>E.g. 729: 7+2+9=18, 1+8=9 ✓'},
+  {icon:'🔢', title:'Square a number ending in 5', body:'Take the tens digit × (tens digit+1), then add 25.<br>E.g. 75² = 7×8=56, add 25 → <strong>5625</strong>'},
+  {icon:'➕', title:'Add near-100 numbers', body:'Round to 100, add, then adjust.<br>E.g. 97+85 = 100+85−3 = <strong>182</strong>'},
+  {icon:'🧮', title:'Percentages are symmetric!', body:'5% of 80 = 80% of 5 = 4<br>Always use whichever is <strong>easier to calculate!</strong>'},
+];
+
+const MATH_JOKES = [
+  'Why was 6 afraid of 7? Because 7 ate (8) 9! 😄',
+  'Why do plants hate maths? It gives them square roots! 🌱',
+  'Parallel lines have so much in common — it\'s a shame they\'ll never meet! 😢',
+  'I had a problem with maths once. Then I realised — I AM the problem! 🤣',
+  'Why is the maths book always sad? It has too many problems! 📚',
+];
+
+/* ============================================================
+   AGE CONFIGURATION
+   ============================================================ */
+const AGE_CONFIG = {
+  tiny:   {label:'5–6',  topics:['count_visual','bigger','comes_after','simple_add','simple_sub','pattern_easy','shapes','number_bond_5'], time:20, lives:5, totalQ:6,  diffProg:['easy','easy','easy','medium']},
+  junior: {label:'7–9',  topics:['add','sub','mul_easy','count_visual','pattern','number_bond_10','simple_time'],                          time:15, lives:4, totalQ:8,  diffProg:['easy','easy','medium','medium']},
+  middle: {label:'10–12',topics:['add','sub','mul','div','percent_simple','fraction','area','pattern','true_false','money_gh'],             time:12, lives:4, totalQ:10, diffProg:['easy','medium','medium','hard']},
+  teen:   {label:'13–15',topics:['mul','div','percent','fraction','area','algebra_simple','prime','pattern','statistics_basic','money_gh'], time:10, lives:3, totalQ:12, diffProg:['medium','hard','hard','expert']},
+  senior: {label:'16+',  topics:['percent','fraction','algebra','compound','geometry','exponent','sqrt','log','trig','statistics','prime'], time:10, lives:3, totalQ:15, diffProg:['medium','hard','expert','expert']},
+};
+
+/* ============================================================
+   ACHIEVEMENTS DEFINITIONS
+   ============================================================ */
+const ACHIEVEMENT_DEFS = [
+  {id:'first_star',   icon:'⭐',  title:'First Star!',      desc:'Get your first correct answer'},
+  {id:'perfect',      icon:'💎',  title:'Diamond Mind',     desc:'100% accuracy in a game'},
+  {id:'streak5',      icon:'🔥',  title:'On Fire!',         desc:'5 correct answers in a row'},
+  {id:'streak10',     icon:'🌋',  title:'Volcanic!',        desc:'10 correct answers in a row'},
+  {id:'no_hints',     icon:'🦅',  title:'Eagle Eye',        desc:'Finish a game without hints'},
+  {id:'no_wrong',     icon:'✨',  title:'Flawless',         desc:'No wrong answers in a game (5+ Qs)'},
+  {id:'speed_3',      icon:'⚡',  title:'Lightning Fast!',  desc:'Answer correctly with ≤ 3s left'},
+  {id:'come_back',    icon:'💪',  title:'The Comeback',     desc:'Win 5+ correct after losing 2 lives'},
+  {id:'ghana_story',  icon:'🇬🇭', title:'Ghana Pride',      desc:'Complete a Story mode game'},
+  {id:'brain_master', icon:'🧠',  title:'Brain Master',     desc:'Complete Brain Train mode'},
+  {id:'blitz_500',    icon:'🌪️',  title:'Blitz Beast',      desc:'Score 500+ in Blitz mode'},
+  {id:'s_rank',       icon:'🏆',  title:'Math Legend',      desc:'Achieve S Rank (95%+ accuracy)'},
+  {id:'level5',       icon:'🏰',  title:'Tower of Maths',   desc:'Reach level 5 in one game'},
+  {id:'tiny_champ',   icon:'🏅',  title:'Tiny Champion',    desc:'Complete the Tiny Tots course'},
+  {id:'geo_guru',     icon:'📐',  title:'Geometry Guru',    desc:'3+ geometry answers correct'},
+  {id:'alg_ace',      icon:'🔢',  title:'Algebra Ace',      desc:'3+ algebra answers correct'},
+  {id:'play5',        icon:'🃏',  title:'Persistent',       desc:'Play 5 games'},
+  {id:'score1000',    icon:'🌟',  title:'Thousand Club!',   desc:'Score 1000+ in one game'},
+  {id:'daily_done',   icon:'📅',  title:'Daily Devotion',   desc:'Complete the daily challenge'},
+  {id:'power_user',   icon:'⚗️',  title:'Power User',       desc:'Use all 3 power-up types'},
+];
+
+/* ============================================================
+   SEEDED PRNG (for daily challenge)
+   ============================================================ */
+function seededRand(seed){
+  let s = seed;
+  return function(){ s = (s * 1664525 + 1013904223) & 0xffffffff; return (s >>> 0) / 0xffffffff; };
+}
+function getDailySeed(){
+  const d = new Date();
+  return d.getFullYear()*10000 + (d.getMonth()+1)*100 + d.getDate();
+}
+
+/* ============================================================
+   STATE
+   ============================================================ */
+let state = {
+  ageGroup:'senior', mode:'classic',
+  playerName:'',
+  score:0, level:1, lives:3, streak:0, bestStreak:0,
+  qIndex:0, totalQ:15, correct:0, wrong:0,
+  hintsLeft:3, hintsUsed:0,
+  timerVal:10, timerMax:10, timerInterval:null,
+  blitzTimeLeft:60, freezeActive:false,
+  answered:false, currentQ:null,
+  categoryStats:{},
+  askedKeys:new Set(),
+  diff:'easy',
+  powerUps:{freeze:0, double:0, shield:0},
+  activePU:{freeze:false, double:false, shield:false},
+  powerUsed:{freeze:false, double:false, shield:false},
+  newAchievements:[],
+  comebackTracked:false, clutchAnswer:false, fastAnswer:false,
+  dailySeed:null,
+};
+
+/* ============================================================
+   UTILITIES
+   ============================================================ */
+function rand(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+function gcd(a,b){ return b?gcd(b,a%b):a; }
+function simplify(n,d){ let g=gcd(Math.abs(n),Math.abs(d)); return [n/g,d/g]; }
+function shuffle(arr){ return [...arr].sort(()=>Math.random()-0.5); }
+function getPlayerName(){ return state.playerName || pick(NAMES); }
+function getPlayCount(){ return parseInt(localStorage.getItem('mqPlayCount')||'0'); }
+
+/* ============================================================
+   QUESTION GENERATORS
+   ============================================================ */
+const GENERATORS = {
+
+  /* ------ TINY TOTS ------ */
+  count_visual: () => {
+    const emoji = pick(FRUIT_EMOJIS);
+    const count = rand(1, 8);
+    return {
+      type:'visual_count',
+      visualItems: Array.from({length:count}, ()=>emoji),
+      q:`How many ${emoji} are there?`,
+      a:count, category:'Counting',
+      explain:`Count each one carefully — there are ${count} altogether.`,
+      thinkSteps:[`Point to each ${emoji} as you count`,`Count out loud: ${Array.from({length:count},(_,i)=>i+1).join(', ')}`,`Total = ${count}`],
+    };
+  },
+
+  bigger: () => {
+    let a = rand(1,20), b;
+    do { b = rand(1,20); } while(b===a);
+    const ans = Math.max(a,b);
+    return {
+      type:'visual_compare',
+      visualA:a, visualB:b,
+      q:`Which number is bigger: ${a} or ${b}?`,
+      a:ans, category:'Comparing',
+      explain:`${ans} is bigger than ${Math.min(a,b)}. ${ans} > ${Math.min(a,b)}.`,
+      thinkSteps:[`Compare ${a} and ${b}`,`The bigger number has more value`,`${ans} is bigger`],
+    };
+  },
+
+  comes_after: () => {
+    const n = rand(0,19);
+    return {
+      q:`What number comes after ${n}?`,
+      a:n+1, category:'Counting',
+      explain:`Counting forward: …${n}, ${n+1}, ${n+2}… The next number is ${n+1}.`,
+      thinkSteps:[`Start at ${n}`,`Count forward one step`,`${n} + 1 = ${n+1}`],
+    };
+  },
+
+  simple_add: () => {
+    const emoji = pick(FRUIT_EMOJIS);
+    let a = rand(1,5), b = rand(1,5);
+    return {
+      type:'visual_count',
+      visualItems:[...Array.from({length:a},()=>emoji), ...Array.from({length:b},()=>'🌟')],
+      q:`${a} + ${b} = ?`,
+      a:a+b, category:'Addition',
+      explain:`${a} + ${b} = ${a+b}. We just count them all!`,
+      thinkSteps:[`Start with ${a}`,`Count ${b} more`,`${a} + ${b} = ${a+b}`],
+    };
+  },
+
+  simple_sub: () => {
+    let a = rand(3,10), b = rand(1,a-1);
+    return {
+      type:'visual_count',
+      visualItems:[...Array.from({length:a-b},()=>'🍎'), ...Array.from({length:b},()=>'❌')],
+      q:`${a} − ${b} = ?`,
+      a:a-b, category:'Subtraction',
+      explain:`${a} take away ${b} = ${a-b}.`,
+      thinkSteps:[`Start with ${a}`,`Take away ${b}`,`${a} − ${b} = ${a-b}`],
+    };
+  },
+
+  pattern_easy: () => {
+    const step = rand(1,3), start = rand(1,5);
+    const seq = [start, start+step, start+step*2, start+step*3];
+    return {
+      q:`What comes next? ${seq.slice(0,3).join(' → ')} → ?`,
+      a:seq[3], category:'Patterns',
+      explain:`The pattern adds ${step} each time. Next = ${seq[2]} + ${step} = ${seq[3]}`,
+      thinkSteps:[`The pattern: ${seq[0]}, ${seq[1]}, ${seq[2]}`,`Difference each time: +${step}`,`Next = ${seq[2]} + ${step} = ${seq[3]}`],
+    };
+  },
+
+  shapes: () => {
+    const shapes = [{name:'Circle',emoji:'⭕',sides:0},{name:'Triangle',emoji:'🔺',sides:3},{name:'Square',emoji:'🟥',sides:4},{name:'Rectangle',emoji:'▬',sides:4}];
+    const s = pick(shapes);
+    const q = s.sides===0
+      ? `A shape with no corners and no straight sides is called a…`
+      : `A ${s.emoji} has ${s.sides} sides. What shape is it?`;
+    return {
+      q, a:s.name, category:'Shapes',
+      explain:`A ${s.name} has ${s.sides===0?'no corners and is perfectly round':s.sides+' sides and '+s.sides+' corners'}.`,
+      thinkSteps:[`Think about the number of sides`,`Count the corners`,`That shape is a ${s.name}`],
+    };
+  },
+
+  number_bond_5: () => {
+    const a = rand(0,5), b = 5-a;
+    const missing = Math.random()>0.5 ? 'first' : 'second';
+    return {
+      q: missing==='first' ? `? + ${b} = 5` : `${a} + ? = 5`,
+      a: missing==='first' ? a : b,
+      category:'Number Bonds',
+      explain:`${a} + ${b} = 5 — these are a number bond pair that makes 5.`,
+      thinkSteps:[`We need two numbers that add to 5`,`${missing==='first'?b:a} is one of them`,`The other is ${missing==='first'?a:b}`],
+    };
+  },
+
+  /* ------ JUNIOR ------ */
+  number_bond_10: () => {
+    const a = rand(0,10), b = 10-a;
+    const missing = Math.random()>0.5 ? 'first' : 'second';
+    return {
+      q: missing==='first' ? `? + ${b} = 10` : `${a} + ? = 10`,
+      a: missing==='first' ? a : b,
+      category:'Number Bonds',
+      explain:`${a} + ${b} = 10. These number bonds are very useful in mental maths!`,
+      thinkSteps:[`We need two numbers that add to 10`,`One of them is ${missing==='first'?b:a}`,`10 − ${missing==='first'?b:a} = ${missing==='first'?a:b}`],
+    };
+  },
+
+  simple_time: () => {
+    const h = rand(1,12), add = pick([1,2,3,4]);
+    const ans = ((h-1+add)%12)+1;
+    return {
+      q:`It is ${h} o'clock. What time will it be in ${add} hour${add>1?'s':''}?`,
+      a:ans, category:'Time',
+      explain:`${h} o'clock + ${add} hours = ${ans} o'clock.`,
+      thinkSteps:[`Start at ${h} o'clock`,`Count forward ${add} hour${add>1?'s':''}`,`New time = ${ans} o'clock`],
+    };
+  },
+
+  /* ------ SHARED ------ */
+  add: (diff) => {
+    let a = diff==='easy'?rand(5,50):diff==='medium'?rand(20,200):rand(100,999);
+    let b = diff==='easy'?rand(5,50):diff==='medium'?rand(20,200):rand(100,999);
+    const name = getPlayerName();
+    return {
+      q:`${name} has ${a} cedis and earns ${b} more. Total?`,
+      a:a+b, category:'Addition',
+      explain:`Add: ${a} + ${b} = ${a+b}`,
+      thinkSteps:[`Start with ${a}`,`Add ${b}`,`${a} + ${b} = ${a+b}`],
+      storySetup:`${name} is counting money at ${pick(MARKETS)}.`,
+    };
+  },
+
+  sub: (diff) => {
+    let a = diff==='easy'?rand(20,100):diff==='medium'?rand(50,500):rand(200,2000);
+    let b = rand(1, Math.floor(a*0.8));
+    const name = getPlayerName(), item = pick(ITEMS);
+    return {
+      q:`${name} has ${a} ${item} and sells ${b}. How many remain?`,
+      a:a-b, category:'Subtraction',
+      explain:`Subtract: ${a} − ${b} = ${a-b}`,
+      thinkSteps:[`Start with ${a}`,`Remove ${b} that were sold`,`${a} − ${b} = ${a-b}`],
+      storySetup:`${name} opened their stall at ${pick(MARKETS)} with ${a} ${item}.`,
+    };
+  },
+
+  mul_easy: () => {
+    let a=rand(2,10), b=rand(2,10);
+    const name=getPlayerName(), item=pick(ITEMS);
+    return {
+      q:`${name} packs ${b} bags, ${a} ${item} each. Total?`,
+      a:a*b, category:'Multiplication',
+      explain:`${a} × ${b} = ${a*b}`,
+      thinkSteps:[`${b} groups of ${a}`,`Skip-count or multiply`,`${a} × ${b} = ${a*b}`],
+      storySetup:`${name} is packing ${item} for market day.`,
+    };
+  },
+
+  mul: (diff) => {
+    let a=diff==='medium'?rand(5,20):rand(10,50);
+    let b=diff==='medium'?rand(3,15):rand(5,25);
+    const name=getPlayerName();
+    return {
+      q:`${name} sells ${b} bags at ${a} cedis each. Total revenue?`,
+      a:a*b, category:'Multiplication',
+      explain:`${a} × ${b} = ${a*b} cedis`,
+      thinkSteps:[`Price per bag: GH₵ ${a}`,`Number sold: ${b}`,`${a} × ${b} = ${a*b}`],
+      storySetup:`${name} is tallying up today's market sales.`,
+    };
+  },
+
+  div: (diff) => {
+    let div=diff==='easy'?rand(2,5):diff==='medium'?rand(3,10):rand(4,20);
+    let q=diff==='easy'?rand(2,12):rand(5,30);
+    const name=getPlayerName(), item=pick(ITEMS);
+    return {
+      q:`${name} divides ${div*q} ${item} equally among ${div} friends. Each gets?`,
+      a:q, category:'Division',
+      explain:`${div*q} ÷ ${div} = ${q}`,
+      thinkSteps:[`Total: ${div*q}, Friends: ${div}`,`Divide equally`,`${div*q} ÷ ${div} = ${q}`],
+      storySetup:`${name} returns from ${pick(MARKETS)} with ${item} to share.`,
+    };
+  },
+
+  percent_simple: () => {
+    const pcts=[10,20,25,50];
+    let pct=pick(pcts), num=rand(1,10)*20;
+    const ans=pct*num/100;
+    const name=getPlayerName();
+    return {
+      q:`${name} gets ${pct}% off a ${num}-cedi item. Discount amount?`,
+      a:ans, category:'Percentages',
+      explain:`${pct}% of ${num} = (${pct}÷100)×${num} = ${ans} cedis`,
+      thinkSteps:[`"Percent" means per hundred`,`${pct}% = ${pct}/100`,`× ${num} = ${ans}`],
+      storySetup:`Sale alert at ${pick(MARKETS)}!`,
+    };
+  },
+
+  percent: (diff) => {
+    let pct=diff==='medium'?rand(10,50):rand(5,95);
+    let num=diff==='medium'?rand(50,300):rand(100,1000);
+    const ans=Math.round(pct*num/100);
+    const name=getPlayerName();
+    return {
+      q:`${name} invests GH₵${num} at ${pct}% profit. Profit amount?`,
+      a:ans, category:'Percentages',
+      explain:`(${pct}/100) × ${num} = ${ans} cedis`,
+      thinkSteps:[`${pct}% = ${pct}/100 = ${(pct/100).toFixed(2)}`,`× ${num}`,`= ${ans} cedis`],
+      storySetup:`${name} reviews this month's trading profits.`,
+    };
+  },
+
+  fraction: (diff) => {
+    let d=diff==='medium'?rand(3,6):rand(4,10);
+    let n=rand(1,d-1);
+    let total=d*rand(3,12);
+    const ans=Math.round(n/d*total);
+    const [sn,sd]=simplify(n,d);
+    const name=getPlayerName(), item=pick(ITEMS);
+    return {
+      q:`${name} sold ${sn}/${sd} of ${total} ${item}. How many sold?`,
+      a:ans, category:'Fractions',
+      explain:`${sn}/${sd} of ${total} = (${total}÷${sd})×${sn} = ${ans}`,
+      thinkSteps:[`Divide ${total} by denominator ${sd}: ${total/sd}`,`Multiply by numerator ${sn}`,`= ${ans}`],
+      storySetup:`${name}'s stall opened with ${total} ${item}.`,
+    };
+  },
+
+  area: (diff) => {
+    const shapes = diff==='easy'?['rectangle']:['rectangle','triangle','circle'];
+    const shape = pick(shapes);
+    if(shape==='rectangle'){
+      let l=rand(4,20), w=rand(3,15);
+      return {q:`Stall is ${l}m × ${w}m. Area?`, a:l*w, category:'Geometry',
+        explain:`Area = l × w = ${l}×${w} = ${l*w} m²`,
+        thinkSteps:[`Formula: A = length × width`,`= ${l} × ${w}`,`= ${l*w} m²`],
+        storySetup:`${getPlayerName()} measures a market plot.`};
+    } else if(shape==='triangle'){
+      let b=rand(4,18), h=rand(4,14);
+      const ans=Math.round(0.5*b*h);
+      return {q:`Triangle: base ${b}m, height ${h}m. Area?`, a:ans, category:'Geometry',
+        explain:`A = ½bh = 0.5×${b}×${h} = ${ans} m²`,
+        thinkSteps:[`Formula: A = ½ × base × height`,`= 0.5 × ${b} × ${h}`,`= ${ans} m²`],
+        storySetup:`${getPlayerName()} fences a triangular plot.`};
+    } else {
+      let r=rand(3,10);
+      const ans=Math.round(3.14159*r*r);
+      return {q:`Circle with radius ${r}m. Area? (π≈3.14)`, a:ans, category:'Geometry',
+        explain:`A = πr² = 3.14×${r}² = ${ans} m²`,
+        thinkSteps:[`Formula: A = π × r²`,`r² = ${r*r}`,`= 3.14 × ${r*r} ≈ ${ans}`],
+        storySetup:`${getPlayerName()} needs to cover a circular tank.`};
+    }
+  },
+
+  algebra_simple: () => {
+    let x=rand(2,12), b=rand(1,10);
+    return {
+      q:`If x = ${x}, what is 2x + ${b}?`,
+      a:2*x+b, category:'Algebra',
+      explain:`2(${x})+${b} = ${2*x}+${b} = ${2*x+b}`,
+      thinkSteps:[`x = ${x}, so 2x = 2×${x} = ${2*x}`,`Add ${b}`,`${2*x}+${b} = ${2*x+b}`],
+      storySetup:`${getPlayerName()}'s teacher sets an algebra challenge.`,
+    };
+  },
+
+  algebra: (diff) => {
+    let x=rand(2,15), a=diff==='hard'?rand(2,8):rand(1,12), b=rand(1,20);
+    return {
+      q:`y = ${a}x + ${b}, when x = ${x}. Find y.`,
+      a:a*x+b, category:'Algebra',
+      explain:`y = ${a}(${x})+${b} = ${a*x}+${b} = ${a*x+b}`,
+      thinkSteps:[`Substitute x = ${x}`,`y = ${a}×${x} + ${b} = ${a*x}+${b}`,`y = ${a*x+b}`],
+      storySetup:`${getPlayerName()} applies algebra to business planning.`,
+    };
+  },
+
+  pattern: (diff) => {
+    const step = diff==='easy'?rand(2,5):diff==='medium'?rand(3,10):rand(5,20);
+    const start = rand(1,10);
+    const isAdd = Math.random()>0.3;
+    const seq = isAdd
+      ? [start, start+step, start+step*2, start+step*3, start+step*4]
+      : [start*Math.pow(2,4), start*Math.pow(2,3), start*Math.pow(2,2), start*2, start].reverse();
+    const shown = seq.slice(0,4);
+    return {
+      q:`Complete the pattern: ${shown.join(' → ')} → ?`,
+      a:seq[4], category:'Patterns',
+      explain:`Pattern: ${isAdd?`add ${step} each time`:'multiply/divide'}. Next = ${seq[4]}`,
+      thinkSteps:[`Sequence: ${shown.join(', ')}`,`Each step: ${isAdd?`+${step}`:`difference`}`,`Next = ${seq[4]}`],
+    };
+  },
+
+  true_false: () => {
+    const ops = [
+      ()=>{const a=rand(5,50),b=rand(5,50),wrong=rand(-3,3);const c=a+b+wrong;return{stmt:`${a} + ${b} = ${c}`,correct:wrong===0};},
+      ()=>{const a=rand(2,12),b=rand(2,12),wrong=rand(-2,2);const c=a*b+wrong;return{stmt:`${a} × ${b} = ${c}`,correct:wrong===0};},
+      ()=>{const a=rand(10,50),b=rand(1,a-1),wrong=rand(-2,2);const c=a-b+wrong;return{stmt:`${a} − ${b} = ${c}`,correct:wrong===0};},
+    ];
+    const {stmt, correct} = pick(ops)();
+    return {
+      type:'true_false',
+      q:`True or False: ${stmt}`,
+      a:correct?'True':'False',
+      category:'True or False',
+      explain:correct?`Yes, ${stmt} is correct!`:`No — check your calculation!`,
+      thinkSteps:[`Work out the calculation`,`Compare with the given answer`,correct?`It matches — TRUE!`:`It doesn't match — FALSE!`],
+    };
+  },
+
+  statistics_basic: () => {
+    const nums = Array.from({length:5},()=>rand(5,40));
+    const type = pick(['mean','median']);
+    if(type==='mean'){
+      const sum=nums.reduce((a,b)=>a+b,0);
+      const ans=Math.round(sum/nums.length);
+      return {q:`Mean of: ${nums.join(', ')}?`, a:ans, category:'Statistics',
+        explain:`Mean = ${sum} ÷ ${nums.length} = ${ans}`,
+        thinkSteps:[`Add: ${nums.join('+')} = ${sum}`,`Divide by ${nums.length}`,`Mean = ${ans}`]};
+    } else {
+      const sorted=[...nums].sort((a,b)=>a-b);
+      const ans=sorted[Math.floor(sorted.length/2)];
+      return {q:`Median of: ${nums.join(', ')}?`, a:ans, category:'Statistics',
+        explain:`Sort: ${sorted.join(', ')} → middle = ${ans}`,
+        thinkSteps:[`Sort: ${sorted.join(', ')}`,`Find middle value`,`Median = ${ans}`]};
+    }
+  },
+
+  money_gh: () => {
+    const price = rand(1,20)*5, qty = rand(2,8);
+    const paid = Math.ceil(price*qty/50)*50;
+    const ans = paid - price*qty;
+    const name=getPlayerName();
+    return {
+      q:`${name} buys ${qty} items at GH₵${price} each. Pays GH₵${paid}. Change?`,
+      a:ans, category:'Money',
+      explain:`Total = ${qty}×${price} = ${qty*price}. Change = ${paid}−${qty*price} = ${ans}`,
+      thinkSteps:[`Cost: ${qty}×GH₵${price} = GH₵${qty*price}`,`Paid: GH₵${paid}`,`Change = ${paid}−${qty*price} = GH₵${ans}`],
+      storySetup:`${name} shops at ${pick(MARKETS)}.`,
+    };
+  },
+
+  prime: () => {
+    const primes=[2,3,5,7,11,13,17,19,23,29,31,37,41,43,47];
+    const composites=[4,6,8,9,10,12,14,15,16,18,20,21,22,24,25];
+    const isPrime=Math.random()>0.5;
+    const num=pick(isPrime?primes:composites);
+    return {
+      q:`Is ${num} a prime number?`,
+      a:isPrime?'Prime':'Not Prime', category:'Number Theory',
+      explain:isPrime?`${num} is prime — divisible only by 1 and itself.`:`${num} is NOT prime — it has other factors.`,
+      thinkSteps:[`Prime = divisible ONLY by 1 and itself`,`Test: can ${num} be divided by 2, 3, 5…?`,isPrime?`${num} is PRIME!`:`${num} has factors — NOT prime`],
+    };
+  },
+
+  compound: (diff) => {
+    let p=diff==='hard'?rand(5,50)*100:rand(100,1000);
+    let r=rand(5,20), t=rand(2,4);
+    const ans=Math.round(p*Math.pow(1+r/100,t));
+    const name=getPlayerName();
+    return {
+      q:`${name} invests GH₵${p} at ${r}% compound interest for ${t} years. Final amount?`,
+      a:ans, category:'Finance',
+      explain:`A = P(1+r/100)^t = ${p}×(1.${String(r).padStart(2,'0')})^${t} ≈ ${ans}`,
+      thinkSteps:[`Formula: A = P × (1+r/100)^t`,`= ${p} × ${(1+r/100).toFixed(2)}^${t}`,`≈ GH₵${ans}`],
+      storySetup:`${name} visits the bank to invest savings.`,
+    };
+  },
+
+  exponent: (diff) => {
+    let base=diff==='hard'?rand(3,7):rand(2,5);
+    let exp=diff==='expert'?rand(3,5):rand(2,4);
+    const ans=Math.pow(base,exp);
+    if(ans>100000) { base=2; exp=rand(2,4); }
+    return {
+      q:`What is ${base}^${exp}?`,
+      a:Math.pow(base,exp), category:'Exponents',
+      explain:`${base}^${exp} = ${Array.from({length:exp},()=>base).join('×')} = ${Math.pow(base,exp)}`,
+      thinkSteps:[`${base}^${exp} = multiply ${base} by itself ${exp} times`,`= ${Array.from({length:exp},()=>base).join('×')}`,`= ${Math.pow(base,exp)}`],
+    };
+  },
+
+  sqrt: () => {
+    const perfect=[4,9,16,25,36,49,64,81,100,121,144,169,196,225];
+    const sq=pick(perfect), ans=Math.sqrt(sq);
+    return {
+      q:`What is √${sq}?`,
+      a:ans, category:'Roots',
+      explain:`√${sq} = ${ans} because ${ans}² = ${sq}`,
+      thinkSteps:[`What number × itself = ${sq}?`,`Try ${ans}: ${ans}×${ans} = ${sq} ✓`,`√${sq} = ${ans}`],
+    };
+  },
+
+  log: () => {
+    const pairs=[[10,1],[100,2],[1000,3],[10000,4]];
+    const [num,ans]=pick(pairs);
+    return {
+      q:`log₁₀(${num}) = ?`,
+      a:ans, category:'Logarithms',
+      explain:`log₁₀(${num}) = ${ans} because 10^${ans} = ${num}`,
+      thinkSteps:[`log₁₀(x) asks "10 to what power = x?"`,`10^${ans} = ${num}`,`So log₁₀(${num}) = ${ans}`],
+    };
+  },
+
+  trig: () => {
+    const angles=[{d:0,s:0,c:1},{d:30,s:0.5,c:0.87},{d:45,s:0.71,c:0.71},{d:60,s:0.87,c:0.5},{d:90,s:1,c:0}];
+    const ang=pick(angles), useSin=Math.random()>0.5;
+    const ans=useSin?ang.s:ang.c;
+    return {
+      q:`${useSin?'sin':'cos'}(${ang.d}°) = ? (to 2 decimal places)`,
+      a:ans, category:'Trigonometry',
+      explain:`${useSin?'sin':'cos'}(${ang.d}°) = ${ans}. Memorise standard angles!`,
+      thinkSteps:[`Recall the standard angle table`,`${useSin?'sin':'cos'}(${ang.d}°) is a key value`,`= ${ans}`],
+    };
+  },
+
+  statistics: () => {
+    const nums=Array.from({length:5},()=>rand(10,60));
+    const type=pick(['mean','median','range']);
+    if(type==='mean'){
+      const sum=nums.reduce((a,b)=>a+b,0);
+      const ans=Math.round(sum/nums.length);
+      return {q:`Mean of: ${nums.join(', ')}?`, a:ans, category:'Statistics',
+        explain:`Sum=${sum}, ÷${nums.length} = ${ans}`,
+        thinkSteps:[`Add: ${sum}`,`Divide by ${nums.length}`,`Mean = ${ans}`]};
+    } else if(type==='range'){
+      const mn=Math.min(...nums), mx=Math.max(...nums);
+      return {q:`Range of: ${nums.join(', ')}?`, a:mx-mn, category:'Statistics',
+        explain:`Range = max−min = ${mx}−${mn} = ${mx-mn}`,
+        thinkSteps:[`Highest: ${mx}`,`Lowest: ${mn}`,`Range = ${mx}−${mn} = ${mx-mn}`]};
+    } else {
+      const sorted=[...nums].sort((a,b)=>a-b);
+      const ans=sorted[2];
+      return {q:`Median of: ${nums.join(', ')}?`, a:ans, category:'Statistics',
+        explain:`Sort: ${sorted.join(', ')} → middle = ${ans}`,
+        thinkSteps:[`Sort the numbers`,`Find the 3rd (middle) value`,`Median = ${ans}`]};
+    }
+  },
+
+  geometry: (diff) => {
+    const types=['angles_triangle','circle_circumference','volume_cuboid'];
+    const t = diff==='medium'?'angles_triangle':pick(types);
+    if(t==='angles_triangle'){
+      const a=rand(30,80), b=rand(20,80);
+      const c=180-a-b;
+      return {q:`Triangle angles: ${a}°, ${b}°, and ___°. Find the missing angle.`, a:c, category:'Geometry',
+        explain:`Angles in a triangle = 180°. ${a}+${b}+?=180 → ?=${c}`,
+        thinkSteps:[`Angles in ANY triangle sum to 180°`,`${a}+${b} = ${a+b}`,`Missing = 180−${a+b} = ${c}°`]};
+    } else if(t==='circle_circumference'){
+      const r=rand(3,12);
+      const ans=Math.round(2*3.14159*r);
+      return {q:`Circle radius ${r}m. Circumference? (π≈3.14)`, a:ans, category:'Geometry',
+        explain:`C = 2πr = 2×3.14×${r} = ${ans}m`,
+        thinkSteps:[`Formula: C = 2πr`,`= 2×3.14×${r}`,`= ${ans}m`]};
+    } else {
+      const l=rand(3,10), w=rand(2,8), h=rand(2,6);
+      const ans=l*w*h;
+      return {q:`Cuboid: ${l}m × ${w}m × ${h}m. Volume?`, a:ans, category:'Geometry',
+        explain:`V = l×w×h = ${l}×${w}×${h} = ${ans} m³`,
+        thinkSteps:[`Formula: V = l × w × h`,`= ${l}×${w}×${h}`,`= ${ans} m³`]};
+    }
+  },
+};
+
+/* ============================================================
+   DIFFICULTY TRACKING
+   ============================================================ */
+function getDiff(){
+  const cfg=AGE_CONFIG[state.ageGroup];
+  const prog=cfg.diffProg;
+  const idx=Math.min(Math.floor(state.qIndex/(state.totalQ/prog.length)),prog.length-1);
+  return prog[idx];
+}
+function getTopics(){ return AGE_CONFIG[state.ageGroup].topics; }
+
+/* ============================================================
+   GENERATE QUESTION
+   ============================================================ */
+function generateQuestion(forcedTopics){
+  const topics = forcedTopics || getTopics();
+  const diff = getDiff();
+  state.diff = diff;
+
+  let qObj, key, tries=0;
+  do {
+    const topic = pick(topics);
+    const gen = GENERATORS[topic];
+    if(!gen){ qObj = GENERATORS.add(diff); }
+    else { qObj = typeof gen==='function' ? gen(diff) : gen(); }
+    key = qObj.q.slice(0,50);
+    tries++;
+  } while(state.askedKeys.has(key) && tries < 30);
+
+  state.askedKeys.add(key);
+  state.currentQ = qObj;
+  return qObj;
+}
+
+/* ============================================================
+   WRONG OPTIONS GENERATOR
+   ============================================================ */
+function makeOptions(correct, diff){
+  const isStr = typeof correct === 'string';
+  if(isStr){
+    if(correct==='True'||correct==='False') return shuffle(['True','False']);
+    if(correct==='Prime'||correct==='Not Prime') return shuffle(['Prime','Not Prime','Even','Odd']);
+    const shapes=['Circle','Triangle','Square','Rectangle','Pentagon','Hexagon'];
+    const others=shapes.filter(s=>s!==correct).slice(0,3);
+    return shuffle([correct,...others]);
+  }
+  const offset = diff==='easy'?5:diff==='medium'?20:diff==='hard'?50:100;
+  let opts = new Set([correct]);
+  let attempts=0;
+  while(opts.size<4 && attempts<120){
+    attempts++;
+    const scale = Math.random()>0.5 ? rand(1,offset) : -rand(1,offset);
+    const candidate = Math.round(correct + scale);
+    if(candidate!==correct && candidate>=0) opts.add(candidate);
+  }
+  while(opts.size<4){ opts.add(Math.round(correct + opts.size*4 + 1)); }
+  return shuffle([...opts]);
+}
+
+/* ============================================================
+   SCREEN MANAGEMENT
+   ============================================================ */
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const t=document.getElementById(id);
+  if(t) t.classList.add('active');
+}
+
+/* ============================================================
+   SELECTIONS
+   ============================================================ */
+function selectAge(btn){
+  document.querySelectorAll('.age-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  state.ageGroup = btn.dataset.age;
+  document.body.dataset.age = state.ageGroup;
+}
+function selectMode(card){
+  document.querySelectorAll('.mode-card').forEach(c=>c.classList.remove('selected'));
+  card.classList.add('selected');
+  state.mode = card.dataset.mode;
+}
+
+/* ============================================================
+   START GAME
+   ============================================================ */
+function startGame(){
+  const cfg = AGE_CONFIG[state.ageGroup];
+  state.playerName = document.getElementById('player-name').value.trim() || '';
+
+  // Increment play count
+  localStorage.setItem('mqPlayCount', getPlayCount()+1);
+
+  Object.assign(state, {
+    score:0, level:1, lives:cfg.lives, streak:0, bestStreak:0,
+    qIndex:0, totalQ:cfg.totalQ, correct:0, wrong:0,
+    hintsLeft:3, hintsUsed:0, answered:false, currentQ:null,
+    categoryStats:{}, askedKeys:new Set(),
+    powerUps:{freeze:1, double:1, shield:1},
+    activePU:{freeze:false, double:false, shield:false},
+    powerUsed:{freeze:false, double:false, shield:false},
+    newAchievements:[], comebackTracked:false,
+    clutchAnswer:false, fastAnswer:false,
+  });
+  state.timerMax = cfg.time;
+  state.timerVal = cfg.time;
+
+  if(state.mode==='blitz'){ state.totalQ=999; state.blitzTimeLeft=60; }
+  if(state.mode==='daily'){
+    state.dailySeed = getDailySeed();
+    document.body.classList.add('daily-mode');
+  } else { document.body.classList.remove('daily-mode'); }
+
+  updateHUD(); updatePUButtons();
+  showScreen('game-screen');
+  if(settings.mascot) showMascot(state.playerName ? `Let's go, ${state.playerName}! 🦉` : `Ready to think? 🦉`);
+  presentQuestion();
+}
+
+/* ============================================================
+   PRESENT QUESTION
+   ============================================================ */
+function presentQuestion(){
+  if(state.qIndex>=state.totalQ && state.mode!=='blitz'){ endGame(); return; }
+
+  clearInterval(state.timerInterval);
+  state.answered = false;
+  state.timerVal  = state.timerMax;
+  const qStart = Date.now();
+
+  // Generate
+  const qObj = generateQuestion();
+  const opts  = makeOptions(qObj.a, state.diff);
+
+  // Progress
+  const pct = state.mode==='blitz' ? 100 : (state.qIndex/state.totalQ)*100;
+  document.getElementById('prog-bar').style.width = pct+'%';
+  document.getElementById('prog-label').textContent = state.mode==='blitz'
+    ? `Score: ${state.score} — ${state.blitzTimeLeft}s`
+    : `Question ${state.qIndex+1} of ${state.totalQ}`;
+
+  const diffMap = {easy:'easy',medium:'medium',hard:'hard',expert:'expert'};
+  document.getElementById('prog-diff').innerHTML = `<span class="diff-badge ${diffMap[state.diff]}">${state.diff}</span>`;
+
+  // Category badge
+  document.getElementById('q-badge').textContent = qObj.category;
+
+  // Question text
+  document.getElementById('question-text').textContent = qObj.q;
+  document.getElementById('hint-count').textContent = state.hintsLeft;
+  document.getElementById('hint-chip').className = 'hint-chip' + (state.hintsLeft<=0?' empty':'');
+
+  // Reset panels
+  ['explanation-panel','math-tip-panel'].forEach(id=>document.getElementById(id).classList.remove('show'));
+  const fbt = document.getElementById('feedback-toast');
+  fbt.textContent=''; fbt.className='feedback-toast';
+
+  // Streak glow
+  document.getElementById('question-box').classList.toggle('streak-glow', state.streak>=3);
+  document.getElementById('streak-fire').classList.toggle('show', state.streak>=5);
+
+  // Visual box
+  renderVisual(qObj);
+
+  // Story mode
+  const ss = document.getElementById('story-scene');
+  if(state.mode==='story' && qObj.storySetup){
+    const ch = pick(STORY_CHARS);
+    document.getElementById('ss-speaker').textContent = `${ch.avatar} ${ch.name} (${ch.role})`;
+    document.getElementById('ss-avatar').textContent   = ch.avatar;
+    document.getElementById('ss-text').textContent     = qObj.storySetup;
+    ss.classList.add('show');
+  } else { ss.classList.remove('show'); }
+
+  // Brain / visual mode think steps
+  const tp = document.getElementById('think-panel');
+  const sd = document.getElementById('step-display');
+  const showThink = (state.mode==='brain' || state.mode==='visual') && qObj.thinkSteps;
+  if(showThink){
+    document.getElementById('think-steps').innerHTML = qObj.thinkSteps.map((s,i)=>
+      `<div class="tp-step"><span class="tp-num">${i+1}.</span><span>${s}</span></div>`).join('');
+    tp.classList.add('show');
+    sd.innerHTML = qObj.thinkSteps.map((s,i)=>
+      `<div class="sd-line"><span class="sd-n">Step ${i+1}</span><span>${s}</span></div>`).join('');
+    sd.classList.add('show');
+  } else {
+    tp.classList.remove('show');
+    sd.classList.remove('show');
+  }
+
+  // Build options
+  const grid = document.getElementById('options-grid');
+  grid.innerHTML = '';
+  const isTiny = state.ageGroup==='tiny' || state.mode==='visual';
+  const isTF   = qObj.type==='true_false';
+  grid.className = 'options-grid' + (isTF?' tf-grid':'');
+  const TINY_COLORS = ['#FF6B6B','#4ECDC4','#45B7D1','#FFE66D'];
+
+  opts.forEach((opt,i)=>{
+    const btn = document.createElement('button');
+    if(isTiny){
+      btn.className = 'opt-btn opt-btn--big';
+      btn.style.background = TINY_COLORS[i%4];
+    } else if(isTF){
+      btn.className = 'opt-btn opt-btn--tf';
+      btn.style.background = opt==='True' ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.12)';
+      btn.style.borderColor = opt==='True' ? 'rgba(16,185,129,0.4)' : 'rgba(239,68,68,0.3)';
+      btn.style.color       = opt==='True' ? 'var(--green)' : 'var(--red)';
+    } else {
+      btn.className = 'opt-btn';
+      const keySpan = document.createElement('span');
+      keySpan.className = 'opt-key'; keySpan.textContent = i+1;
+      btn.appendChild(keySpan);
+    }
+    const txt = document.createTextNode(String(opt));
+    btn.appendChild(txt);
+    btn.dataset.val = opt;
+    btn.onclick = ()=>{ if(!state.answered) selectAnswer(opt, btn, Date.now()-qStart); };
+    grid.appendChild(btn);
+  });
+
+  updateHUD(); updateTimerUI(); updatePUButtons();
+
+  // Timer
+  state.timerInterval = setInterval(()=>{
+    if(state.freezeActive) return;
+    if(state.mode==='blitz'){
+      state.blitzTimeLeft--;
+      document.getElementById('prog-label').textContent = `Score: ${state.score} — ${state.blitzTimeLeft}s`;
+      if(state.blitzTimeLeft<=0){ clearInterval(state.timerInterval); endGame(); return; }
+    }
+    state.timerVal--;
+    if(state.timerVal<=3 && state.timerVal>0) SFX.tick();
+    updateTimerUI();
+    if(state.timerVal<=0 && !state.answered) timeOut();
+  }, 1000);
+}
+
+/* ============================================================
+   RENDER VISUAL
+   ============================================================ */
+function renderVisual(qObj){
+  const vb = document.getElementById('visual-box');
+  if(qObj.type==='visual_count' && qObj.visualItems){
+    const html = qObj.visualItems.map(e=>`<span class="visual-emoji">${e}</span>`).join('');
+    vb.innerHTML = `<div class="visual-emoji-grid">${html}</div>`;
+    vb.classList.add('show');
+  } else if(qObj.type==='visual_compare'){
+    vb.innerHTML = `<div class="visual-compare">
+      <div class="compare-box">${qObj.visualA}</div>
+      <span class="compare-vs">vs</span>
+      <div class="compare-box">${qObj.visualB}</div>
+    </div>`;
+    vb.classList.add('show');
+  } else {
+    vb.innerHTML=''; vb.classList.remove('show');
+  }
+}
+
+/* ============================================================
+   SELECT ANSWER
+   ============================================================ */
+function selectAnswer(selected, btn, elapsed){
+  if(state.answered) return;
+  state.answered = true;
+  clearInterval(state.timerInterval);
+  SFX.correct();
+
+  const correct = state.currentQ.a;
+  const isCorrect = String(selected) == String(correct);
+  const cat = state.currentQ.category;
+  if(!state.categoryStats[cat]) state.categoryStats[cat]={correct:0,wrong:0};
+
+  // Highlight
+  document.querySelectorAll('.opt-btn').forEach(b=>{
+    b.disabled=true;
+    if(String(b.dataset.val)===String(correct)) b.classList.add('correct');
+    else if(String(b.dataset.val)===String(selected)&&!isCorrect) b.classList.add('wrong');
+    else b.classList.add('dimmed');
+  });
+
+  if(isCorrect){
+    SFX.correct();
+    state.streak++; state.correct++;
+    if(state.streak>state.bestStreak) state.bestStreak=state.streak;
+    state.categoryStats[cat].correct++;
+
+    // Fast answer check
+    if(elapsed && elapsed/1000 <= 3) state.fastAnswer=true;
+
+    // Score
+    const timeBonus = Math.floor(state.timerVal * 2);
+    const streakBonus = state.streak>=3 ? state.streak*6 : 0;
+    const diffBonus = {easy:10,medium:18,hard:28,expert:42}[state.diff];
+    let pts = diffBonus + timeBonus + streakBonus;
+    if(state.activePU.double){ pts*=2; state.activePU.double=false; }
+    state.score += pts;
+
+    const msgs=['Excellent! 🎉','Brilliant! ⭐','Spot on! 🎯','Amazing! 🔥','Correct! ✅','Super! 🌟','Perfect! 💎','Outstanding! 🏆'];
+    const fbt = document.getElementById('feedback-toast');
+    fbt.className='feedback-toast correct-msg';
+    fbt.innerHTML = `${pick(msgs)} <span class="pts-chip">+${pts} pts${streakBonus?` (🔥×${state.streak})`:''}</span>`;
+
+    if(state.streak>=3) jsConfetti.addConfetti({particleCount:40,spread:50,colors:['#F59E0B','#10b981','#ec4899']});
+    if(state.streak===5) showMascot(`5 in a row! You're unstoppable! 🔥`);
+    if(state.streak===10) showMascot(`10 STREAK! You are a Math Champion! 🏆`);
+
+    checkLevelUp();
+    showExplanation();
+    if(settings.tips) showMathTip(cat);
+
+    const delay = (state.mode==='brain'||state.mode==='visual') ? 2800 : 1600;
+    setTimeout(()=>{ state.qIndex++; if(state.mode!=='blitz'&&state.qIndex>=state.totalQ) endGame(); else presentQuestion(); }, delay);
+
+  } else {
+    SFX.wrong();
+    // Shield power-up
+    if(state.activePU.shield){ state.activePU.shield=false; showLevelBanner('🛡 Shield Activated!'); }
+    else { state.lives=Math.max(0,state.lives-1); }
+    state.streak=0; state.wrong++;
+    state.categoryStats[cat].wrong++;
+    updateHUD();
+
+    const fbt=document.getElementById('feedback-toast');
+    fbt.className='feedback-toast wrong-msg';
+    fbt.textContent=`Not quite — the answer is ${correct}`;
+
+    if(state.lives<=2 && !state.comebackTracked) state.comebackTracked=true;
+    showExplanation();
+    if(settings.tips) showMathTip(cat);
+
+    const gameOver=state.lives<=0 && state.mode!=='blitz';
+    const delay=gameOver?2000:2000;
+    setTimeout(()=>{
+      if(gameOver){ endGame(); return; }
+      state.qIndex++;
+      if(state.mode!=='blitz'&&state.qIndex>=state.totalQ) endGame();
+      else presentQuestion();
+    }, delay);
+  }
+  updateHUD();
+  checkAchievements();
+}
+
+/* ============================================================
+   TIMEOUT
+   ============================================================ */
+function timeOut(){
+  if(state.answered) return;
+  state.answered=true; SFX.timeout();
+  state.lives=Math.max(0,state.lives-1); state.streak=0; updateHUD();
+  document.querySelectorAll('.opt-btn').forEach(b=>{
+    b.disabled=true;
+    if(String(b.dataset.val)===String(state.currentQ.a)) b.classList.add('correct');
+    else b.classList.add('dimmed');
+  });
+  const fbt=document.getElementById('feedback-toast');
+  fbt.className='feedback-toast wrong-msg';
+  fbt.textContent=`⏱ Time's up! Answer: ${state.currentQ.a}`;
+  showExplanation();
+  if(settings.tips) showMathTip(state.currentQ.category);
+
+  if(state.lives<=0&&state.mode!=='blitz'){ setTimeout(endGame,2000); return; }
+  setTimeout(()=>{ state.qIndex++; if(state.mode!=='blitz'&&state.qIndex>=state.totalQ) endGame(); else presentQuestion(); }, 2200);
+}
+
+/* ============================================================
+   HINTS
+   ============================================================ */
+function useHint(){
+  if(state.hintsLeft<=0||state.answered) return;
+  state.hintsLeft--; state.hintsUsed++;
+  SFX.hint();
+  document.getElementById('hint-count').textContent = state.hintsLeft;
+  if(state.hintsLeft<=0) document.getElementById('hint-chip').className='hint-chip empty';
+  const btns=[...document.querySelectorAll('.opt-btn:not(:disabled):not(.correct):not(.wrong)')];
+  const wrongBtns=btns.filter(b=>String(b.dataset.val)!==String(state.currentQ.a));
+  if(wrongBtns.length>0){ pick(wrongBtns).classList.add('dimmed'); pick(wrongBtns).disabled=true; }
+  const fbt=document.getElementById('feedback-toast');
+  fbt.className='feedback-toast hint-msg';
+  fbt.textContent='💡 One wrong answer removed!';
+}
+
+/* ============================================================
+   EXPLANATION & TIPS
+   ============================================================ */
+function showExplanation(){
+  const panel=document.getElementById('explanation-panel');
+  document.getElementById('exp-text').textContent=state.currentQ.explain||'';
+  panel.classList.add('show');
+}
+function showMathTip(cat){
+  // 50% chance to show a tip; prefer category-relevant
+  if(Math.random()>0.55) return;
+  const trick = pick(MENTAL_TRICKS);
+  const fact  = pick(MATH_FACTS);
+  const useJoke = state.correct>0 && state.correct%5===0;
+  const panel=document.getElementById('math-tip-panel');
+  const title=document.getElementById('mt-title');
+  const body =document.getElementById('mt-body');
+  if(useJoke){
+    title.textContent='😄 Math Joke';
+    body.innerHTML=pick(MATH_JOKES);
+  } else if(Math.random()>0.5){
+    title.textContent=`${trick.icon} Mental Maths Trick: ${trick.title}`;
+    body.innerHTML=trick.body;
+  } else {
+    title.textContent=`${fact.icon} Did You Know?`;
+    body.innerHTML=fact.text;
+  }
+  panel.classList.add('show');
+}
+
+/* ============================================================
+   LEVEL UP
+   ============================================================ */
+function checkLevelUp(){
+  const threshold=state.level*3;
+  if(state.correct>0 && state.correct%threshold===0){
+    state.level++;
+    SFX.levelUp();
+    showLevelBanner(`🎊 Level ${state.level} Reached!`);
+    // Grant power-up on level up
+    const puKeys=['freeze','double','shield'];
+    const key=pick(puKeys);
+    state.powerUps[key]++;
+    updatePUButtons();
+    showAchToast('⬆️',`Level ${state.level}!`,`Power-up earned: ${key}!`);
+  }
+}
+function showLevelBanner(msg){
+  const b=document.getElementById('level-banner');
+  b.textContent=msg; b.classList.add('show');
+  setTimeout(()=>b.classList.remove('show'),2600);
+}
+
+/* ============================================================
+   POWER-UP SYSTEM
+   ============================================================ */
+function updatePUButtons(){
+  const pus=['freeze','double','shield'];
+  pus.forEach(k=>{
+    const btn=document.getElementById('pu-'+k);
+    const cnt=document.getElementById('pu-'+k+'-count');
+    cnt.textContent=state.powerUps[k];
+    btn.disabled=state.powerUps[k]<=0||state.answered;
+    btn.classList.toggle('active',state.activePU[k]);
+  });
+  document.getElementById('pu-hint-label').textContent=state.powerUps.freeze+state.powerUps.double+state.powerUps.shield>0?'':'Earn power-ups by levelling up!';
+}
+function usePowerUp(type){
+  if(state.powerUps[type]<=0||state.answered) return;
+  state.powerUps[type]--;
+  state.powerUsed[type]=true;
+  SFX.powerUp();
+  const flash=document.getElementById('pu-flash');
+  flash.classList.add('show');
+  setTimeout(()=>flash.classList.remove('show'),300);
+  if(type==='freeze'){
+    state.freezeActive=true;
+    showLevelBanner('⏸ Time Frozen for 5s!');
+    setTimeout(()=>{state.freezeActive=false;},5000);
+  } else if(type==='double'){
+    state.activePU.double=true;
+    showLevelBanner('✨ Double Points Next Answer!');
+  } else if(type==='shield'){
+    state.activePU.shield=true;
+    showLevelBanner('🛡 Shield Active!');
+  }
+  updatePUButtons();
+}
+
+/* ============================================================
+   ACHIEVEMENT SYSTEM
+   ============================================================ */
+function getUnlocked(){ return JSON.parse(localStorage.getItem('mqAchievements')||'{}'); }
+function unlockAch(id){ const u=getUnlocked(); u[id]=Date.now(); localStorage.setItem('mqAchievements',JSON.stringify(u)); }
+function isUnlocked(id){ return !!getUnlocked()[id]; }
+
+function checkAchievements(){
+  const s=state, ach=ACHIEVEMENT_DEFS;
+  const checks=[
+    ['first_star',  s.correct>=1],
+    ['perfect',     s.mode!=='blitz' && s.correct>0 && s.wrong===0 && s.qIndex===s.totalQ],
+    ['streak5',     s.streak>=5],
+    ['streak10',    s.streak>=10],
+    ['no_hints',    s.hintsUsed===0 && s.qIndex>=5],
+    ['speed_3',     s.fastAnswer],
+    ['come_back',   s.comebackTracked && s.correct>=5],
+    ['s_rank',      false], // checked at end
+    ['level5',      s.level>=5],
+    ['geo_guru',    (s.categoryStats['Geometry']?.correct||0)>=3],
+    ['alg_ace',     (s.categoryStats['Algebra']?.correct||0)>=3],
+    ['play5',       getPlayCount()>=5],
+    ['score1000',   s.score>=1000],
+    ['blitz_500',   s.mode==='blitz'&&s.score>=500],
+    ['brain_master',s.mode==='brain'&&s.qIndex>=10],
+    ['ghana_story', s.mode==='story'&&s.correct>=5],
+    ['tiny_champ',  s.ageGroup==='tiny'&&s.qIndex>=6],
+    ['power_user',  s.powerUsed.freeze&&s.powerUsed.double&&s.powerUsed.shield],
+  ];
+  checks.forEach(([id, cond])=>{
+    if(cond && !isUnlocked(id)){
+      unlockAch(id);
+      state.newAchievements.push(id);
+      const def=ach.find(a=>a.id===id);
+      if(def) showAchToast(def.icon,def.title,def.desc);
+    }
+  });
+}
+
+function showAchToast(icon,title,desc){
+  SFX.achievement();
+  const toast=document.getElementById('ach-toast');
+  document.getElementById('at-icon').textContent=icon;
+  document.getElementById('at-title').textContent=title;
+  document.getElementById('at-desc').textContent=desc;
+  toast.classList.add('show');
+  setTimeout(()=>toast.classList.remove('show'),4000);
+}
+
+function renderAchievements(){
+  const unlocked=getUnlocked();
+  const count=Object.keys(unlocked).length;
+  document.getElementById('ach-count-label').textContent=`${count}/${ACHIEVEMENT_DEFS.length} unlocked`;
+  const grid=document.getElementById('ach-grid');
+  grid.innerHTML=ACHIEVEMENT_DEFS.map(a=>`
+    <div class="ach-item ${isUnlocked(a.id)?'unlocked':'locked'}">
+      <span class="ai-icon">${isUnlocked(a.id)?a.icon:'🔒'}</span>
+      <div class="ai-info">
+        <div class="ai-title">${a.title}</div>
+        <div class="ai-desc">${a.desc}</div>
+      </div>
+    </div>`).join('');
+}
+
+/* ============================================================
+   HUD
+   ============================================================ */
+function updateHUD(){
+  document.getElementById('hud-level').textContent=state.level;
+  document.getElementById('hud-streak').textContent=state.streak;
+  document.getElementById('hud-score').textContent=state.score;
+  const maxL=AGE_CONFIG[state.ageGroup].lives;
+  document.getElementById('hud-lives').innerHTML=Array.from({length:maxL},(_,i)=>
+    `<span class="heart${i>=state.lives?' lost':''}">${i<state.lives?'❤️':'🖤'}</span>`).join('');
+}
+function updateTimerUI(){
+  const max=state.timerMax, val=Math.max(0,state.timerVal);
+  const circ=document.getElementById('timer-circle');
+  const num=document.getElementById('hud-timer');
+  const C=141.4;
+  circ.style.strokeDashoffset=C-(val/max)*C;
+  const col=val>max*0.5?'var(--ap)':val>max*0.25?'#f97316':'#ef4444';
+  circ.style.stroke=col; num.style.color=col;
+  num.textContent=val;
+}
+
+/* ============================================================
+   MASCOT
+   ============================================================ */
+let mascotTimer=null;
+function showMascot(msg){
+  if(!settings.mascot) return;
+  const m=document.getElementById('mascot');
+  const b=document.getElementById('mascot-bubble');
+  clearTimeout(mascotTimer);
+  b.textContent=msg;
+  m.classList.add('show');
+  mascotTimer=setTimeout(()=>m.classList.remove('show'),3500);
+}
+
+/* ============================================================
+   END GAME
+   ============================================================ */
+function endGame(){
+  clearInterval(state.timerInterval);
+  const total=state.correct+state.wrong;
+  const accuracy=total>0?Math.round(state.correct/total*100):0;
+  state.accuracy=accuracy;
+
+  // End achievements
+  if(accuracy===100&&total>=5){ if(!isUnlocked('perfect')){ unlockAch('perfect'); state.newAchievements.push('perfect'); showAchToast('💎','Diamond Mind','100% accuracy!'); } }
+  if(accuracy>=95){              if(!isUnlocked('s_rank')) { unlockAch('s_rank');  state.newAchievements.push('s_rank');  showAchToast('🏆','Math Legend','S Rank achieved!'); } }
+  if(state.mode==='daily'){      if(!isUnlocked('daily_done')){unlockAch('daily_done');state.newAchievements.push('daily_done');} }
+  if(state.hintsUsed===0&&state.qIndex>=5){ if(!isUnlocked('no_hints')){ unlockAch('no_hints'); state.newAchievements.push('no_hints'); } }
+  if(state.wrong===0&&total>=5){ if(!isUnlocked('no_wrong')){ unlockAch('no_wrong'); state.newAchievements.push('no_wrong'); showAchToast('✨','Flawless','No wrong answers!'); } }
+
+  saveScore();
+
+  // Grade
+  let grade, msg;
+  if(accuracy>=95){ grade='🏆 S Rank'; msg='Legendary! You are a true Math Champion!'; }
+  else if(accuracy>=85){ grade='⭐ A Rank'; msg='Excellent! Near-perfect performance!'; }
+  else if(accuracy>=70){ grade='🥈 B Rank'; msg='Great job! Keep practising to reach A Rank!'; }
+  else if(accuracy>=55){ grade='🥉 C Rank'; msg='Good effort! Review your weak topics and try again.'; }
+  else { grade='📚 D Rank'; msg='Every mistake is a learning moment. Keep going!'; }
+
+  document.getElementById('result-grade').textContent=grade;
+  document.getElementById('result-msg').textContent=`${state.playerName?state.playerName+', ':''} ${msg}`;
+  document.getElementById('rc-score').textContent=state.score;
+  document.getElementById('rs-correct').textContent=state.correct;
+  document.getElementById('rs-accuracy').textContent=accuracy+'%';
+  document.getElementById('rs-streak').textContent=state.bestStreak;
+
+  // Score ring
+  const C=345.4;
+  setTimeout(()=>{ document.getElementById('sr-fill').style.strokeDashoffset = C-(accuracy/100)*C; },100);
+
+  // Mastery report
+  const cats=state.categoryStats;
+  const masteryHTML=Object.entries(cats).map(([cat,{correct,wrong}])=>{
+    const t=correct+wrong; const pct=t>0?Math.round(correct/t*100):0;
+    const col=pct>=80?'var(--green)':pct>=60?'var(--ap)':'var(--red)';
+    return `<div class="mastery-row">
+      <span class="mastery-name">${cat}</span>
+      <div class="mastery-bar-wrap"><div class="mastery-bar" style="width:${pct}%;background:${col}"></div></div>
+      <span class="mastery-pct" style="color:${col}">${correct}/${t}</span>
+    </div>`;
+  }).join('');
+  const ms=document.getElementById('mastery-section');
+  ms.innerHTML=`<div class="mastery-title">📊 Topic Mastery</div>${masteryHTML||'<p style="color:var(--text-muted);font-size:0.83rem">No data yet.</p>'}`;
+
+  // Recommendation
+  const weak=Object.entries(cats).filter(([,{correct,wrong}])=>{ const t=correct+wrong; return t>0&&correct/t<0.6; });
+  const strong=Object.entries(cats).filter(([,{correct,wrong}])=>{ const t=correct+wrong; return t>0&&correct/t>=0.8; });
+  const rb=document.getElementById('recommend-box');
+  rb.innerHTML=`<div class="rb-title">🎯 Personalised Feedback</div>
+    ${strong.length?`<div class="rb-item">✅ You excel at: <strong>${strong.map(([c])=>c).join(', ')}</strong></div>`:''}
+    ${weak.length?`<div class="rb-item">📖 Practise more: <strong>${weak.map(([c])=>c).join(', ')}</strong></div>`:''}
+    <div class="rb-item">💡 Tip: ${pick(MENTAL_TRICKS).title} — try it next time!</div>`;
+
+  // New achievements
+  const naWrap=document.getElementById('new-achievements-wrap');
+  const naRow=document.getElementById('na-row');
+  if(state.newAchievements.length>0){
+    naRow.innerHTML=state.newAchievements.map(id=>{
+      const def=ACHIEVEMENT_DEFS.find(a=>a.id===id);
+      return def?`<span class="na-badge">${def.icon} ${def.title}</span>`:'';
+    }).join('');
+    naWrap.classList.remove('hidden');
+  } else { naWrap.classList.add('hidden'); }
+
+  if(accuracy>=85) jsConfetti.addConfetti({particleCount:180,spread:90,colors:['#F59E0B','#10b981','#D62828','#2A9D8F']});
+
+  showScreen('result-screen');
+  if(settings.mascot) showMascot(accuracy>=70?`Amazing work, ${state.playerName||'champion'}! 🦉`:`Keep practising — you've got this! 🦉`);
+}
+
+/* ============================================================
+   HIGH SCORES
+   ============================================================ */
+function saveScore(){
+  const scores=JSON.parse(localStorage.getItem('mqScores')||'[]');
+  scores.push({
+    name:state.playerName||'Player',
+    score:state.score,
+    accuracy:state.accuracy||0,
+    age:AGE_CONFIG[state.ageGroup].label,
+    mode:state.mode.charAt(0).toUpperCase()+state.mode.slice(1),
+    streak:state.bestStreak,
+    date:new Date().toLocaleDateString('en-GH'),
+  });
+  scores.sort((a,b)=>b.score-a.score);
+  localStorage.setItem('mqScores',JSON.stringify(scores.slice(0,30)));
+}
+function loadHighScores(){
+  const scores=JSON.parse(localStorage.getItem('mqScores')||'[]');
+  const list=document.getElementById('scores-list');
+  if(!scores.length){
+    list.innerHTML='<p style="color:var(--text-muted);text-align:center;padding:1rem">No scores yet — play to set records!</p>';
+    return;
+  }
+  list.innerHTML=scores.map((s,i)=>{
+    const rk=i===0?'gold':i===1?'silver':i===2?'bronze':'other';
+    return `<div class="score-entry">
+      <div class="score-rank ${rk}">${i+1}</div>
+      <div class="score-info">
+        <div class="si-val">${s.name} · ${s.mode} · Age ${s.age}</div>
+        <div class="si-meta">${s.accuracy}% acc · 🔥${s.streak} streak · ${s.date}</div>
+      </div>
+      <div class="score-pts">${s.score}</div>
+    </div>`;
+  }).join('');
+}
+function clearScores(){
+  if(confirm('Clear all scores? This cannot be undone.')){
+    localStorage.removeItem('mqScores');
+    document.getElementById('scores-list').innerHTML='<p style="color:var(--text-muted);text-align:center">Cleared!</p>';
+  }
+}
+function confirmQuit(){
+  if(confirm('Quit this game? Your progress will be lost.')){
+    clearInterval(state.timerInterval);
+    showScreen('menu-screen');
+  }
+}
+
+/* ============================================================
+   KEYBOARD NAVIGATION
+   ============================================================ */
+document.addEventListener('keydown',e=>{
+  if(['1','2','3','4'].includes(e.key)){
+    const idx=parseInt(e.key)-1;
+    const btns=document.querySelectorAll('.opt-btn:not(:disabled)');
+    if(btns[idx]) btns[idx].click();
+  }
+  if(e.key==='Escape') closeSettings();
+});
+
+/* ============================================================
+   ANIMATED BACKGROUND — FLOATING MATH SYMBOLS
+   ============================================================ */
+(function initCanvas(){
+  const canvas=document.getElementById('bg-canvas');
+  const ctx=canvas.getContext('2d');
+  let W,H;
+
+  const SYMBOLS = ['∑','∫','π','√','∞','÷','×','≈','≠','α','β','θ','Δ','φ','±','∂','%','²','³','∝'];
+  const PARTICLES=[];
+  const COUNT=55;
+
+  function resize(){ W=canvas.width=window.innerWidth; H=canvas.height=window.innerHeight; }
+  resize(); window.addEventListener('resize',resize);
+
+  for(let i=0;i<COUNT;i++){
+    PARTICLES.push({
+      x:Math.random()*W, y:Math.random()*H,
+      symbol:SYMBOLS[i%SYMBOLS.length],
+      size:Math.random()*10+8,
+      vx:(Math.random()-0.5)*0.25,
+      vy:(Math.random()-0.5)*0.25,
+      alpha:Math.random()*0.12+0.04,
+      rot:Math.random()*Math.PI*2,
+      rotV:(Math.random()-0.5)*0.005,
+    });
+  }
+
+  // Also some dot particles
+  for(let i=0;i<30;i++){
+    PARTICLES.push({
+      x:Math.random()*W, y:Math.random()*H,
+      symbol:'',
+      size:Math.random()*1.5+0.5,
+      vx:(Math.random()-0.5)*0.2,
+      vy:(Math.random()-0.5)*0.2,
+      alpha:Math.random()*0.25+0.08,
+      rot:0, rotV:0,
+    });
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    // subtle gradient bg overlay
+    const g=ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,Math.max(W,H)/2);
+    g.addColorStop(0,'rgba(11,14,27,0)');
+    g.addColorStop(1,'rgba(11,14,27,0.3)');
+    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+
+    PARTICLES.forEach(p=>{
+      p.x+=p.vx; p.y+=p.vy; p.rot+=p.rotV;
+      if(p.x<-20) p.x=W+20; if(p.x>W+20) p.x=-20;
+      if(p.y<-20) p.y=H+20; if(p.y>H+20) p.y=-20;
+
+      ctx.save();
+      ctx.globalAlpha=p.alpha;
+      if(p.symbol){
+        ctx.translate(p.x,p.y); ctx.rotate(p.rot);
+        ctx.font=`${p.size}px 'Nunito',sans-serif`;
+        ctx.fillStyle='#F59E0B';
+        ctx.fillText(p.symbol,-p.size/2,p.size/2);
+      } else {
+        ctx.beginPath();
+        ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
+        ctx.fillStyle='#F59E0B';
+        ctx.fill();
+      }
+      ctx.restore();
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+/* ============================================================
+   INIT
+   ============================================================ */
+document.addEventListener('DOMContentLoaded',()=>{
+  document.body.dataset.age='senior';
+  renderAchievements();
+  // Sync achievements screen when navigating
+  const origShow = window.showScreen;
+  window.showScreen = function(id){
+    origShow(id);
+    if(id==='achievements-screen') renderAchievements();
+    if(id==='scores-screen') loadHighScores();
+  };
+});
+</script>
+</body>
+</html>

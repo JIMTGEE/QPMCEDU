@@ -1,0 +1,22 @@
+# Secrets
+config/db.php
+config/gemini.php
+.env
+
+# Database exports
+*.sql
+db.txt
+
+# Logs
+logs/
+*.log
+error.log
+error_log
+error_log.txt
+
+# Uploads
+Uploads/
+uploads/
+
+# Cache
+cache/

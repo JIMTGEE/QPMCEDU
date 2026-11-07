@@ -1,0 +1,1738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Français Quest — Learn French Through Adventure</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&family=Righteous&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/js-confetti@0.12.0/dist/js-confetti.browser.js"></script>
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --surface2: #1a2235;
+    --border: rgba(255,255,255,0.08);
+    --text: #f0f4ff;
+    --text-muted: #8896b3;
+    --french-blue: #002395;
+    --french-white: #FFFFFF;
+    --french-red: #ED2939;
+    --accent-gold: #FFD700;
+    --correct: #10b981;
+    --wrong: #ef4444;
+    --beginner: #4CAF50;
+    --intermediate: #FF9800;
+    --advanced: #F44336;
+    --expert: #9C27B0;
+    --card-shadow: 0 8px 40px rgba(0,0,0,0.5);
+    --paris-blue: #1E3F66;
+    --provence-lavender: #9B59B6;
+    --cote-ivoire-orange: #F77F00;
+    --senegal-green: #009639;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    font-family: 'Space Grotesk', sans-serif;
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  #bg-canvas {
+    position: fixed; top:0; left:0; width:100%; height:100%;
+    pointer-events: none; z-index: 0;
+  }
+
+  .screen {
+    position: fixed; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 10; padding: 1rem;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    transform: translateY(20px);
+    overflow-y: auto;
+  }
+  .screen.active {
+    opacity: 1; pointer-events: all; transform: translateY(0);
+  }
+
+  .card {
+    background: linear-gradient(145deg, rgba(17,24,39,0.95), rgba(26,34,53,0.95));
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 2rem;
+    width: 100%; max-width: 650px;
+    box-shadow: var(--card-shadow), inset 0 1px 0 rgba(255,255,255,0.05);
+    position: relative; overflow: hidden;
+  }
+
+  /* French flag accent on card */
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--french-blue) 33.33%, var(--french-white) 33.33%, var(--french-white) 66.66%, var(--french-red) 66.66%);
+    border-radius: 24px 24px 0 0;
+  }
+
+  .logo {
+    font-family: 'Righteous', cursive;
+    font-size: clamp(2rem, 5vw, 2.8rem);
+    background: linear-gradient(135deg, var(--french-blue), var(--french-red));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: none;
+  }
+
+  .french-flag-emoji {
+    font-size: 2rem;
+    display: inline-block;
+  }
+
+  /* Language Selector */
+  .theme-selector {
+    display: grid; grid-template-columns: repeat(2, 1fr);
+    gap: 0.8rem; margin: 1.5rem 0;
+  }
+
+  .theme-card {
+    background: var(--surface2);
+    border: 2px solid var(--border);
+    border-radius: 16px;
+    padding: 1rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .theme-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+  }
+  .theme-card.selected {
+    border-color: var(--accent-gold);
+    box-shadow: 0 0 0 3px rgba(255,215,0,0.2);
+  }
+  .theme-card.paris { border-left: 4px solid var(--paris-blue); }
+  .theme-card.provence { border-left: 4px solid var(--provence-lavender); }
+  .theme-card.afrique { border-left: 4px solid var(--cote-ivoire-orange); }
+  .theme-card.senegal { border-left: 4px solid var(--senegal-green); }
+
+  .theme-icon { font-size: 2.2rem; margin-bottom: 0.3rem; }
+  .theme-name { font-weight: 700; font-size: 0.95rem; }
+  .theme-desc { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem; }
+
+  .btn-primary {
+    width: 100%; padding: 1rem;
+    background: linear-gradient(135deg, var(--french-blue), #1a237e);
+    border: none; border-radius: 14px;
+    color: white; font-weight: 800;
+    font-size: 1.05rem; cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Space Grotesk', sans-serif;
+    box-shadow: 0 4px 20px rgba(0,35,149,0.4);
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-primary::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+  }
+  .btn-primary:hover::after {
+    left: 100%;
+  }
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0,35,149,0.6);
+  }
+
+  /* Game Screen */
+  .game-header {
+    display: flex; justify-content: space-between;
+    align-items: center; margin-bottom: 1.5rem;
+    flex-wrap: wrap; gap: 0.5rem;
+  }
+
+  .stat-pill {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0.4rem 0.9rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    display: flex; align-items: center; gap: 0.4rem;
+  }
+  .stat-pill.gold-border { border-color: var(--accent-gold); }
+
+  .progress-wrap { margin-bottom: 1.2rem; }
+  .progress-track {
+    height: 8px; background: var(--surface2);
+    border-radius: 999px; overflow: hidden;
+    margin-top: 0.3rem;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--french-blue), var(--french-white), var(--french-red));
+    border-radius: 999px; transition: width 0.5s ease;
+  }
+
+  .quest-type-badge {
+    display: inline-block;
+    padding: 0.3rem 0.8rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 1rem;
+  }
+  .quest-vocab { background: rgba(0,35,149,0.2); color: #4A90E2; }
+  .quest-grammar { background: rgba(237,41,57,0.2); color: var(--french-red); }
+  .quest-conversation { background: rgba(255,215,0,0.2); color: var(--accent-gold); }
+  .quest-culture { background: rgba(155,89,182,0.2); color: var(--provence-lavender); }
+  .quest-verb { background: rgba(247,127,0,0.2); color: var(--cote-ivoire-orange); }
+  .quest-phrase { background: rgba(0,150,57,0.2); color: var(--senegal-green); }
+
+  .question-display {
+    background: linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    font-size: 1.1rem;
+    line-height: 1.6;
+  }
+  .french-word {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--accent-gold);
+    font-family: 'Righteous', cursive;
+    display: block;
+    margin: 0.5rem 0;
+  }
+  .phonetic {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+  .gender-indicator {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin-left: 0.5rem;
+  }
+  .gender-masculine { background: rgba(0,35,149,0.2); color: #4A90E2; }
+  .gender-feminine { background: rgba(237,41,57,0.2); color: #F06292; }
+
+  .options-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 0.7rem; margin-bottom: 1rem;
+  }
+  .option-btn {
+    background: var(--surface2);
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    padding: 0.9rem;
+    color: var(--text);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Space Grotesk', sans-serif;
+    text-align: left;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .option-btn:hover:not(:disabled) {
+    border-color: var(--accent-gold);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255,215,0,0.15);
+  }
+  .option-btn.correct {
+    border-color: var(--correct);
+    background: rgba(16,185,129,0.1);
+    animation: correctPop 0.4s ease;
+  }
+  .option-btn.wrong {
+    border-color: var(--wrong);
+    background: rgba(239,68,68,0.1);
+    animation: shake 0.4s ease;
+  }
+  .option-btn.dimmed { opacity: 0.35; }
+
+  @keyframes correctPop {
+    0%,100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    25% { transform: translateX(-8px); }
+    75% { transform: translateX(8px); }
+  }
+
+  .feedback-area {
+    text-align: center; min-height: 2.5rem;
+    padding: 0.5rem; font-weight: 600;
+    transition: all 0.3s;
+  }
+  .feedback-correct { color: var(--correct); }
+  .feedback-wrong { color: var(--wrong); }
+
+  .culture-note {
+    background: rgba(255,215,0,0.05);
+    border: 1px solid rgba(255,215,0,0.2);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-top: 1rem;
+    display: none;
+  }
+  .culture-note.show { display: block; animation: fadeSlide 0.3s ease; }
+  .culture-note .cn-title {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--accent-gold);
+    font-weight: 700;
+    margin-bottom: 0.3rem;
+  }
+
+  @keyframes fadeSlide {
+    from { opacity:0; transform: translateY(10px); }
+    to { opacity:1; transform: translateY(0); }
+  }
+
+  .verb-table {
+    width: 100%;
+    margin: 1rem 0;
+    border-collapse: collapse;
+  }
+  .verb-table th {
+    background: var(--surface2);
+    padding: 0.6rem;
+    font-size: 0.8rem;
+    color: var(--accent-gold);
+    text-transform: uppercase;
+  }
+  .verb-table td {
+    padding: 0.5rem;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.9rem;
+  }
+  .verb-table tr:hover td {
+    background: rgba(255,215,0,0.05);
+  }
+
+  .vocab-list {
+    display: grid; gap: 0.5rem;
+    margin: 1rem 0;
+    max-height: 400px; overflow-y: auto;
+  }
+  .vocab-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 0.8rem 1rem;
+    display: flex; justify-content: space-between;
+    align-items: center;
+    transition: all 0.2s;
+  }
+  .vocab-item.mastered {
+    border-color: var(--correct);
+    background: rgba(16,185,129,0.05);
+  }
+  .vocab-item .vi-french {
+    font-weight: 700;
+    font-size: 1.1rem;
+  }
+  .vocab-item .vi-english {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+  }
+  .vocab-item .vi-status {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+  }
+  .vi-mastered { background: rgba(16,185,129,0.2); color: var(--correct); }
+  .vi-learning { background: rgba(255,152,0,0.2); color: var(--intermediate); }
+
+  .achievement-toast {
+    position: fixed; bottom: 2rem; right: 1rem; z-index: 999;
+    background: var(--surface);
+    border: 2px solid var(--accent-gold);
+    border-radius: 16px;
+    padding: 1rem 1.5rem;
+    display: flex; align-items: center; gap: 1rem;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+    transform: translateX(120%);
+    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  .achievement-toast.show { transform: translateX(0); }
+
+  .speech-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.5rem 1rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 0.85rem;
+    display: inline-flex; align-items: center; gap: 0.4rem;
+  }
+  .speech-btn:hover {
+    border-color: var(--accent-gold);
+    color: var(--accent-gold);
+  }
+  .speech-btn.recording {
+    border-color: var(--wrong);
+    color: var(--wrong);
+    animation: pulse 1s ease infinite;
+  }
+  @keyframes pulse {
+    0%,100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+
+  .daily-challenge {
+    background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(237,41,57,0.05));
+    border: 2px solid rgba(255,215,0,0.3);
+    border-radius: 16px;
+    padding: 1.2rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+  .daily-challenge .dc-title {
+    font-family: 'Righteous', cursive;
+    color: var(--accent-gold);
+    font-size: 1.1rem;
+  }
+
+  @media (max-width: 480px) {
+    .card { padding: 1.5rem 1rem; }
+    .theme-selector { grid-template-columns: 1fr; }
+    .options-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+
+<!-- ==================== MAIN MENU ==================== -->
+<div class="screen active" id="menu-screen">
+  <div class="card">
+    <div class="text-center" style="margin-bottom:1.5rem;">
+      <div class="logo">
+        <span class="french-flag-emoji">🇫🇷</span> Français Quest
+      </div>
+      <div style="color:var(--text-muted);margin-top:0.5rem;font-style:italic;">
+        "Apprendre le français en s'amusant !" — Learn French while having fun!
+      </div>
+    </div>
+
+    <div class="daily-challenge" id="daily-challenge">
+      <div class="dc-title">🌟 Défi du Jour (Daily Challenge)</div>
+      <div style="font-size:0.9rem;margin-top:0.5rem;" id="daily-word">
+        Loading today's challenge...
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-bottom:1rem;color:var(--text-muted);font-weight:600;">
+      Choose Your French Adventure Theme
+    </div>
+
+    <div class="theme-selector" id="theme-selector">
+      <div class="theme-card paris selected" data-theme="paris" onclick="selectTheme(this)">
+        <div class="theme-icon">🗼</div>
+        <div class="theme-name">Paris Métropolitain</div>
+        <div class="theme-desc">City life, cafés, monuments</div>
+      </div>
+      <div class="theme-card provence" data-theme="provence" onclick="selectTheme(this)">
+        <div class="theme-icon">🌸</div>
+        <div class="theme-name">Provence & Campagne</div>
+        <div class="theme-desc">Countryside, markets, nature</div>
+      </div>
+      <div class="theme-card afrique" data-theme="afrique" onclick="selectTheme(this)">
+        <div class="theme-icon">🌍</div>
+        <div class="theme-name">Afrique Francophone</div>
+        <div class="theme-desc">Côte d'Ivoire, Senegal, Congo</div>
+      </div>
+      <div class="theme-card senegal" data-theme="senegal" onclick="selectTheme(this)">
+        <div class="theme-icon">🥁</div>
+        <div class="theme-name">Sénégal Teranga</div>
+        <div class="theme-desc">Hospitality, culture, cuisine</div>
+      </div>
+    </div>
+
+    <div style="margin:1rem 0;">
+      <div style="font-size:0.85rem;color:var(--text-muted);font-weight:600;margin-bottom:0.5rem;">
+        Niveau (Level)
+      </div>
+      <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+        <button class="stat-pill gold-border level-btn selected" data-level="debutant" onclick="selectLevel(this)" style="cursor:pointer;">
+          🌱 Débutant (A1)
+        </button>
+        <button class="stat-pill gold-border level-btn" data-level="intermediaire" onclick="selectLevel(this)" style="cursor:pointer;">
+          ⚡ Intermédiaire (A2-B1)
+        </button>
+        <button class="stat-pill gold-border level-btn" data-level="avance" onclick="selectLevel(this)" style="cursor:pointer;">
+          🔥 Avancé (B2-C1)
+        </button>
+        <button class="stat-pill gold-border level-btn" data-level="expert" onclick="selectLevel(this)" style="cursor:pointer;">
+          👑 Expert (C2)
+        </button>
+      </div>
+    </div>
+
+    <div style="margin:1rem 0;">
+      <div style="font-size:0.85rem;color:var(--text-muted);font-weight:600;margin-bottom:0.5rem;">
+        Type de Quête (Quest Focus)
+      </div>
+      <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+        <button class="stat-pill quest-btn selected" data-quest="all" onclick="selectQuestType(this)" style="cursor:pointer;">
+          🎯 Tous
+        </button>
+        <button class="stat-pill quest-btn" data-quest="vocab" onclick="selectQuestType(this)" style="cursor:pointer;">
+          📝 Vocabulaire
+        </button>
+        <button class="stat-pill quest-btn" data-quest="grammar" onclick="selectQuestType(this)" style="cursor:pointer;">
+          📐 Grammaire
+        </button>
+        <button class="stat-pill quest-btn" data-quest="conversation" onclick="selectQuestType(this)" style="cursor:pointer;">
+          💬 Conversation
+        </button>
+        <button class="stat-pill quest-btn" data-quest="verb" onclick="selectQuestType(this)" style="cursor:pointer;">
+          ⚡ Verbes
+        </button>
+        <button class="stat-pill quest-btn" data-quest="culture" onclick="selectQuestType(this)" style="cursor:pointer;">
+          🎨 Culture
+        </button>
+      </div>
+    </div>
+
+    <button class="btn-primary" onclick="startAdventure()">
+      Commencer l'Aventure ! 🚀
+    </button>
+
+    <div style="text-align:center;margin-top:1rem;display:flex;gap:0.5rem;justify-content:center;flex-wrap:wrap;">
+      <button class="speech-btn" onclick="showScreen('progress-screen')">
+        📊 Mon Progrès
+      </button>
+      <button class="speech-btn" onclick="showScreen('vocabulary-screen')">
+        📚 Mon Dictionnaire
+      </button>
+      <button class="speech-btn" onclick="showScreen('verb-screen')">
+        ⚡ Conjugaison
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== GAME SCREEN ==================== -->
+<div class="screen" id="game-screen">
+  <div class="card">
+    <div class="game-header">
+      <div>
+        <span style="font-weight:700;" id="current-theme-name">Paris</span>
+        <span style="font-size:0.8rem;color:var(--text-muted);"> — </span>
+        <span style="font-size:0.8rem;color:var(--accent-gold);" id="current-level-name">Débutant</span>
+      </div>
+      <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+        <div class="stat-pill gold-border">⭐ <span id="score-display">0</span></div>
+        <div class="stat-pill gold-border">🔥 <span id="streak-display">0</span></div>
+        <div class="stat-pill gold-border">❤️ <span id="lives-display">5</span></div>
+        <div class="stat-pill gold-border">📚 <span id="words-mastered-display">0</span></div>
+      </div>
+    </div>
+
+    <div class="progress-wrap">
+      <div style="display:flex;justify-content:space-between;font-size:0.8rem;color:var(--text-muted);">
+        <span id="quest-progress">Question 1 sur 15</span>
+        <span id="quest-category">Vocabulaire</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progress-bar" style="width:0%"></div>
+      </div>
+    </div>
+
+    <div id="quest-type-display" class="quest-type-badge quest-vocab">VOCABULAIRE</div>
+
+    <div class="question-display" id="question-container">
+      <span id="context-text"></span>
+      <span class="french-word" id="french-word-display"></span>
+      <span class="phonetic" id="phonetic-display"></span>
+      <span class="gender-indicator" id="gender-display" style="display:none;"></span>
+    </div>
+
+    <div class="options-grid" id="options-container"></div>
+
+    <div class="feedback-area" id="feedback-display"></div>
+
+    <div class="culture-note" id="culture-note">
+      <div class="cn-title">🎨 Saviez-vous que... (Did you know?)</div>
+      <div id="culture-text"></div>
+    </div>
+
+    <div style="display:flex;gap:0.5rem;margin-top:1rem;justify-content:center;flex-wrap:wrap;">
+      <button class="speech-btn" id="listen-btn" onclick="speakFrench()">
+        🔊 Écouter
+      </button>
+      <button class="speech-btn" id="record-btn" onclick="toggleRecording()">
+        🎤 Prononcer
+      </button>
+      <button class="speech-btn" onclick="useHint()">
+        💡 Indice <span id="hints-remaining">(3)</span>
+      </button>
+      <button class="speech-btn" onclick="showVerbTable()" id="verb-table-btn" style="display:none;">
+        📋 Voir Conjugaison
+      </button>
+    </div>
+
+    <div style="text-align:center;margin-top:0.5rem;font-size:0.75rem;color:var(--text-muted);">
+      Appuyez sur 1-4 pour répondre rapidement
+    </div>
+  </div>
+</div>
+
+<!-- ==================== VOCABULARY SCREEN ==================== -->
+<div class="screen" id="vocabulary-screen">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+      <h2 style="font-family:'Righteous',cursive;">📚 Mon Dictionnaire Français</h2>
+      <button class="speech-btn" onclick="showScreen('menu-screen')">← Retour</button>
+    </div>
+    
+    <div style="margin-bottom:1rem;display:flex;gap:0.5rem;flex-wrap:wrap;">
+      <select id="vocab-filter" onchange="displayVocabulary()" style="background:var(--surface2);color:var(--text);border:1px solid var(--border);padding:0.5rem;border-radius:8px;font-family:inherit;">
+        <option value="all">Tous les thèmes</option>
+        <option value="paris">🗼 Paris</option>
+        <option value="provence">🌸 Provence</option>
+        <option value="afrique">🌍 Afrique</option>
+        <option value="senegal">🥁 Sénégal</option>
+      </select>
+      <select id="vocab-level-filter" onchange="displayVocabulary()" style="background:var(--surface2);color:var(--text);border:1px solid var(--border);padding:0.5rem;border-radius:8px;font-family:inherit;">
+        <option value="all">Tous les niveaux</option>
+        <option value="debutant">Débutant</option>
+        <option value="intermediaire">Intermédiaire</option>
+        <option value="avance">Avancé</option>
+      </select>
+    </div>
+
+    <div class="vocab-list" id="vocab-list"></div>
+    
+    <div style="text-align:center;margin-top:1rem;font-size:0.85rem;color:var(--text-muted);">
+      <span id="vocab-count">0 mots disponibles</span>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== VERB SCREEN ==================== -->
+<div class="screen" id="verb-screen">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+      <h2 style="font-family:'Righteous',cursive;">⚡ Conjugaison des Verbes</h2>
+      <button class="speech-btn" onclick="showScreen('menu-screen')">← Retour</button>
+    </div>
+
+    <div style="margin-bottom:1rem;">
+      <select id="verb-select" onchange="displayVerbConjugation()" style="background:var(--surface2);color:var(--text);border:1px solid var(--border);padding:0.5rem;border-radius:8px;font-family:inherit;width:100%;">
+        <option value="etre">Être (to be)</option>
+        <option value="avoir">Avoir (to have)</option>
+        <option value="aller">Aller (to go)</option>
+        <option value="faire">Faire (to do/make)</option>
+        <option value="parler">Parler (to speak)</option>
+        <option value="manger">Manger (to eat)</option>
+        <option value="venir">Venir (to come)</option>
+        <option value="voir">Voir (to see)</option>
+        <option value="savoir">Savoir (to know)</option>
+        <option value="pouvoir">Pouvoir (can/to be able)</option>
+        <option value="vouloir">Vouloir (to want)</option>
+        <option value="devoir">Devoir (must/to have to)</option>
+        <option value="prendre">Prendre (to take)</option>
+        <option value="donner">Donner (to give)</option>
+        <option value="aimer">Aimer (to like/love)</option>
+      </select>
+    </div>
+
+    <div id="verb-table-container">
+      <table class="verb-table">
+        <thead>
+          <tr>
+            <th>Pronom</th>
+            <th>Présent</th>
+            <th>Imparfait</th>
+            <th>Futur Simple</th>
+            <th>Passé Composé</th>
+          </tr>
+        </thead>
+        <tbody id="verb-table-body">
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== PROGRESS SCREEN ==================== -->
+<div class="screen" id="progress-screen">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+      <h2 style="font-family:'Righteous',cursive;">📊 Mon Progrès en Français</h2>
+      <button class="speech-btn" onclick="showScreen('menu-screen')">← Retour</button>
+    </div>
+
+    <div id="progress-stats"></div>
+    
+    <div style="margin-top:1.5rem;">
+      <h3 style="font-size:0.85rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.8rem;">
+        Maîtrise par Thème
+      </h3>
+      <div id="theme-progress"></div>
+    </div>
+
+    <div style="margin-top:1.5rem;">
+      <h3 style="font-size:0.85rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.8rem;">
+        Badges & Réalisations
+      </h3>
+      <div id="achievements-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Achievement Toast -->
+<div class="achievement-toast" id="achievement-toast">
+  <div style="font-size:2rem;" id="toast-icon">🏆</div>
+  <div>
+    <div style="font-weight:700;color:var(--accent-gold);" id="toast-title"></div>
+    <div style="font-size:0.85rem;color:var(--text-muted);" id="toast-desc"></div>
+  </div>
+</div>
+
+<script>
+const confetti = new JSConfetti();
+
+// ==================== GAME STATE ====================
+const gameState = {
+  theme: 'paris',
+  level: 'debutant',
+  questFocus: 'all',
+  score: 0,
+  streak: 0,
+  bestStreak: 0,
+  lives: 5,
+  currentQuestion: 0,
+  totalQuestions: 15,
+  answered: false,
+  wordsMastered: [],
+  hintsRemaining: 3,
+  currentQuestData: null,
+  mediaRecorder: null,
+  audioChunks: [],
+  isRecording: false,
+  dailyChallengeCompleted: false
+};
+
+// ==================== FRENCH LANGUAGE DATABASE ====================
+const frenchDB = {
+  paris: {
+    name: 'Paris Métropolitain',
+    icon: '🗼',
+    vocabulary: {
+      debutant: [
+        { french: 'Bonjour', english: 'Hello/Good morning', phonetic: 'bohn-zhoor', gender: null, context: 'Universal greeting', category: 'Greetings' },
+        { french: 'Merci', english: 'Thank you', phonetic: 'mehr-see', gender: null, context: 'Expression of gratitude', category: 'Politeness' },
+        { french: 'S\'il vous plaît', english: 'Please', phonetic: 'seel-voo-pleh', gender: null, context: 'Formal please', category: 'Politeness' },
+        { french: 'Oui', english: 'Yes', phonetic: 'wee', gender: null, context: 'Affirmation', category: 'Basic' },
+        { french: 'Non', english: 'No', phonetic: 'nohn', gender: null, context: 'Negation', category: 'Basic' },
+        { french: 'Au revoir', english: 'Goodbye', phonetic: 'oh-reh-vwahr', gender: null, context: 'Farewell', category: 'Greetings' },
+        { french: 'Comment allez-vous?', english: 'How are you? (formal)', phonetic: 'koh-mahn-tah-lay-voo', gender: null, context: 'Formal inquiry', category: 'Conversation' },
+        { french: 'Je m\'appelle...', english: 'My name is...', phonetic: 'zhuh mah-pehl', gender: null, context: 'Self-introduction', category: 'Introduction' },
+        { french: 'Le café', english: 'The café/coffee', phonetic: 'luh kah-fay', gender: 'masculine', context: 'Essential Parisian word', category: 'Food' },
+        { french: 'La baguette', english: 'The baguette', phonetic: 'lah bah-get', gender: 'feminine', context: 'Iconic French bread', category: 'Food' },
+      ],
+      intermediaire: [
+        { french: 'Je voudrais...', english: 'I would like...', phonetic: 'zhuh voo-dreh', gender: null, context: 'Ordering in cafés', category: 'Restaurant' },
+        { french: 'L\'addition, s\'il vous plaît', english: 'The bill, please', phonetic: 'lah-dee-syohn seel-voo-pleh', gender: null, context: 'Restaurant phrase', category: 'Restaurant' },
+        { french: 'Où sont les toilettes?', english: 'Where is the bathroom?', phonetic: 'oo sohn lay twah-let', gender: null, context: 'Essential question', category: 'Travel' },
+        { french: 'Le métro', english: 'The subway', phonetic: 'luh may-troh', gender: 'masculine', context: 'Paris transport', category: 'Transport' },
+        { french: 'La tour Eiffel', english: 'The Eiffel Tower', phonetic: 'lah toor eh-fehl', gender: 'feminine', context: 'Famous landmark', category: 'Monuments' },
+        { french: 'C\'est combien?', english: 'How much is it?', phonetic: 'seh kohm-byen', gender: null, context: 'Shopping question', category: 'Shopping' },
+        { french: 'Je ne comprends pas', english: 'I don\'t understand', phonetic: 'zhuh nuh kohm-prahn pah', gender: null, context: 'Clarification', category: 'Communication' },
+        { french: 'Pouvez-vous m\'aider?', english: 'Can you help me?', phonetic: 'poo-vay-voo meh-day', gender: null, context: 'Asking for help', category: 'Communication' },
+      ],
+      avance: [
+        { french: 'Il fait un temps magnifique', english: 'The weather is magnificent', phonetic: 'eel feh uhn tahn mah-nyee-feek', gender: null, context: 'Weather expression', category: 'Conversation' },
+        { french: 'Je suis ravi de faire votre connaissance', english: 'I am delighted to meet you', phonetic: 'zhuh swee rah-vee duh fehr voh-truh koh-neh-sahns', gender: null, context: 'Formal introduction', category: 'Formal' },
+        { french: 'Pourriez-vous me recommander un bon restaurant?', english: 'Could you recommend a good restaurant?', phonetic: 'poo-ryay-voo muh ruh-koh-mahn-day uhn bohn res-toh-rahn', gender: null, context: 'Dining request', category: 'Restaurant' },
+      ]
+    },
+    grammar: {
+      debutant: [
+        { question: 'The French definite articles are:', correct: 'le, la, les, l\'', options: ['le, la, les, l\'', 'un, une, des', 'mon, ma, mes', 'ce, cette, ces'], explanation: 'Le (masculine), La (feminine), Les (plural), L\' (before vowels)' },
+        { question: '"Je suis" means:', correct: 'I am', options: ['I am', 'You are', 'He is', 'We are'], explanation: 'Je = I, suis = am (être verb)' },
+        { question: 'To make a French adjective feminine, usually add:', correct: '-e', options: ['-e', '-s', '-ment', '-tion'], explanation: 'Example: petit → petite, grand → grande' },
+      ],
+      intermediaire: [
+        { question: 'The passé composé of "aller" with "je" is:', correct: 'Je suis allé(e)', options: ['Je suis allé(e)', 'J\'ai allé', 'Je aller', 'Je vais aller'], explanation: 'Aller uses être as auxiliary verb in passé composé' },
+        { question: 'The French subjunctive is used to express:', correct: 'Doubt, emotion, necessity', options: ['Doubt, emotion, necessity', 'Past actions only', 'Future plans only', 'Simple facts'], explanation: 'Subjunctive expresses uncertainty, desire, or emotion' },
+      ]
+    },
+    conversation: {
+      debutant: [
+        { scenario: 'Au café (At the café)', question: 'How do you order a coffee?', correct: 'Un café, s\'il vous plaît', options: ['Un café, s\'il vous plaît', 'Je suis café', 'Donnez-moi café', 'Café maintenant'] },
+        { scenario: 'Dans la rue (On the street)', question: 'How do you ask for directions?', correct: 'Excusez-moi, où est...?', options: ['Excusez-moi, où est...?', 'Où?', 'Je veux aller', 'Montrez-moi'] },
+        { scenario: 'À l\'hôtel (At the hotel)', question: 'How do you say "I have a reservation"?', correct: 'J\'ai une réservation', options: ['J\'ai une réservation', 'Je réserve', 'Réservation pour moi', 'Donnez-moi chambre'] },
+      ],
+      intermediaire: [
+        { scenario: 'Au marché (At the market)', question: 'How do you ask "Is this organic?"', correct: 'Est-ce que c\'est bio?', options: ['Est-ce que c\'est bio?', 'C\'est bon?', 'Naturel?', 'Pas chimique?'] },
+      ]
+    },
+    culture: [
+      'Paris has over 1,800 monuments and 170 museums',
+      'The Louvre is the world\'s largest art museum',
+      'French people greet each other with "la bise" (cheek kisses)',
+      'The Eiffel Tower was built for the 1889 World\'s Fair',
+      'Paris is divided into 20 arrondissements (districts)',
+    ]
+  },
+  
+  provence: {
+    name: 'Provence & Campagne',
+    icon: '🌸',
+    vocabulary: {
+      debutant: [
+        { french: 'La lavande', english: 'Lavender', phonetic: 'lah lah-vahnd', gender: 'feminine', context: 'Symbol of Provence', category: 'Nature' },
+        { french: 'Le marché', english: 'The market', phonetic: 'luh mar-shay', gender: 'masculine', context: 'Provençal markets are famous', category: 'Shopping' },
+        { french: 'Le fromage', english: 'Cheese', phonetic: 'luh froh-mazh', gender: 'masculine', context: 'France has 365+ cheeses', category: 'Food' },
+        { french: 'Le vin', english: 'Wine', phonetic: 'luh van', gender: 'masculine', context: 'Provence is wine country', category: 'Food' },
+        { french: 'La ferme', english: 'The farm', phonetic: 'lah fehrm', gender: 'feminine', context: 'Countryside life', category: 'Places' },
+        { french: 'Le soleil', english: 'The sun', phonetic: 'luh soh-lay', gender: 'masculine', context: 'Provence is sunny', category: 'Nature' },
+        { french: 'Beau/Belle', english: 'Beautiful', phonetic: 'boh/behl', gender: 'both', context: 'Describing the countryside', category: 'Adjectives' },
+        { french: 'La fleur', english: 'The flower', phonetic: 'lah fluhr', gender: 'feminine', context: 'Flower fields of Provence', category: 'Nature' },
+      ],
+      intermediaire: [
+        { french: 'Le champ de lavande', english: 'Lavender field', phonetic: 'luh shahn duh lah-vahnd', gender: 'masculine', context: 'Iconic Provençal landscape', category: 'Nature' },
+        { french: 'La dégustation de vin', english: 'Wine tasting', phonetic: 'lah day-goos-tah-syohn duh van', gender: 'feminine', context: 'Popular activity', category: 'Activities' },
+        { french: 'Faire une randonnée', english: 'To go hiking', phonetic: 'fehr ewn rahn-doh-nay', gender: null, context: 'Outdoor activity', category: 'Activities' },
+      ]
+    },
+    grammar: {
+      debutant: [
+        { question: '"La" is used for:', correct: 'Feminine nouns', options: ['Feminine nouns', 'Masculine nouns', 'Plural nouns', 'Verbs'], explanation: 'La is the feminine definite article' },
+      ]
+    },
+    conversation: {
+      debutant: [
+        { scenario: 'Au marché provençal', question: 'How do you ask "How much for the cheese?"', correct: 'Le fromage, c\'est combien?', options: ['Le fromage, c\'est combien?', 'Prix fromage?', 'Combien fromage?', 'Donnez-moi fromage'] },
+      ]
+    },
+    culture: [
+      'Provence is known for its lavender fields that bloom in June-July',
+      'The Mistral is a strong, cold wind characteristic of Provence',
+      'AOC (Appellation d\'Origine Contrôlée) protects regional products',
+      'Provençal cuisine features olive oil, garlic, and herbs de Provence',
+    ]
+  },
+
+  afrique: {
+    name: 'Afrique Francophone',
+    icon: '🌍',
+    vocabulary: {
+      debutant: [
+        { french: 'Bonjour', english: 'Hello', phonetic: 'bohn-zhoor', gender: null, context: 'Used across Francophone Africa', category: 'Greetings' },
+        { french: 'Comment ça va?', english: 'How are you?', phonetic: 'koh-mahn sah vah', gender: null, context: 'Informal greeting', category: 'Greetings' },
+        { french: 'La famille', english: 'The family', phonetic: 'lah fah-mee-yuh', gender: 'feminine', context: 'Important in African culture', category: 'Family' },
+        { french: 'Le marché', english: 'The market', phonetic: 'luh mar-shay', gender: 'masculine', context: 'Central to community life', category: 'Places' },
+        { french: 'Manger', english: 'To eat', phonetic: 'mahn-zhay', gender: null, context: 'Essential verb', category: 'Verbs' },
+        { french: 'L\'eau', english: 'Water', phonetic: 'loh', gender: 'feminine', context: 'Essential resource', category: 'Basic' },
+        { french: 'La musique', english: 'Music', phonetic: 'lah mew-zeek', gender: 'feminine', context: 'Rich musical traditions', category: 'Culture' },
+        { french: 'Danser', english: 'To dance', phonetic: 'dahn-say', gender: null, context: 'Important cultural activity', category: 'Verbs' },
+      ],
+      intermediaire: [
+        { french: 'La solidarité', english: 'Solidarity', phonetic: 'lah soh-lee-dah-ree-tay', gender: 'feminine', context: 'Key African value', category: 'Values' },
+        { french: 'Le pagne', english: 'Traditional cloth', phonetic: 'luh pahn-yuh', gender: 'masculine', context: 'Worn across West Africa', category: 'Clothing' },
+        { french: 'Le griot', english: 'Storyteller/musician', phonetic: 'luh gree-oh', gender: 'masculine', context: 'Cultural historian', category: 'Culture' },
+        { french: 'La teranga', english: 'Hospitality (Wolof origin)', phonetic: 'lah tay-rahn-gah', gender: 'feminine', context: 'Senegalese hospitality', category: 'Values' },
+      ]
+    },
+    grammar: {
+      debutant: [
+        { question: 'In Francophone Africa, "On" is often used instead of:', correct: 'Nous (we)', options: ['Nous (we)', 'Je (I)', 'Vous (you)', 'Ils (they)'], explanation: 'On is commonly used for "we" in informal African French' },
+      ]
+    },
+    conversation: {
+      debutant: [
+        { scenario: 'Rencontrer quelqu\'un (Meeting someone)', question: 'How do you ask "Where are you from?"', correct: 'Tu viens d\'où?', options: ['Tu viens d\'où?', 'Où tu?', 'Ton pays?', 'D\'où viens?'] },
+      ]
+    },
+    culture: [
+      'Côte d\'Ivoire has the largest number of French speakers in Africa',
+      'Senegal\'s official language is French, but Wolof is widely spoken',
+      'Francophone African literature has produced Nobel Prize winners',
+      'The FESPACO film festival in Burkina Faso is Africa\'s largest',
+      'Francophone Africa has influenced French with words like "boubou" and "brousse"',
+    ]
+  },
+
+  senegal: {
+    name: 'Sénégal Teranga',
+    icon: '🥁',
+    vocabulary: {
+      debutant: [
+        { french: 'La teranga', english: 'Hospitality', phonetic: 'lah tay-rahn-gah', gender: 'feminine', context: 'Senegal is known as the land of teranga', category: 'Values' },
+        { french: 'Le thiéboudienne', english: 'Fish and rice dish', phonetic: 'luh cheh-boo-dyen', gender: 'masculine', context: 'National dish of Senegal', category: 'Food' },
+        { french: 'Le boubou', english: 'Traditional robe', phonetic: 'luh boo-boo', gender: 'masculine', context: 'Elegant West African garment', category: 'Clothing' },
+        { french: 'La plage', english: 'The beach', phonetic: 'lah plazh', gender: 'feminine', context: 'Senegal has beautiful beaches', category: 'Nature' },
+        { french: 'Le thé', english: 'Tea', phonetic: 'luh tay', gender: 'masculine', context: 'Ataya - ceremonial tea', category: 'Food' },
+        { french: 'Le sabar', english: 'Traditional drum', phonetic: 'luh sah-bar', gender: 'masculine', context: 'Used in celebrations', category: 'Music' },
+        { french: 'Partager', english: 'To share', phonetic: 'par-tah-zhay', gender: null, context: 'Important cultural value', category: 'Verbs' },
+        { french: 'Bienvenue', english: 'Welcome', phonetic: 'byen-vuh-new', gender: null, context: 'Warm Senegalese welcome', category: 'Greetings' },
+      ],
+      intermediaire: [
+        { french: 'Le yassa', english: 'Chicken with onion sauce', phonetic: 'luh yah-sah', gender: 'masculine', context: 'Popular Senegalese dish', category: 'Food' },
+        { french: 'La mosquée', english: 'The mosque', phonetic: 'lah mos-kay', gender: 'feminine', context: 'Religious architecture', category: 'Places' },
+        { french: 'Le djembé', english: 'Djembe drum', phonetic: 'luh jem-bay', gender: 'masculine', context: 'Traditional instrument', category: 'Music' },
+      ]
+    },
+    grammar: {
+      debutant: [
+        { question: '"Bienvenue" literally means:', correct: 'Well come (Welcome)', options: ['Well come (Welcome)', 'Good journey', 'Happy day', 'Good health'], explanation: 'Bien = well, venue = come' },
+      ]
+    },
+    conversation: {
+      debutant: [
+        { scenario: 'Partager un repas (Sharing a meal)', question: 'How do you say "This is delicious"?', correct: 'C\'est délicieux!', options: ['C\'est délicieux!', 'Bon!', 'J\'aime', 'Merci pour manger'] },
+      ]
+    },
+    culture: [
+      'Senegal is known as "Le Pays de la Teranga" (The Land of Hospitality)',
+      'Dakar, the capital, is the westernmost point of continental Africa',
+      'The Island of Gorée is a UNESCO World Heritage site',
+      'Senegalese wrestling (La Lutte) is the national sport',
+      'Youssou N\'Dour is Senegal\'s most famous musician',
+    ]
+  }
+};
+
+// ==================== VERB CONJUGATION DATABASE ====================
+const verbDB = {
+  etre: {
+    name: 'Être (to be)',
+    conjugations: {
+      present: ['je suis', 'tu es', 'il/elle est', 'nous sommes', 'vous êtes', 'ils/elles sont'],
+      imparfait: ['j\'étais', 'tu étais', 'il/elle était', 'nous étions', 'vous étiez', 'ils/elles étaient'],
+      futur: ['je serai', 'tu seras', 'il/elle sera', 'nous serons', 'vous serez', 'ils/elles seront'],
+      passeCompose: ['j\'ai été', 'tu as été', 'il/elle a été', 'nous avons été', 'vous avez été', 'ils/elles ont été']
+    }
+  },
+  avoir: {
+    name: 'Avoir (to have)',
+    conjugations: {
+      present: ['j\'ai', 'tu as', 'il/elle a', 'nous avons', 'vous avez', 'ils/elles ont'],
+      imparfait: ['j\'avais', 'tu avais', 'il/elle avait', 'nous avions', 'vous aviez', 'ils/elles avaient'],
+      futur: ['j\'aurai', 'tu auras', 'il/elle aura', 'nous aurons', 'vous aurez', 'ils/elles auront'],
+      passeCompose: ['j\'ai eu', 'tu as eu', 'il/elle a eu', 'nous avons eu', 'vous avez eu', 'ils/elles ont eu']
+    }
+  },
+  aller: {
+    name: 'Aller (to go)',
+    conjugations: {
+      present: ['je vais', 'tu vas', 'il/elle va', 'nous allons', 'vous allez', 'ils/elles vont'],
+      imparfait: ['j\'allais', 'tu allais', 'il/elle allait', 'nous allions', 'vous alliez', 'ils/elles allaient'],
+      futur: ['j\'irai', 'tu iras', 'il/elle ira', 'nous irons', 'vous irez', 'ils/elles iront'],
+      passeCompose: ['je suis allé(e)', 'tu es allé(e)', 'il/elle est allé(e)', 'nous sommes allé(e)s', 'vous êtes allé(e)(s)', 'ils/elles sont allé(e)s']
+    }
+  },
+  faire: {
+    name: 'Faire (to do/make)',
+    conjugations: {
+      present: ['je fais', 'tu fais', 'il/elle fait', 'nous faisons', 'vous faites', 'ils/elles font'],
+      imparfait: ['je faisais', 'tu faisais', 'il/elle faisait', 'nous faisions', 'vous faisiez', 'ils/elles faisaient'],
+      futur: ['je ferai', 'tu feras', 'il/elle fera', 'nous ferons', 'vous ferez', 'ils/elles feront'],
+      passeCompose: ['j\'ai fait', 'tu as fait', 'il/elle a fait', 'nous avons fait', 'vous avez fait', 'ils/elles ont fait']
+    }
+  },
+  parler: {
+    name: 'Parler (to speak)',
+    conjugations: {
+      present: ['je parle', 'tu parles', 'il/elle parle', 'nous parlons', 'vous parlez', 'ils/elles parlent'],
+      imparfait: ['je parlais', 'tu parlais', 'il/elle parlait', 'nous parlions', 'vous parliez', 'ils/elles parlaient'],
+      futur: ['je parlerai', 'tu parleras', 'il/elle parlera', 'nous parlerons', 'vous parlerez', 'ils/elles parleront'],
+      passeCompose: ['j\'ai parlé', 'tu as parlé', 'il/elle a parlé', 'nous avons parlé', 'vous avez parlé', 'ils/elles ont parlé']
+    }
+  },
+  manger: {
+    name: 'Manger (to eat)',
+    conjugations: {
+      present: ['je mange', 'tu manges', 'il/elle mange', 'nous mangeons', 'vous mangez', 'ils/elles mangent'],
+      imparfait: ['je mangeais', 'tu mangeais', 'il/elle mangeait', 'nous mangions', 'vous mangiez', 'ils/elles mangeaient'],
+      futur: ['je mangerai', 'tu mangeras', 'il/elle mangera', 'nous mangerons', 'vous mangerez', 'ils/elles mangeront'],
+      passeCompose: ['j\'ai mangé', 'tu as mangé', 'il/elle a mangé', 'nous avons mangé', 'vous avez mangé', 'ils/elles ont mangé']
+    }
+  }
+};
+
+// Add more verbs
+['venir','voir','savoir','pouvoir','vouloir','devoir','prendre','donner','aimer'].forEach(verb => {
+  verbDB[verb] = {
+    name: `${verb.charAt(0).toUpperCase() + verb.slice(1)} (to ${verb})`,
+    conjugations: {
+      present: [`je ${verb}`, `tu ${verb}s`, `il/elle ${verb}`, `nous ${verb}ons`, `vous ${verb}z`, `ils/elles ${verb}nt`],
+      imparfait: [`je ${verb}ais`, `tu ${verb}ais`, `il/elle ${verb}ait`, `nous ${verb}ions`, `vous ${verb}iez`, `ils/elles ${verb}aient`],
+      futur: [`je ${verb}ai`, `tu ${verb}as`, `il/elle ${verb}a`, `nous ${verb}ons`, `vous ${verb}z`, `ils/elles ${verb}ont`],
+      passeCompose: [`j'ai ${verb}`, `tu as ${verb}`, `il/elle a ${verb}`, `nous avons ${verb}`, `vous avez ${verb}`, `ils/elles ont ${verb}`]
+    }
+  };
+});
+
+// ==================== SELECTION HANDLERS ====================
+function selectTheme(element) {
+  document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('selected'));
+  element.classList.add('selected');
+  gameState.theme = element.dataset.theme;
+}
+
+function selectLevel(element) {
+  document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('selected'));
+  element.classList.add('selected');
+  gameState.level = element.dataset.level;
+}
+
+function selectQuestType(element) {
+  document.querySelectorAll('.quest-btn').forEach(b => b.classList.remove('selected'));
+  element.classList.add('selected');
+  gameState.questFocus = element.dataset.quest;
+}
+
+// ==================== SCREEN MANAGEMENT ====================
+function showScreen(screenId) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(screenId).classList.add('active');
+  
+  if (screenId === 'vocabulary-screen') displayVocabulary();
+  if (screenId === 'progress-screen') displayProgress();
+  if (screenId === 'verb-screen') displayVerbConjugation();
+}
+
+// ==================== DAILY CHALLENGE ====================
+function setDailyChallenge() {
+  const today = new Date().toDateString();
+  const saved = localStorage.getItem('frenchDailyChallenge');
+  
+  if (saved) {
+    const data = JSON.parse(saved);
+    if (data.date === today) {
+      gameState.dailyChallengeCompleted = data.completed;
+    }
+  }
+  
+  const words = ['Bonjour', 'Merci', 'Au revoir', 'S\'il vous plaît', 'Oui', 'Non'];
+  const dailyWord = words[new Date().getDay() % words.length];
+  
+  document.getElementById('daily-word').innerHTML = `
+    <strong>Mot du jour:</strong> <span style="font-size:1.2rem;color:var(--accent-gold);">${dailyWord}</span>
+    <br><span style="font-size:0.8rem;">Prononcez ce mot 3 fois aujourd'hui!</span>
+    ${gameState.dailyChallengeCompleted ? '<br><span style="color:var(--correct);">✅ Complété!</span>' : ''}
+  `;
+  
+  if (!gameState.dailyChallengeCompleted) {
+    document.getElementById('daily-word').onclick = function() {
+      gameState.dailyChallengeCompleted = true;
+      gameState.score += 50;
+      localStorage.setItem('frenchDailyChallenge', JSON.stringify({
+        date: today,
+        completed: true
+      }));
+      setDailyChallenge();
+      showAchievement('🌟', 'Défi Quotidien!', 'Daily challenge completed! +50 points');
+    };
+    document.getElementById('daily-word').style.cursor = 'pointer';
+  }
+}
+
+// ==================== GAME LOGIC ====================
+function startAdventure() {
+  gameState.score = 0;
+  gameState.streak = 0;
+  gameState.bestStreak = 0;
+  gameState.lives = 5;
+  gameState.currentQuestion = 0;
+  gameState.totalQuestions = gameState.level === 'debutant' ? 10 : gameState.level === 'intermediaire' ? 15 : gameState.level === 'avance' ? 20 : 25;
+  gameState.wordsMastered = [];
+  gameState.hintsRemaining = 3;
+  gameState.answered = false;
+
+  document.getElementById('current-theme-name').textContent = frenchDB[gameState.theme].name;
+  document.getElementById('current-level-name').textContent = 
+    gameState.level === 'debutant' ? 'Débutant (A1)' : 
+    gameState.level === 'intermediaire' ? 'Intermédiaire (A2-B1)' : 
+    gameState.level === 'avance' ? 'Avancé (B2-C1)' : 'Expert (C2)';
+  
+  updateHUD();
+  showScreen('game-screen');
+  presentQuest();
+}
+
+function presentQuest() {
+  if (gameState.currentQuestion >= gameState.totalQuestions) {
+    endAdventure();
+    return;
+  }
+
+  gameState.answered = false;
+  const themeData = frenchDB[gameState.theme];
+  const level = gameState.level;
+  
+  // Determine quest type
+  let questType;
+  if (gameState.questFocus === 'all') {
+    const types = ['vocab', 'grammar', 'conversation', 'verb', 'culture'];
+    questType = types[Math.floor(Math.random() * types.length)];
+  } else {
+    questType = gameState.questFocus;
+  }
+
+  // Get quest data
+  let questData;
+  switch(questType) {
+    case 'vocab':
+      questData = getVocabularyQuest(themeData, level);
+      break;
+    case 'grammar':
+      questData = getGrammarQuest(themeData, level);
+      break;
+    case 'conversation':
+      questData = getConversationQuest(themeData, level);
+      break;
+    case 'verb':
+      questData = getVerbQuest(level);
+      break;
+    case 'culture':
+      questData = getCultureQuest(themeData);
+      break;
+    default:
+      questData = getVocabularyQuest(themeData, level);
+  }
+
+  displayQuest(questData, questType);
+  updateHUD();
+}
+
+function getVocabularyQuest(themeData, level) {
+  const vocab = themeData.vocabulary[level] || themeData.vocabulary.debutant;
+  const word = vocab[Math.floor(Math.random() * vocab.length)];
+  
+  const allWords = [...vocab].filter(w => w.french !== word.french);
+  const wrongOptions = allWords.sort(() => Math.random() - 0.5).slice(0, 3).map(w => w.english);
+  
+  return {
+    type: 'vocab',
+    context: 'Que signifie ce mot? (What does this word mean?)',
+    target: word.french,
+    phonetic: word.phonetic,
+    gender: word.gender,
+    correct: word.english,
+    options: shuffleArray([word.english, ...wrongOptions]),
+    explanation: `"${word.french}" means "${word.english}". ${word.context}`,
+    cultureNote: themeData.culture[Math.floor(Math.random() * themeData.culture.length)],
+    wordData: word
+  };
+}
+
+function getGrammarQuest(themeData, level) {
+  const grammar = themeData.grammar[level] || themeData.grammar.debutant;
+  if (!grammar || grammar.length === 0) return getVocabularyQuest(themeData, level);
+  
+  const quest = grammar[Math.floor(Math.random() * grammar.length)];
+  return {
+    type: 'grammar',
+    context: 'Défi Grammaire (Grammar Challenge)',
+    target: quest.question,
+    phonetic: '',
+    gender: null,
+    correct: quest.correct,
+    options: quest.options,
+    explanation: quest.explanation,
+    cultureNote: 'La grammaire est la base du français!',
+    wordData: null
+  };
+}
+
+function getConversationQuest(themeData, level) {
+  const conv = themeData.conversation[level] || themeData.conversation.debutant;
+  if (!conv || conv.length === 0) return getVocabularyQuest(themeData, level);
+  
+  const quest = conv[Math.floor(Math.random() * conv.length)];
+  return {
+    type: 'conversation',
+    context: `💬 ${quest.scenario}`,
+    target: quest.question,
+    phonetic: '',
+    gender: null,
+    correct: quest.correct,
+    options: quest.options,
+    explanation: `Réponse correcte: "${quest.correct}"`,
+    cultureNote: 'Pratiquez ces phrases dans de vraies conversations!',
+    wordData: null
+  };
+}
+
+function getVerbQuest(level) {
+  const verbs = ['etre', 'avoir', 'aller', 'faire', 'parler', 'manger'];
+  const verb = verbDB[verbs[Math.floor(Math.random() * verbs.length)]];
+  const pronoun = ['je', 'tu', 'il/elle', 'nous', 'vous', 'ils/elles'][Math.floor(Math.random() * 6)];
+  const tense = level === 'debutant' ? 'present' : ['present', 'imparfait', 'futur'][Math.floor(Math.random() * 3)];
+  
+  const correctForm = verb.conjugations[tense][['je', 'tu', 'il/elle', 'nous', 'vous', 'ils/elles'].indexOf(pronoun)];
+  
+  return {
+    type: 'verb',
+    context: `Conjuguez le verbe (Conjugate the verb)`,
+    target: `${verb.name} — ${pronoun} (${tense})`,
+    phonetic: '',
+    gender: null,
+    correct: correctForm,
+    options: shuffleArray([correctForm, 
+      verb.conjugations[tense][Math.floor(Math.random() * 6)],
+      verb.conjugations[Object.keys(verb.conjugations)[Math.floor(Math.random() * 4)]][Math.floor(Math.random() * 6)],
+      correctForm.replace('e', 'es').replace('s', '')
+    ]),
+    explanation: `La conjugaison correcte est "${correctForm}"`,
+    cultureNote: 'Les verbes français sont essentiels pour communiquer!',
+    wordData: null
+  };
+}
+
+function getCultureQuest(themeData) {
+  const facts = themeData.culture;
+  const fact = facts[Math.floor(Math.random() * facts.length)];
+  
+  // Create a question from the fact
+  const words = fact.split(' ');
+  const keyWord = words[Math.floor(Math.random() * words.length)].replace(/[.,!?]/g, '');
+  
+  return {
+    type: 'culture',
+    context: 'Saviez-vous que... (Did you know?)',
+    target: `Quel mot manque? "${fact.replace(keyWord, '_____')}"`,
+    phonetic: '',
+    gender: null,
+    correct: keyWord,
+    options: shuffleArray([keyWord, 'Paris', 'France', 'fromage', 'bonjour']).slice(0, 4),
+    explanation: `Le mot correct est "${keyWord}". ${fact}`,
+    cultureNote: fact,
+    wordData: null
+  };
+}
+
+function displayQuest(quest, questType) {
+  const typeMap = {
+    vocab: ['VOCABULAIRE', 'quest-vocab'],
+    grammar: ['GRAMMAIRE', 'quest-grammar'],
+    conversation: ['CONVERSATION', 'quest-conversation'],
+    verb: ['VERBES', 'quest-verb'],
+    culture: ['CULTURE', 'quest-culture']
+  };
+  
+  const [typeName, typeClass] = typeMap[questType] || ['VOCABULAIRE', 'quest-vocab'];
+  document.getElementById('quest-type-display').textContent = typeName;
+  document.getElementById('quest-type-display').className = `quest-type-badge ${typeClass}`;
+  document.getElementById('quest-category').textContent = typeName;
+  
+  document.getElementById('context-text').textContent = quest.context;
+  document.getElementById('french-word-display').textContent = quest.target;
+  document.getElementById('phonetic-display').textContent = quest.phonetic ? `/ ${quest.phonetic} /` : '';
+  
+  // Gender indicator
+  const genderDisplay = document.getElementById('gender-display');
+  if (quest.gender) {
+    genderDisplay.style.display = 'inline-block';
+    genderDisplay.textContent = quest.gender === 'masculine' ? 'm.' : 'f.';
+    genderDisplay.className = `gender-indicator ${quest.gender === 'masculine' ? 'gender-masculine' : 'gender-feminine'}`;
+  } else {
+    genderDisplay.style.display = 'none';
+  }
+  
+  // Options
+  const optionsContainer = document.getElementById('options-container');
+  optionsContainer.innerHTML = '';
+  
+  quest.options.forEach((option, index) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = `<span style="font-weight:700;color:var(--text-muted);">${index + 1}.</span> ${option}`;
+    btn.onclick = () => checkAnswer(option, quest, btn);
+    optionsContainer.appendChild(btn);
+  });
+  
+  // Show verb table button for verb quests
+  document.getElementById('verb-table-btn').style.display = questType === 'verb' ? 'inline-flex' : 'none';
+  
+  document.getElementById('feedback-display').textContent = '';
+  document.getElementById('feedback-display').className = 'feedback-area';
+  
+  const cultureNote = document.getElementById('culture-note');
+  cultureNote.classList.remove('show');
+  document.getElementById('culture-text').textContent = quest.cultureNote || '';
+  
+  document.getElementById('quest-progress').textContent = `Question ${gameState.currentQuestion + 1} sur ${gameState.totalQuestions}`;
+  document.getElementById('progress-bar').style.width = `${(gameState.currentQuestion / gameState.totalQuestions) * 100}%`;
+  
+  gameState.currentQuestData = quest;
+}
+
+function checkAnswer(selected, quest, clickedBtn) {
+  if (gameState.answered) return;
+  gameState.answered = true;
+  
+  const isCorrect = selected === quest.correct;
+  const allButtons = document.querySelectorAll('.option-btn');
+  
+  allButtons.forEach(btn => {
+    btn.disabled = true;
+    if (btn.textContent.includes(quest.correct)) {
+      btn.classList.add('correct');
+    } else if (btn === clickedBtn && !isCorrect) {
+      btn.classList.add('wrong');
+    } else {
+      btn.classList.add('dimmed');
+    }
+  });
+  
+  const feedback = document.getElementById('feedback-display');
+  
+  if (isCorrect) {
+    const pointsMap = { debutant: 10, intermediaire: 20, avance: 30, expert: 50 };
+    gameState.score += pointsMap[gameState.level] || 10;
+    gameState.streak++;
+    if (gameState.streak > gameState.bestStreak) {
+      gameState.bestStreak = gameState.streak;
+    }
+    
+    if (quest.wordData && !gameState.wordsMastered.find(w => w.french === quest.wordData.french)) {
+      gameState.wordsMastered.push(quest.wordData);
+    }
+    
+    const encouragements = ['Excellent! 🎉', 'Parfait! ⭐', 'Magnifique! 🎯', 'Très bien! 🔥', 'Bravo! ✅'];
+    feedback.textContent = `${encouragements[Math.floor(Math.random() * encouragements.length)]} ${quest.explanation}`;
+    feedback.className = 'feedback-area feedback-correct';
+    
+    document.getElementById('culture-note').classList.add('show');
+    
+    if (gameState.streak >= 5) {
+      confetti.addConfetti({ particleCount: 50, spread: 60 });
+    }
+    
+    checkAchievements();
+  } else {
+    gameState.streak = 0;
+    gameState.lives = Math.max(0, gameState.lives - 1);
+    
+    feedback.textContent = `❌ Pas tout à fait! La réponse correcte est: ${quest.correct}. ${quest.explanation}`;
+    feedback.className = 'feedback-area feedback-wrong';
+    
+    if (gameState.lives <= 0) {
+      setTimeout(() => endAdventure(), 2000);
+      return;
+    }
+  }
+  
+  updateHUD();
+  
+  setTimeout(() => {
+    gameState.currentQuestion++;
+    presentQuest();
+  }, 2500);
+}
+
+function useHint() {
+  if (gameState.hintsRemaining <= 0 || gameState.answered) return;
+  
+  gameState.hintsRemaining--;
+  document.getElementById('hints-remaining').textContent = `(${gameState.hintsRemaining})`;
+  
+  const buttons = [...document.querySelectorAll('.option-btn:not(:disabled)')];
+  const wrongButtons = buttons.filter(b => !b.textContent.includes(gameState.currentQuestData.correct));
+  
+  if (wrongButtons.length > 0) {
+    const toRemove = wrongButtons[Math.floor(Math.random() * wrongButtons.length)];
+    toRemove.classList.add('dimmed');
+    toRemove.disabled = true;
+    
+    document.getElementById('feedback-display').textContent = '💡 Indice: Une mauvaise réponse supprimée!';
+    document.getElementById('feedback-display').className = 'feedback-area';
+  }
+}
+
+function speakFrench() {
+  const word = document.getElementById('french-word-display').textContent;
+  if ('speechSynthesis' in window) {
+    const utterance = new SpeechSynthesisUtterance(word);
+    utterance.lang = 'fr-FR';
+    utterance.rate = 0.75;
+    
+    const voices = speechSynthesis.getVoices();
+    const frenchVoice = voices.find(v => v.lang.startsWith('fr'));
+    if (frenchVoice) utterance.voice = frenchVoice;
+    
+    speechSynthesis.speak(utterance);
+  } else {
+    alert('Speech synthesis not supported');
+  }
+}
+
+function toggleRecording() {
+  const recordBtn = document.getElementById('record-btn');
+  
+  if (!gameState.isRecording) {
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(stream => {
+          gameState.mediaRecorder = new MediaRecorder(stream);
+          gameState.audioChunks = [];
+          
+          gameState.mediaRecorder.ondataavailable = event => {
+            gameState.audioChunks.push(event.data);
+          };
+          
+          gameState.mediaRecorder.onstop = () => {
+            const audioBlob = new Blob(gameState.audioChunks, { type: 'audio/wav' });
+            const audioUrl = URL.createObjectURL(audioBlob);
+            const audio = new Audio(audioUrl);
+            audio.play();
+            
+            document.getElementById('feedback-display').textContent = '🎤 Très bien! Continuez à pratiquer!';
+            document.getElementById('feedback-display').className = 'feedback-area feedback-correct';
+          };
+          
+          gameState.mediaRecorder.start();
+          gameState.isRecording = true;
+          recordBtn.classList.add('recording');
+          recordBtn.textContent = '⏹️ Arrêter';
+        })
+        .catch(err => {
+          console.error('Microphone error:', err);
+          alert('Impossible d\'accéder au microphone.');
+        });
+    }
+  } else {
+    gameState.mediaRecorder.stop();
+    gameState.isRecording = false;
+    recordBtn.classList.remove('recording');
+    recordBtn.textContent = '🎤 Prononcer';
+    gameState.mediaRecorder.stream.getTracks().forEach(track => track.stop());
+  }
+}
+
+function showVerbTable() {
+  showScreen('verb-screen');
+}
+
+function displayVerbConjugation() {
+  const verbKey = document.getElementById('verb-select').value;
+  const verb = verbDB[verbKey];
+  if (!verb) return;
+  
+  const pronouns = ['je', 'tu', 'il/elle', 'nous', 'vous', 'ils/elles'];
+  const tbody = document.getElementById('verb-table-body');
+  
+  tbody.innerHTML = pronouns.map((pronoun, i) => `
+    <tr>
+      <td style="font-weight:700;">${pronoun}</td>
+      <td>${verb.conjugations.present[i]}</td>
+      <td>${verb.conjugations.imparfait[i]}</td>
+      <td>${verb.conjugations.futur[i]}</td>
+      <td>${verb.conjugations.passeCompose[i]}</td>
+    </tr>
+  `).join('');
+}
+
+function checkAchievements() {
+  const achievements = [];
+  
+  if (gameState.wordsMastered.length >= 10) {
+    achievements.push({ icon: '📚', title: 'Collectionneur de Mots', desc: '10 mots maîtrisés!' });
+  }
+  if (gameState.bestStreak >= 7) {
+    achievements.push({ icon: '🔥', title: 'Inarrêtable', desc: '7 bonnes réponses d\'affilée!' });
+  }
+  if (gameState.score >= 100) {
+    achievements.push({ icon: '⭐', title: 'Centurion', desc: '100 points gagnés!' });
+  }
+  
+  if (achievements.length > 0) {
+    const achievement = achievements[achievements.length - 1];
+    showAchievement(achievement.icon, achievement.title, achievement.desc);
+  }
+}
+
+function showAchievement(icon, title, desc) {
+  const toast = document.getElementById('achievement-toast');
+  document.getElementById('toast-icon').textContent = icon;
+  document.getElementById('toast-title').textContent = title;
+  document.getElementById('toast-desc').textContent = desc;
+  
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+function updateHUD() {
+  document.getElementById('score-display').textContent = gameState.score;
+  document.getElementById('streak-display').textContent = gameState.streak;
+  document.getElementById('lives-display').textContent = '❤️'.repeat(gameState.lives) + '🖤'.repeat(5 - gameState.lives);
+  document.getElementById('words-mastered-display').textContent = gameState.wordsMastered.length;
+  document.getElementById('hints-remaining').textContent = `(${gameState.hintsRemaining})`;
+}
+
+function endAdventure() {
+  confetti.addConfetti({ particleCount: 150, spread: 80 });
+  saveProgress();
+  
+  setTimeout(() => {
+    showScreen('progress-screen');
+  }, 2000);
+}
+
+// ==================== VOCABULARY DISPLAY ====================
+function displayVocabulary() {
+  const themeFilter = document.getElementById('vocab-filter')?.value || 'all';
+  const levelFilter = document.getElementById('vocab-level-filter')?.value || 'all';
+  const container = document.getElementById('vocab-list');
+  const countDisplay = document.getElementById('vocab-count');
+  
+  let words = [];
+  Object.entries(frenchDB).forEach(([themeKey, themeData]) => {
+    if (themeFilter !== 'all' && themeKey !== themeFilter) return;
+    
+    Object.entries(themeData.vocabulary).forEach(([level, vocabList]) => {
+      if (levelFilter !== 'all' && level !== levelFilter) return;
+      words.push(...vocabList.map(w => ({...w, theme: themeKey, level})));
+    });
+  });
+  
+  container.innerHTML = words.map(word => {
+    const isMastered = gameState.wordsMastered.some(w => w.french === word.french);
+    return `
+      <div class="vocab-item ${isMastered ? 'mastered' : ''}">
+        <div>
+          <div class="vi-french">
+            ${word.french}
+            ${word.gender ? `<span class="gender-indicator ${word.gender === 'masculine' ? 'gender-masculine' : 'gender-feminine'}">${word.gender === 'masculine' ? 'm' : 'f'}</span>` : ''}
+          </div>
+          <div class="vi-english">${word.english} ${word.phonetic ? `(/ ${word.phonetic} /)` : ''}</div>
+        </div>
+        <div class="vi-status ${isMastered ? 'vi-mastered' : 'vi-learning'}">
+          ${isMastered ? '✓ Maîtrisé' : 'À apprendre'}
+        </div>
+      </div>
+    `;
+  }).join('');
+  
+  countDisplay.textContent = `${words.length} mots · ${gameState.wordsMastered.length} maîtrisés`;
+}
+
+// ==================== PROGRESS DISPLAY ====================
+function displayProgress() {
+  const statsContainer = document.getElementById('progress-stats');
+  const themeProgressContainer = document.getElementById('theme-progress');
+  const achievementsContainer = document.getElementById('achievements-list');
+  
+  statsContainer.innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:0.8rem;">
+      <div style="background:var(--surface2);padding:1rem;border-radius:12px;text-align:center;">
+        <div style="font-size:1.5rem;font-weight:800;color:var(--accent-gold);">${gameState.score}</div>
+        <div style="font-size:0.8rem;color:var(--text-muted);">Points Totaux</div>
+      </div>
+      <div style="background:var(--surface2);padding:1rem;border-radius:12px;text-align:center;">
+        <div style="font-size:1.5rem;font-weight:800;color:var(--correct);">${gameState.wordsMastered.length}</div>
+        <div style="font-size:0.8rem;color:var(--text-muted);">Mots Maîtrisés</div>
+      </div>
+      <div style="background:var(--surface2);padding:1rem;border-radius:12px;text-align:center;">
+        <div style="font-size:1.5rem;font-weight:800;color:#fbbf24;">${gameState.bestStreak}</div>
+        <div style="font-size:0.8rem;color:var(--text-muted);">Meilleure Série</div>
+      </div>
+      <div style="background:var(--surface2);padding:1rem;border-radius:12px;text-align:center;">
+        <div style="font-size:1.5rem;font-weight:800;color:var(--french-red);">${gameState.level}</div>
+        <div style="font-size:0.8rem;color:var(--text-muted);">Niveau</div>
+      </div>
+    </div>
+  `;
+  
+  // Theme progress
+  themeProgressContainer.innerHTML = Object.entries(frenchDB).map(([key, themeData]) => {
+    const totalWords = Object.values(themeData.vocabulary).flat().length;
+    const learned = gameState.wordsMastered.filter(w => 
+      Object.values(themeData.vocabulary).flat().some(v => v.french === w.french)
+    ).length;
+    const percent = totalWords > 0 ? Math.round((learned / totalWords) * 100) : 0;
+    
+    return `
+      <div style="margin-bottom:0.8rem;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:0.3rem;">
+          <span style="font-weight:600;">${themeData.icon} ${themeData.name}</span>
+          <span style="color:var(--text-muted);">${learned}/${totalWords} mots</span>
+        </div>
+        <div style="height:6px;background:var(--surface2);border-radius:999px;overflow:hidden;">
+          <div style="height:100%;width:${percent}%;background:linear-gradient(90deg,var(--french-blue),var(--french-red));border-radius:999px;transition:width 1s;"></div>
+        </div>
+      </div>
+    `;
+  }).join('');
+  
+  // Achievements
+  const achievements = [];
+  if (gameState.wordsMastered.length >= 5) achievements.push('📚 Apprenti: 5 mots maîtrisés');
+  if (gameState.wordsMastered.length >= 20) achievements.push('📚 Expert: 20 mots maîtrisés');
+  if (gameState.bestStreak >= 5) achievements.push('🔥 En Feu: 5 réponses correctes consécutives');
+  if (gameState.bestStreak >= 10) achievements.push('🔥 Légendaire: 10 réponses consécutives');
+  if (gameState.score >= 50) achievements.push('⭐ Étoile Montante: 50 points');
+  if (gameState.score >= 200) achievements.push('⭐ Champion: 200 points');
+  
+  achievementsContainer.innerHTML = achievements.length > 0 
+    ? achievements.map(a => `
+        <div style="background:var(--surface2);padding:0.8rem;border-radius:10px;margin-bottom:0.5rem;font-size:0.9rem;">
+          ${a}
+        </div>
+      `).join('')
+    : '<p style="color:var(--text-muted);">Complétez des quêtes pour gagner des badges!</p>';
+}
+
+// ==================== PROGRESS SAVING ====================
+function saveProgress() {
+  const progress = {
+    score: gameState.score,
+    wordsMastered: gameState.wordsMastered,
+    bestStreak: gameState.bestStreak,
+    level: gameState.level,
+    theme: gameState.theme
+  };
+  localStorage.setItem('francaisQuest', JSON.stringify(progress));
+}
+
+function loadProgress() {
+  const saved = localStorage.getItem('francaisQuest');
+  if (saved) {
+    const progress = JSON.parse(saved);
+    gameState.score = progress.score || 0;
+    gameState.wordsMastered = progress.wordsMastered || [];
+    gameState.bestStreak = progress.bestStreak || 0;
+    gameState.level = progress.level || 'debutant';
+    gameState.theme = progress.theme || 'paris';
+  }
+}
+
+// ==================== UTILITY FUNCTIONS ====================
+function shuffleArray(array) {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
+// ==================== KEYBOARD SHORTCUTS ====================
+document.addEventListener('keydown', (e) => {
+  const gameScreen = document.getElementById('game-screen');
+  if (!gameScreen.classList.contains('active')) return;
+  
+  const keys = ['1', '2', '3', '4'];
+  const index = keys.indexOf(e.key);
+  
+  if (index !== -1) {
+    const buttons = document.querySelectorAll('.option-btn:not(:disabled)');
+    if (buttons[index]) buttons[index].click();
+  }
+  
+  if (e.key === 'l' || e.key === 'L') speakFrench();
+  if (e.key === 'h' || e.key === 'H') useHint();
+});
+
+// ==================== BACKGROUND ANIMATION ====================
+(function initBackground() {
+  const canvas = document.getElementById('bg-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H;
+  const particles = [];
+
+  function resize() {
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const colors = ['#002395', '#ED2939', '#FFD700', '#1E3F66', '#9B59B6', '#F77F00', '#009639'];
+  
+  for (let i = 0; i < 80; i++) {
+    particles.push({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      r: Math.random() * 2 + 0.5,
+      vx: (Math.random() - 0.5) * 0.4,
+      vy: (Math.random() - 0.5) * 0.4,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      alpha: Math.random() * 0.4 + 0.15
+    });
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    particles.forEach(p => {
+      p.x += p.vx;
+      p.y += p.vy;
+      
+      if (p.x < 0) p.x = W;
+      if (p.x > W) p.x = 0;
+      if (p.y < 0) p.y = H;
+      if (p.y > H) p.y = 0;
+      
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      const hex = p.color.replace('#', '');
+      const r = parseInt(hex.substring(0, 2), 16);
+      const g = parseInt(hex.substring(2, 4), 16);
+      const b = parseInt(hex.substring(4, 6), 16);
+      ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${p.alpha})`;
+      ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ==================== INITIALIZATION ====================
+window.onload = function() {
+  loadProgress();
+  setDailyChallenge();
+  
+  if ('speechSynthesis' in window) {
+    speechSynthesis.getVoices();
+  }
+  
+  // Pre-select first theme
+  document.querySelector('.theme-card.paris').classList.add('selected');
+  
+  console.log('🇫🇷 Français Quest initialized!');
+  console.log('📚 Features: Vocabulary, Grammar, Conversation, Verbs, Culture');
+  console.log('🎤 Voice recording and pronunciation practice');
+  console.log('💡 Hint system and keyboard shortcuts');
+  console.log('🌟 Daily challenges and achievement tracking');
+};
+</script>
+</body>
+</html>

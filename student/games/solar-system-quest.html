@@ -1,0 +1,1338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solar System Explorer Quest — Deep Space Edition</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/js-confetti@0.12.0/dist/js-confetti.browser.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:ital,wght@0,300;0,400;0,600;1,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --space-black: #020408;
+  --deep-blue: #050d1a;
+  --nebula-blue: #0a1628;
+  --star-white: #e8f4ff;
+  --gold: #ffd700;
+  --plasma-orange: #ff6b2b;
+  --cyan-glow: #00e5ff;
+  --green-ok: #00ff88;
+  --red-danger: #ff3355;
+  --purple-myst: #8b5cf6;
+  --glass: rgba(10,22,40,0.85);
+  --glass-border: rgba(0,229,255,0.2);
+  --glass-border-bright: rgba(0,229,255,0.6);
+  --hud-font: 'Orbitron', sans-serif;
+  --body-font: 'Exo 2', sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--space-black);color:var(--star-white);font-family:var(--body-font);overflow:hidden;user-select:none;}
+canvas{display:block;position:fixed;top:0;left:0;z-index:0;}
+
+/* ========== SCREEN LAYERS ========== */
+.screen{position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;pointer-events:none;}
+.screen.active{pointer-events:all;}
+.screen-hidden{display:none!important;}
+
+/* ========== MAIN MENU ========== */
+#menu-screen{background:radial-gradient(ellipse at 30% 40%, rgba(0,100,200,0.15) 0%, transparent 60%), radial-gradient(ellipse at 80% 70%, rgba(139,92,246,0.1) 0%, transparent 50%), linear-gradient(180deg,var(--space-black) 0%,var(--deep-blue) 100%);}
+.menu-panel{text-align:center;max-width:520px;width:90%;animation:panelIn 0.8s cubic-bezier(0.16,1,0.3,1);}
+.menu-logo{font-family:var(--hud-font);font-size:clamp(1.8rem,5vw,3rem);font-weight:900;letter-spacing:0.1em;background:linear-gradient(135deg,var(--cyan-glow),#fff,var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.1;margin-bottom:0.3em;}
+.menu-sub{font-size:0.9rem;color:rgba(200,220,255,0.6);letter-spacing:0.3em;text-transform:uppercase;margin-bottom:2.5rem;}
+.menu-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem;}
+.menu-btn{background:var(--glass);border:1px solid var(--glass-border);color:var(--star-white);padding:1rem;border-radius:12px;font-family:var(--hud-font);font-size:0.75rem;letter-spacing:0.08em;cursor:pointer;transition:all 0.3s;text-transform:uppercase;backdrop-filter:blur(20px);}
+.menu-btn:hover{border-color:var(--cyan-glow);box-shadow:0 0 20px rgba(0,229,255,0.3),inset 0 0 20px rgba(0,229,255,0.05);transform:translateY(-2px);}
+.menu-btn.primary{grid-column:1/-1;background:linear-gradient(135deg,rgba(0,100,200,0.4),rgba(0,229,255,0.2));border-color:var(--cyan-glow);font-size:0.9rem;padding:1.2rem;}
+.menu-btn.primary:hover{background:linear-gradient(135deg,rgba(0,100,200,0.6),rgba(0,229,255,0.4));}
+.diff-label{display:block;font-size:0.6rem;color:var(--cyan-glow);margin-bottom:0.3em;}
+.diff-icon{font-size:1.3rem;display:block;margin-bottom:0.3em;}
+.theme-row{display:flex;gap:0.7rem;margin-bottom:1.5rem;}
+.theme-btn{flex:1;background:var(--glass);border:1px solid var(--glass-border);color:rgba(200,220,255,0.7);padding:0.6rem;border-radius:8px;font-family:var(--body-font);font-size:0.8rem;cursor:pointer;transition:all 0.25s;}
+.theme-btn.active{border-color:var(--gold);color:var(--gold);background:rgba(255,215,0,0.1);}
+.menu-scores-preview{background:rgba(0,0,0,0.4);border:1px solid var(--glass-border);border-radius:10px;padding:0.8rem;font-size:0.75rem;color:rgba(200,220,255,0.5);min-height:3rem;}
+
+/* ========== HUD ========== */
+#hud{position:fixed;inset:0;z-index:20;pointer-events:none;}
+.hud-top{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:flex-start;padding:1rem;gap:1rem;}
+.hud-panel{background:var(--glass);border:1px solid var(--glass-border);border-radius:10px;padding:0.6rem 1rem;backdrop-filter:blur(20px);pointer-events:all;}
+.hud-score{font-family:var(--hud-font);font-size:1.1rem;color:var(--gold);}
+.hud-score span{font-size:0.65rem;display:block;color:rgba(200,220,255,0.5);letter-spacing:0.1em;text-transform:uppercase;}
+.hud-timer{font-family:var(--hud-font);font-size:1.4rem;color:var(--cyan-glow);text-align:center;}
+.hud-timer.danger{color:var(--red-danger);animation:timerPulse 0.5s ease-in-out infinite;}
+.hud-timer span{font-size:0.6rem;display:block;color:rgba(200,220,255,0.5);letter-spacing:0.1em;text-transform:uppercase;}
+.hud-streak{font-family:var(--hud-font);font-size:0.9rem;text-align:right;}
+.streak-val{font-size:1.6rem;color:var(--plasma-orange);display:block;line-height:1;}
+.hud-bottom{position:absolute;bottom:0;left:0;right:0;display:flex;justify-content:space-between;align-items:flex-end;padding:1rem;gap:1rem;}
+.resource-bar{background:var(--glass);border:1px solid var(--glass-border);border-radius:10px;padding:0.6rem 1rem;backdrop-filter:blur(20px);pointer-events:all;min-width:200px;}
+.resource-label{font-family:var(--hud-font);font-size:0.6rem;letter-spacing:0.15em;color:rgba(200,220,255,0.5);text-transform:uppercase;margin-bottom:0.4rem;}
+.resource-tokens{display:flex;gap:0.4rem;flex-wrap:wrap;max-width:180px;}
+.token{width:16px;height:16px;border-radius:50%;background:rgba(255,215,0,0.3);border:1px solid rgba(255,215,0,0.5);transition:all 0.3s;}
+.token.active{background:var(--gold);box-shadow:0 0 8px var(--gold);}
+.mission-panel{background:var(--glass);border:1px solid var(--glass-border);border-radius:10px;padding:0.8rem 1rem;backdrop-filter:blur(20px);pointer-events:all;max-width:280px;}
+.mission-title{font-family:var(--hud-font);font-size:0.65rem;letter-spacing:0.15em;color:var(--cyan-glow);text-transform:uppercase;margin-bottom:0.4rem;}
+.mission-text{font-size:0.8rem;color:rgba(200,220,255,0.8);}
+.mission-progress{margin-top:0.5rem;height:3px;background:rgba(255,255,255,0.1);border-radius:2px;}
+.mission-bar{height:100%;background:linear-gradient(90deg,var(--cyan-glow),var(--purple-myst));border-radius:2px;transition:width 0.5s ease;}
+.controls-hint{font-size:0.7rem;color:rgba(200,220,255,0.4);font-family:var(--hud-font);letter-spacing:0.08em;pointer-events:all;}
+
+/* ========== NPC GUIDE ========== */
+#npc-guide{position:fixed;right:1.2rem;top:50%;transform:translateY(-50%);z-index:25;pointer-events:all;display:flex;flex-direction:column;align-items:flex-end;gap:0.5rem;}
+.npc-avatar{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#1a3a6b,#0a1628);border:2px solid var(--cyan-glow);display:flex;align-items:center;justify-content:center;font-size:1.6rem;box-shadow:0 0 15px rgba(0,229,255,0.4);cursor:pointer;transition:transform 0.3s;animation:npcFloat 3s ease-in-out infinite;}
+.npc-avatar:hover{transform:scale(1.1);}
+.npc-bubble{background:var(--glass);border:1px solid var(--glass-border-bright);border-radius:14px 14px 4px 14px;padding:0.8rem 1rem;max-width:200px;font-size:0.78rem;color:var(--star-white);line-height:1.4;opacity:0;transform:translateX(10px);transition:all 0.3s;pointer-events:none;}
+.npc-bubble.show{opacity:1;transform:translateX(0);}
+.npc-name{font-family:var(--hud-font);font-size:0.6rem;color:var(--cyan-glow);letter-spacing:0.1em;text-align:right;margin-bottom:0.3em;text-transform:uppercase;}
+
+/* ========== QUIZ OVERLAY ========== */
+#quiz-overlay{position:fixed;inset:0;z-index:30;background:radial-gradient(ellipse at center,rgba(5,13,26,0.97) 0%,rgba(2,4,8,0.99) 100%);display:none;flex-direction:column;align-items:center;justify-content:center;padding:2rem;}
+.quiz-header{font-family:var(--hud-font);font-size:0.7rem;letter-spacing:0.3em;color:var(--cyan-glow);text-transform:uppercase;margin-bottom:1.5rem;}
+.quiz-card{background:var(--glass);border:1px solid var(--glass-border-bright);border-radius:20px;padding:2rem;max-width:600px;width:100%;backdrop-filter:blur(30px);box-shadow:0 0 60px rgba(0,229,255,0.1);}
+.quiz-planet-name{font-family:var(--hud-font);font-size:1rem;color:var(--gold);margin-bottom:1rem;letter-spacing:0.1em;}
+.quiz-question{font-size:1.1rem;color:var(--star-white);line-height:1.5;margin-bottom:1.5rem;font-weight:300;}
+.quiz-timer-bar{height:4px;background:rgba(255,255,255,0.1);border-radius:2px;margin-bottom:1.5rem;overflow:hidden;}
+.quiz-timer-fill{height:100%;background:linear-gradient(90deg,var(--green-ok),var(--cyan-glow));border-radius:2px;transition:width 0.1s linear;}
+.quiz-options{display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;}
+.quiz-opt{background:rgba(10,22,40,0.8);border:1px solid rgba(0,229,255,0.25);color:var(--star-white);padding:0.9rem 1rem;border-radius:10px;font-family:var(--body-font);font-size:0.9rem;cursor:pointer;transition:all 0.25s;text-align:left;}
+.quiz-opt:hover{border-color:var(--cyan-glow);background:rgba(0,229,255,0.1);transform:translateX(2px);}
+.quiz-opt.correct{border-color:var(--green-ok)!important;background:rgba(0,255,136,0.2)!important;box-shadow:0 0 15px rgba(0,255,136,0.3);}
+.quiz-opt.wrong{border-color:var(--red-danger)!important;background:rgba(255,51,85,0.15)!important;}
+.quiz-fact{margin-top:1.2rem;padding:0.8rem 1rem;background:rgba(255,215,0,0.08);border:1px solid rgba(255,215,0,0.2);border-radius:8px;font-size:0.82rem;color:rgba(200,220,255,0.8);line-height:1.4;display:none;}
+.quiz-fact.show{display:block;animation:fadeUp 0.3s ease;}
+.quiz-continue-btn{margin-top:1rem;width:100%;padding:0.8rem;background:linear-gradient(135deg,rgba(0,100,200,0.5),rgba(0,229,255,0.3));border:1px solid var(--cyan-glow);color:var(--star-white);font-family:var(--hud-font);font-size:0.75rem;letter-spacing:0.1em;border-radius:8px;cursor:pointer;text-transform:uppercase;display:none;transition:all 0.3s;}
+.quiz-continue-btn:hover{background:linear-gradient(135deg,rgba(0,100,200,0.7),rgba(0,229,255,0.5));}
+.quiz-continue-btn.show{display:block;}
+
+/* ========== FACT CARD ========== */
+#fact-card{position:fixed;z-index:28;background:var(--glass);border:1px solid var(--gold);border-radius:16px;padding:1.2rem;width:280px;backdrop-filter:blur(30px);box-shadow:0 0 30px rgba(255,215,0,0.15);display:none;cursor:grab;}
+#fact-card.dragging{cursor:grabbing;box-shadow:0 0 50px rgba(255,215,0,0.3);}
+.fact-card-title{font-family:var(--hud-font);font-size:0.7rem;color:var(--gold);letter-spacing:0.2em;text-transform:uppercase;margin-bottom:0.8rem;display:flex;justify-content:space-between;align-items:center;}
+.fact-close{cursor:pointer;color:rgba(255,255,255,0.4);font-size:1rem;transition:color 0.2s;}
+.fact-close:hover{color:white;}
+.fact-body{font-size:0.82rem;line-height:1.6;color:rgba(200,220,255,0.9);}
+.fact-stat{display:flex;justify-content:space-between;padding:0.4rem 0;border-bottom:1px solid rgba(255,255,255,0.05);}
+.fact-stat-label{color:rgba(200,220,255,0.5);font-size:0.75rem;}
+.fact-stat-value{color:var(--cyan-glow);font-family:var(--hud-font);font-size:0.75rem;}
+.fact-compare{margin-top:0.8rem;background:rgba(0,0,0,0.3);border-radius:8px;padding:0.6rem;}
+.compare-bar-label{font-size:0.7rem;color:rgba(200,220,255,0.5);margin-bottom:0.3rem;}
+.compare-bar{height:6px;background:rgba(255,255,255,0.1);border-radius:3px;margin-bottom:0.5rem;overflow:hidden;}
+.compare-fill{height:100%;border-radius:3px;transition:width 1s ease;}
+
+/* ========== MISSION COMPLETE / ACHIEVEMENT ========== */
+#toast-container{position:fixed;top:5rem;left:50%;transform:translateX(-50%);z-index:50;display:flex;flex-direction:column;gap:0.5rem;pointer-events:none;}
+.toast{background:linear-gradient(135deg,rgba(0,50,100,0.95),rgba(0,20,40,0.95));border:1px solid var(--cyan-glow);border-radius:12px;padding:0.8rem 1.5rem;font-family:var(--hud-font);font-size:0.8rem;color:var(--star-white);text-align:center;animation:toastIn 0.4s cubic-bezier(0.16,1,0.3,1);box-shadow:0 0 30px rgba(0,229,255,0.2);letter-spacing:0.05em;}
+.toast.gold{border-color:var(--gold);box-shadow:0 0 30px rgba(255,215,0,0.3);}
+.toast.green{border-color:var(--green-ok);box-shadow:0 0 30px rgba(0,255,136,0.3);}
+.toast-icon{font-size:1.2rem;display:block;margin-bottom:0.2em;}
+
+/* ========== PLANET INFO TOOLTIP ========== */
+#planet-tooltip{position:fixed;z-index:22;background:var(--glass);border:1px solid var(--glass-border);border-radius:10px;padding:0.5rem 0.8rem;font-size:0.75rem;color:rgba(200,220,255,0.8);pointer-events:none;display:none;backdrop-filter:blur(10px);font-family:var(--hud-font);letter-spacing:0.05em;}
+
+/* ========== ORBIT CHALLENGE ========== */
+#orbit-challenge-ui{position:fixed;inset:0;z-index:35;display:none;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:2rem;pointer-events:none;}
+#orbit-challenge-ui.active{display:flex;}
+.orbit-instruction{background:var(--glass);border:1px solid var(--glass-border-bright);border-radius:14px;padding:1rem 1.5rem;text-align:center;pointer-events:all;max-width:400px;}
+.orbit-instruction h3{font-family:var(--hud-font);font-size:0.85rem;color:var(--cyan-glow);margin-bottom:0.4rem;letter-spacing:0.1em;}
+.orbit-instruction p{font-size:0.8rem;color:rgba(200,220,255,0.7);}
+
+/* ========== MISSIONS PANEL ========== */
+#missions-screen{background:radial-gradient(ellipse at 30% 40%, rgba(0,100,200,0.12) 0%, transparent 60%),var(--space-black);}
+.missions-panel{max-width:600px;width:90%;max-height:80vh;overflow-y:auto;}
+.missions-panel::-webkit-scrollbar{width:4px;}
+.missions-panel::-webkit-scrollbar-track{background:transparent;}
+.missions-panel::-webkit-scrollbar-thumb{background:var(--glass-border);border-radius:2px;}
+.screen-title{font-family:var(--hud-font);font-size:1.5rem;color:var(--cyan-glow);letter-spacing:0.1em;margin-bottom:0.3em;}
+.screen-sub{font-size:0.8rem;color:rgba(200,220,255,0.4);letter-spacing:0.2em;text-transform:uppercase;margin-bottom:1.5rem;}
+.mission-card{background:var(--glass);border:1px solid var(--glass-border);border-radius:14px;padding:1rem 1.2rem;margin-bottom:0.8rem;cursor:pointer;transition:all 0.3s;backdrop-filter:blur(10px);}
+.mission-card:hover,.mission-card.available{border-color:var(--cyan-glow);}
+.mission-card.locked{opacity:0.4;cursor:not-allowed;}
+.mission-card.completed{border-color:var(--gold);opacity:0.7;}
+.mc-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.5rem;}
+.mc-name{font-family:var(--hud-font);font-size:0.8rem;color:var(--star-white);}
+.mc-badge{font-size:0.65rem;padding:0.15rem 0.5rem;border-radius:4px;font-family:var(--hud-font);}
+.mc-badge.new{background:rgba(0,255,136,0.2);color:var(--green-ok);border:1px solid var(--green-ok);}
+.mc-badge.locked{background:rgba(255,255,255,0.05);color:rgba(200,220,255,0.3);}
+.mc-badge.done{background:rgba(255,215,0,0.2);color:var(--gold);border:1px solid var(--gold);}
+.mc-desc{font-size:0.78rem;color:rgba(200,220,255,0.6);margin-bottom:0.6rem;}
+.mc-steps{display:flex;gap:0.4rem;flex-wrap:wrap;}
+.mc-step{font-size:0.68rem;padding:0.2rem 0.5rem;border-radius:4px;background:rgba(0,229,255,0.08);color:rgba(200,220,255,0.5);border:1px solid rgba(0,229,255,0.15);}
+.mc-step.done{background:rgba(0,255,136,0.1);color:var(--green-ok);border-color:rgba(0,255,136,0.3);}
+.mc-reward{font-size:0.7rem;color:var(--gold);margin-top:0.5rem;}
+.back-btn{background:var(--glass);border:1px solid var(--glass-border);color:rgba(200,220,255,0.6);padding:0.6rem 1.2rem;border-radius:8px;font-family:var(--hud-font);font-size:0.7rem;letter-spacing:0.1em;cursor:pointer;transition:all 0.3s;margin-top:1rem;text-transform:uppercase;}
+.back-btn:hover{border-color:var(--cyan-glow);color:var(--star-white);}
+
+/* ========== LEADERBOARD ========== */
+#scores-screen{background:var(--space-black);}
+.scores-table{width:100%;border-collapse:collapse;max-width:500px;}
+.scores-table th{font-family:var(--hud-font);font-size:0.65rem;letter-spacing:0.15em;color:rgba(200,220,255,0.4);text-transform:uppercase;padding:0.5rem;border-bottom:1px solid var(--glass-border);text-align:left;}
+.scores-table td{padding:0.6rem;font-size:0.82rem;border-bottom:1px solid rgba(255,255,255,0.04);}
+.scores-table tr:first-child td{color:var(--gold);}
+.scores-table tr:nth-child(2) td{color:rgba(200,200,200,0.9);}
+.scores-table tr:nth-child(3) td{color:rgba(205,127,50,0.9);}
+.rank-badge{font-family:var(--hud-font);font-size:0.8rem;}
+
+/* ========== SKIN / UNLOCK SCREEN ========== */
+.skins-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;max-width:500px;width:100%;}
+.skin-card{background:var(--glass);border:1px solid var(--glass-border);border-radius:12px;padding:1rem;text-align:center;cursor:pointer;transition:all 0.3s;}
+.skin-card.unlocked{border-color:var(--gold);}
+.skin-card:hover{transform:translateY(-3px);}
+.skin-icon{font-size:2rem;margin-bottom:0.5rem;}
+.skin-name{font-family:var(--hud-font);font-size:0.65rem;color:rgba(200,220,255,0.7);}
+.skin-req{font-size:0.62rem;color:rgba(200,220,255,0.3);margin-top:0.3em;}
+
+/* ========== GAME OVER SCREEN ========== */
+#gameover-screen{background:radial-gradient(ellipse at center,rgba(0,50,100,0.5),var(--space-black));}
+.go-panel{text-align:center;max-width:400px;width:90%;}
+.go-score{font-family:var(--hud-font);font-size:3.5rem;color:var(--gold);letter-spacing:0.05em;animation:scoreReveal 0.8s cubic-bezier(0.16,1,0.3,1);}
+.go-label{font-size:0.7rem;letter-spacing:0.3em;color:rgba(200,220,255,0.4);text-transform:uppercase;margin-bottom:0.3rem;}
+.go-title{font-family:var(--hud-font);font-size:1.4rem;color:var(--star-white);margin-bottom:0.5rem;}
+.go-stats{display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;margin:1.5rem 0;text-align:left;}
+.go-stat{background:var(--glass);border:1px solid var(--glass-border);border-radius:10px;padding:0.7rem;}
+.go-stat-val{font-family:var(--hud-font);font-size:1.2rem;color:var(--cyan-glow);}
+.go-stat-key{font-size:0.65rem;color:rgba(200,220,255,0.4);text-transform:uppercase;letter-spacing:0.1em;}
+.go-actions{display:flex;gap:0.8rem;justify-content:center;flex-wrap:wrap;}
+
+/* ========== SHARED BUTTON ========== */
+.btn{background:var(--glass);border:1px solid var(--glass-border);color:var(--star-white);padding:0.7rem 1.4rem;border-radius:8px;font-family:var(--hud-font);font-size:0.7rem;letter-spacing:0.08em;cursor:pointer;transition:all 0.25s;text-transform:uppercase;backdrop-filter:blur(10px);}
+.btn:hover{border-color:var(--cyan-glow);box-shadow:0 0 15px rgba(0,229,255,0.2);}
+.btn.accent{background:linear-gradient(135deg,rgba(0,100,200,0.5),rgba(0,229,255,0.25));border-color:var(--cyan-glow);}
+.btn.gold-btn{background:linear-gradient(135deg,rgba(200,150,0,0.4),rgba(255,215,0,0.2));border-color:var(--gold);color:var(--gold);}
+.btn.danger{background:rgba(255,51,85,0.15);border-color:var(--red-danger);color:var(--red-danger);}
+
+/* ========== GRAVITY RING ========== */
+.gravity-ring{position:fixed;border-radius:50%;border:1px solid rgba(0,229,255,0.15);pointer-events:none;z-index:5;display:none;animation:ringPulse 2s ease-in-out infinite;}
+
+/* ========== PARTICLES ========== */
+.particle{position:fixed;pointer-events:none;z-index:40;border-radius:50%;animation:particleFly 0.8s ease-out forwards;}
+
+/* ========== ANIMATIONS ========== */
+@keyframes panelIn{from{opacity:0;transform:translateY(20px) scale(0.97);}to{opacity:1;transform:none;}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+@keyframes timerPulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
+@keyframes npcFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
+@keyframes toastIn{from{opacity:0;transform:translateY(-10px) scale(0.95);}to{opacity:1;transform:none;}}
+@keyframes scoreReveal{from{transform:scale(0.5);opacity:0;}to{transform:none;opacity:1;}}
+@keyframes ringPulse{0%,100%{transform:translate(-50%,-50%) scale(1);opacity:0.15;}50%{opacity:0.3;}}
+@keyframes particleFly{0%{transform:translate(0,0) scale(1);opacity:1;}100%{transform:var(--tx,0) var(--ty,-80px) scale(0);opacity:0;}}
+@keyframes glow{0%,100%{box-shadow:0 0 10px var(--glow-color,var(--cyan-glow));}50%{box-shadow:0 0 25px var(--glow-color,var(--cyan-glow));}}
+
+/* ========== RESPONSIVE ========== */
+@media(max-width:600px){
+  .quiz-options{grid-template-columns:1fr;}
+  .go-stats{grid-template-columns:1fr;}
+  .menu-grid{grid-template-columns:1fr;}
+  .skins-grid{grid-template-columns:1fr 1fr;}
+  #npc-guide{right:0.5rem;}
+  .npc-bubble{max-width:160px;font-size:0.72rem;}
+}
+</style>
+</head>
+<body>
+
+<!-- ========== MAIN MENU ========== -->
+<div id="menu-screen" class="screen active">
+  <div class="menu-panel">
+    <div class="menu-logo">☀️ Solar System<br>Explorer Quest</div>
+    <div class="menu-sub">Deep Space Edition</div>
+    <div class="theme-row">
+      <button class="theme-btn active" data-theme="science" onclick="setTheme('science',this)">🔭 Science</button>
+      <button class="theme-btn" data-theme="mythology" onclick="setTheme('mythology',this)">🌙 Mythology</button>
+    </div>
+    <div class="menu-grid">
+      <button class="menu-btn primary" onclick="showScreen('missions-screen')">🚀 Mission Mode</button>
+      <button class="menu-btn" onclick="startQuickPlay('easy')"><span class="diff-icon">🟢</span><span class="diff-label">Easy • 60s</span>Quick Play</button>
+      <button class="menu-btn" onclick="startQuickPlay('medium')"><span class="diff-icon">🟡</span><span class="diff-label">Medium • 45s</span>Quick Play</button>
+      <button class="menu-btn" onclick="startQuickPlay('hard')"><span class="diff-icon">🔴</span><span class="diff-label">Hard • 30s</span>Quick Play</button>
+      <button class="menu-btn" onclick="showScreen('scores-screen')">🏆 Leaderboard</button>
+      <button class="menu-btn" onclick="showScreen('skins-screen')">✨ Unlocks</button>
+    </div>
+    <div class="menu-scores-preview" id="top-score-preview">Loading best score…</div>
+  </div>
+</div>
+
+<!-- ========== HUD (in-game) ========== -->
+<div id="hud" style="display:none;">
+  <div class="hud-top">
+    <div class="hud-panel">
+      <div class="hud-score" id="hud-score">0<span>Score</span></div>
+    </div>
+    <div class="hud-panel">
+      <div class="hud-timer" id="hud-timer">60<span>Seconds</span></div>
+    </div>
+    <div class="hud-panel">
+      <div class="hud-streak"><span class="streak-val" id="streak-val">0×</span>Streak</div>
+    </div>
+    <button class="btn danger" style="pointer-events:all;font-size:0.6rem;padding:0.5rem 0.8rem;" onclick="endGame(true)">✕ Exit</button>
+  </div>
+  <div class="hud-bottom">
+    <div class="resource-bar">
+      <div class="resource-label">🔋 Knowledge Tokens</div>
+      <div class="resource-tokens" id="token-display"></div>
+    </div>
+    <div class="mission-panel" id="mission-hud">
+      <div class="mission-title">Current Mission</div>
+      <div class="mission-text" id="mission-hud-text">Explore the solar system!</div>
+      <div class="mission-progress"><div class="mission-bar" id="mission-bar" style="width:0%"></div></div>
+    </div>
+    <div class="controls-hint">Click planet to quiz • Drag to orbit • Scroll to zoom</div>
+  </div>
+</div>
+
+<!-- ========== NPC GUIDE ========== -->
+<div id="npc-guide" style="display:none;">
+  <div class="npc-bubble" id="npc-bubble">
+    <div class="npc-name">NOVA — AI Guide</div>
+    <span id="npc-text">Welcome, Explorer! Click any planet to begin your quest.</span>
+  </div>
+  <div class="npc-avatar" onclick="toggleNpc()" title="NOVA — AI Guide">🧑‍🚀</div>
+</div>
+
+<!-- ========== PLANET TOOLTIP ========== -->
+<div id="planet-tooltip"></div>
+
+<!-- ========== QUIZ OVERLAY ========== -->
+<div id="quiz-overlay">
+  <div class="quiz-header" id="quiz-header">Planetary Quiz</div>
+  <div class="quiz-card">
+    <div class="quiz-planet-name" id="quiz-planet-name"></div>
+    <div class="quiz-question" id="quiz-question"></div>
+    <div class="quiz-timer-bar"><div class="quiz-timer-fill" id="quiz-timer-fill"></div></div>
+    <div class="quiz-options" id="quiz-options"></div>
+    <div class="quiz-fact" id="quiz-fact"></div>
+    <button class="quiz-continue-btn" id="quiz-continue" onclick="closeQuiz()">Continue Exploring →</button>
+  </div>
+</div>
+
+<!-- ========== DRAGGABLE FACT CARD ========== -->
+<div id="fact-card">
+  <div class="fact-card-title">
+    <span id="fc-title">Planet Data</span>
+    <span class="fact-close" onclick="closeFactCard()">✕</span>
+  </div>
+  <div class="fact-body" id="fc-body"></div>
+</div>
+
+<!-- ========== ORBIT CHALLENGE ========== -->
+<div id="orbit-challenge-ui">
+  <div class="orbit-instruction">
+    <h3>⚡ Orbit Challenge Active!</h3>
+    <p id="orbit-instruction-text">Click planets in order from Sun outward: Mercury → Neptune</p>
+    <div style="margin-top:0.8rem;display:flex;gap:0.5rem;justify-content:center;flex-wrap:wrap;" id="orbit-seq-display"></div>
+  </div>
+</div>
+
+<!-- ========== GRAVITY RING ========== -->
+<div class="gravity-ring" id="gravity-ring"></div>
+
+<!-- ========== TOAST CONTAINER ========== -->
+<div id="toast-container"></div>
+
+<!-- ========== MISSIONS SCREEN ========== -->
+<div id="missions-screen" class="screen screen-hidden">
+  <div class="missions-panel">
+    <div class="screen-title">🚀 Mission Control</div>
+    <div class="screen-sub">Choose your mission</div>
+    <div id="missions-list"></div>
+    <button class="back-btn" onclick="showScreen('menu-screen')">← Back to Menu</button>
+  </div>
+</div>
+
+<!-- ========== LEADERBOARD SCREEN ========== -->
+<div id="scores-screen" class="screen screen-hidden">
+  <div style="text-align:center;max-width:560px;width:90%;">
+    <div class="screen-title">🏆 Leaderboard</div>
+    <div class="screen-sub">Top Explorers</div>
+    <table class="scores-table" id="scores-table">
+      <thead><tr><th>#</th><th>Score</th><th>Mode</th><th>Difficulty</th><th>Date</th></tr></thead>
+      <tbody id="scores-body"></tbody>
+    </table>
+    <button class="back-btn" onclick="showScreen('menu-screen')">← Back</button>
+  </div>
+</div>
+
+<!-- ========== SKINS / UNLOCKS SCREEN ========== -->
+<div id="skins-screen" class="screen screen-hidden">
+  <div style="text-align:center;max-width:520px;width:90%;">
+    <div class="screen-title">✨ Unlockable Rewards</div>
+    <div class="screen-sub">Earn by playing</div>
+    <div class="skins-grid" id="skins-grid"></div>
+    <button class="back-btn" onclick="showScreen('menu-screen')">← Back</button>
+  </div>
+</div>
+
+<!-- ========== GAME OVER SCREEN ========== -->
+<div id="gameover-screen" class="screen screen-hidden">
+  <div class="go-panel">
+    <div class="go-label">Final Score</div>
+    <div class="go-score" id="go-score">0</div>
+    <div class="go-title" id="go-title">Mission Complete!</div>
+    <div class="go-stats">
+      <div class="go-stat"><div class="go-stat-val" id="go-correct">0</div><div class="go-stat-key">Correct</div></div>
+      <div class="go-stat"><div class="go-stat-val" id="go-best-streak">0×</div><div class="go-stat-key">Best Streak</div></div>
+      <div class="go-stat"><div class="go-stat-val" id="go-tokens">0</div><div class="go-stat-key">Tokens</div></div>
+      <div class="go-stat"><div class="go-stat-val" id="go-planets">0</div><div class="go-stat-key">Planets Visited</div></div>
+    </div>
+    <div class="go-actions">
+      <button class="btn accent" onclick="restartGame()">🔄 Play Again</button>
+      <button class="btn" onclick="showScreen('menu-screen')">🏠 Menu</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   SOLAR SYSTEM EXPLORER QUEST — Deep Space Edition
+   Enhanced architecture with missions, NPC, resources, etc.
+   ============================================================ */
+
+// ===== THREE.JS SETUP =====
+const scene = new THREE.Scene();
+scene.fog = new THREE.Fog(0x000000, 80, 250);
+const camera = new THREE.PerspectiveCamera(60, innerWidth/innerHeight, 0.1, 1000);
+camera.position.set(0, 25, 60);
+const renderer = new THREE.WebGLRenderer({antialias:true,alpha:true});
+renderer.setSize(innerWidth,innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.setClearColor(0x000000,1);
+document.body.prepend(renderer.domElement);
+
+// Lighting
+const ambientLight = new THREE.AmbientLight(0x223366, 1.2);
+scene.add(ambientLight);
+const sunLight = new THREE.PointLight(0xfff5e0, 4, 150);
+sunLight.castShadow = true;
+scene.add(sunLight);
+const rimLight = new THREE.DirectionalLight(0x4488ff, 0.4);
+rimLight.position.set(-30,20,20);
+scene.add(rimLight);
+
+// Stars
+const starGeo = new THREE.BufferGeometry();
+const starCount = 3000;
+const starPos = new Float32Array(starCount*3);
+const starColors = new Float32Array(starCount*3);
+for(let i=0;i<starCount*3;i+=3){
+  starPos[i]=(Math.random()-0.5)*2000;
+  starPos[i+1]=(Math.random()-0.5)*2000;
+  starPos[i+2]=(Math.random()-0.5)*2000;
+  const temp = Math.random();
+  starColors[i] = 0.7+temp*0.3;
+  starColors[i+1] = 0.8+temp*0.2;
+  starColors[i+2] = 1;
+}
+starGeo.setAttribute('position',new THREE.BufferAttribute(starPos,3));
+starGeo.setAttribute('color',new THREE.BufferAttribute(starColors,3));
+const starMat = new THREE.PointsMaterial({size:1.5,vertexColors:true,transparent:true,opacity:0.8,sizeAttenuation:false});
+scene.add(new THREE.Points(starGeo,starMat));
+
+// Simple OrbitControls
+let isDragging=false, prevMouse={x:0,y:0};
+let camTheta=0.3, camPhi=0.6, camRadius=60;
+let targetTheta=0.3, targetPhi=0.6, targetRadius=60;
+const controls = {
+  update(){
+    camTheta += (targetTheta - camTheta)*0.08;
+    camPhi += (targetPhi - camPhi)*0.08;
+    camRadius += (targetRadius - camRadius)*0.08;
+    camPhi = Math.max(0.1, Math.min(Math.PI-0.1, camPhi));
+    camRadius = Math.max(8, Math.min(120, camRadius));
+    camera.position.set(
+      camRadius*Math.sin(camPhi)*Math.sin(camTheta),
+      camRadius*Math.cos(camPhi),
+      camRadius*Math.sin(camPhi)*Math.cos(camTheta)
+    );
+    camera.lookAt(0,0,0);
+  }
+};
+renderer.domElement.addEventListener('mousedown',e=>{isDragging=true;prevMouse={x:e.clientX,y:e.clientY};});
+renderer.domElement.addEventListener('mousemove',e=>{
+  onMouseMove(e);
+  if(!isDragging) return;
+  targetTheta -= (e.clientX-prevMouse.x)*0.005;
+  targetPhi -= (e.clientY-prevMouse.y)*0.005;
+  prevMouse={x:e.clientX,y:e.clientY};
+});
+renderer.domElement.addEventListener('mouseup',e=>{
+  if(!isDragging) return;
+  isDragging=false;
+  onClick(e);
+});
+renderer.domElement.addEventListener('wheel',e=>{
+  targetRadius += e.deltaY*0.05;
+  updateGravityRing();
+});
+let touchStart=null;
+renderer.domElement.addEventListener('touchstart',e=>{
+  touchStart={x:e.touches[0].clientX,y:e.touches[0].clientY,r:camRadius};
+  prevMouse={x:e.touches[0].clientX,y:e.touches[0].clientY};
+},{passive:true});
+renderer.domElement.addEventListener('touchmove',e=>{
+  if(e.touches.length===2){
+    const d = Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+    if(touchStart.pinchD) targetRadius = touchStart.r * (touchStart.pinchD/d);
+    else touchStart.pinchD = d;
+  } else {
+    targetTheta -= (e.touches[0].clientX-prevMouse.x)*0.005;
+    targetPhi -= (e.touches[0].clientY-prevMouse.y)*0.005;
+    prevMouse={x:e.touches[0].clientX,y:e.touches[0].clientY};
+  }
+},{passive:true});
+renderer.domElement.addEventListener('touchend',e=>{
+  if(touchStart && Math.hypot(e.changedTouches[0].clientX-touchStart.x,e.changedTouches[0].clientY-touchStart.y)<10){
+    const ev = {clientX:e.changedTouches[0].clientX,clientY:e.changedTouches[0].clientY};
+    onClick(ev);
+  }
+  touchStart=null;
+});
+window.addEventListener('resize',()=>{
+  camera.aspect=innerWidth/innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth,innerHeight);
+});
+
+// ===== PLANET DATA =====
+const PLANET_DATA = [
+  {name:'Mercury',emoji:'☿',radius:0.4,distance:8,speed:0.047,color:0x9a7a5c,roughness:0.95,inclination:7,gravityFactor:0.38,facts:{diameter:'4,880 km',moons:'0',year:'88 days',temp:'-173° to 427°C',atmosphere:'Minimal'}},
+  {name:'Venus',emoji:'♀',radius:0.9,distance:11.5,speed:0.035,color:0xe8c97a,roughness:0.85,inclination:3.4,gravityFactor:0.90,facts:{diameter:'12,104 km',moons:'0',year:'225 days',temp:'462°C avg',atmosphere:'CO₂ 96%'}},
+  {name:'Earth',emoji:'🌍',radius:1,distance:15,speed:0.03,color:0x4a7fc1,roughness:0.7,inclination:0,gravityFactor:1,facts:{diameter:'12,742 km',moons:'1 (Luna)',year:'365 days',temp:'-89° to 57°C',atmosphere:'N₂ 78%, O₂ 21%'}},
+  {name:'Mars',emoji:'♂',radius:0.55,distance:20,speed:0.024,color:0xc1440e,roughness:0.9,inclination:1.8,gravityFactor:0.38,facts:{diameter:'6,779 km',moons:'2 (Phobos,Deimos)',year:'687 days',temp:'-87° to -5°C',atmosphere:'CO₂ 95%'}},
+  {name:'Jupiter',emoji:'♃',radius:4,distance:32,speed:0.013,color:0xc88b3a,roughness:0.6,inclination:1.3,gravityFactor:2.36,facts:{diameter:'139,820 km',moons:'95+',year:'12 years',temp:'-145°C (cloud)',atmosphere:'H₂ 90%, He 10%'}},
+  {name:'Saturn',emoji:'♄',radius:3.4,distance:44,speed:0.009,color:0xead6a5,roughness:0.65,inclination:2.5,gravityFactor:0.92,facts:{diameter:'116,460 km',moons:'145+',year:'29 years',temp:'-178°C avg',atmosphere:'H₂, He, rings of ice'}},
+  {name:'Uranus',emoji:'⛢',radius:2,distance:56,speed:0.006,color:0x72d5e3,roughness:0.5,inclination:0.8,gravityFactor:0.89,facts:{diameter:'50,724 km',moons:'27',year:'84 years',temp:'-224°C min',atmosphere:'H₂, He, CH₄'}},
+  {name:'Neptune',emoji:'♆',radius:1.9,distance:68,speed:0.005,color:0x3d5bd6,roughness:0.55,inclination:1.8,gravityFactor:1.12,facts:{diameter:'49,244 km',moons:'16',year:'165 years',temp:'-218°C avg',atmosphere:'H₂, He, CH₄ (blue)'}},
+];
+
+// ===== QUESTION BANK =====
+const QB = {
+  science:[
+    {q:'What is the smallest planet in our solar system?',a:'Mercury',opts:['Venus','Mercury','Mars','Pluto'],fact:'Mercury has a diameter of just 4,880 km — smaller than some moons!'},
+    {q:'Mercury has no moons. True or False?',a:'True',opts:['True','False'],fact:'Mercury\'s proximity to the Sun makes it difficult to retain moons.'},
+    {q:'Which planet is called the "Red Planet"?',a:'Mars',opts:['Mars','Venus','Jupiter','Mercury'],fact:'Mars gets its red color from iron oxide (rust) on its surface.'},
+    {q:'What is the hottest planet in our solar system?',a:'Venus',opts:['Mercury','Venus','Mars','Jupiter'],fact:'Venus reaches 462°C due to its thick CO₂ greenhouse atmosphere.'},
+    {q:'How many moons does Earth have?',a:'1',opts:['0','1','2','3'],fact:'Earth\'s Moon, Luna, stabilizes our planet\'s axial tilt.'},
+    {q:'What is the largest planet in the solar system?',a:'Jupiter',opts:['Saturn','Jupiter','Uranus','Neptune'],fact:'Jupiter\'s diameter is 139,820 km — big enough to fit 1,300 Earths!'},
+    {q:'Saturn is famous for its…',a:'Rings',opts:['Moons','Rings','Color','Storms'],fact:'Saturn\'s rings are made of ice and rock particles, some as large as houses.'},
+    {q:'Which planet has the most moons?',a:'Saturn',opts:['Jupiter','Neptune','Saturn','Uranus'],fact:'Saturn has 145+ confirmed moons, including the giant Titan.'},
+    {q:'What percentage of Earth is covered in water?',a:'71%',opts:['50%','71%','90%','35%'],fact:'Earth\'s oceans contain about 1.335 billion cubic kilometres of water.'},
+    {q:'What is Earth\'s atmosphere mostly made of?',a:'Nitrogen',opts:['Oxygen','Nitrogen','CO₂','Argon'],fact:'Earth\'s air is 78% nitrogen and only 21% oxygen.'},
+    {q:'Which planet rotates backwards (retrograde)?',a:'Venus',opts:['Mars','Mercury','Venus','Neptune'],fact:'On Venus, the Sun rises in the west and sets in the east!'},
+    {q:'Jupiter\'s Great Red Spot is a…',a:'Massive storm',opts:['Volcano','Massive storm','Ocean','Crater'],fact:'The Great Red Spot is a storm that has raged for over 350 years.'},
+    {q:'What planet has the strongest winds in the solar system?',a:'Neptune',opts:['Jupiter','Saturn','Uranus','Neptune'],fact:'Neptune\'s winds reach 2,100 km/h — faster than any tornado on Earth.'},
+    {q:'Uranus tilts at almost 98 degrees. True or False?',a:'True',opts:['True','False'],fact:'Uranus rolls around the Sun like a bowling ball due to its extreme tilt.'},
+    {q:'Which planet has the shortest year?',a:'Mercury',opts:['Venus','Earth','Mars','Mercury'],fact:'Mercury orbits the Sun in just 88 Earth days.'},
+    {q:'What gives Neptune its blue color?',a:'Methane',opts:['Water','Methane','Nitrogen','Oxygen'],fact:'Methane in Neptune\'s atmosphere absorbs red light, making it appear vivid blue.'},
+    {q:'Which is Earth\'s closest planetary neighbor?',a:'Venus',opts:['Mars','Venus','Mercury','Jupiter'],fact:'Venus is closest on average, though Mars is sometimes nearer.'},
+    {q:'Saturn could float in water. True or False?',a:'True',opts:['True','False'],fact:'Saturn\'s density is 0.69 g/cm³ — less than liquid water!'},
+    {q:'What is the largest volcano in the solar system?',a:'Olympus Mons',opts:['Mount Everest','Olympus Mons','Mauna Kea','Kilimanjaro'],fact:'Olympus Mons on Mars is 22 km tall — nearly 3× the height of Everest.'},
+    {q:'How long does light take to travel from the Sun to Earth?',a:'8 minutes',opts:['2 seconds','8 minutes','30 minutes','2 hours'],fact:'Light travels at 299,792 km/s and takes ~8.3 minutes to reach Earth.'},
+    {q:'Which planet has an Earth-like day length?',a:'Mars',opts:['Venus','Mercury','Mars','Jupiter'],fact:'Mars has a day of 24 hours 37 minutes — very similar to Earth\'s!'},
+    {q:'Jupiter\'s shortest day in our solar system is about…',a:'10 hours',opts:['5 hours','10 hours','20 hours','30 hours'],fact:'Jupiter spins so fast it bulges at its equator!'},
+    {q:'What are Saturn\'s rings primarily made of?',a:'Ice particles',opts:['Rock only','Ice particles','Gas','Metal'],fact:'The rings are mostly water ice, ranging from tiny grains to boulders.'},
+    {q:'Which planet has polar ice caps?',a:'Mars',opts:['Venus','Mercury','Earth only','Mars'],fact:'Mars has ice caps of frozen water and CO₂ at both poles.'},
+    {q:'Neptune\'s year is approximately…',a:'165 Earth years',opts:['12 years','84 years','165 Earth years','29 years'],fact:'Neptune has completed only one orbit since its discovery in 1846!'},
+    {q:'What is the Sun primarily composed of?',a:'Hydrogen',opts:['Oxygen','Hydrogen','Helium','Carbon'],fact:'The Sun is 73.5% hydrogen, undergoing nuclear fusion at its core.'},
+    {q:'Uranus\'s distinctive color comes from…',a:'Methane ice',opts:['Water','Methane ice','Sulfur','Nitrogen'],fact:'Methane absorbs red wavelengths, giving Uranus its cyan-blue color.'},
+    {q:'How many planets are in our solar system?',a:'8',opts:['7','8','9','10'],fact:'Pluto was reclassified as a dwarf planet in 2006.'},
+    {q:'What is Jupiter\'s largest moon?',a:'Ganymede',opts:['Titan','Europa','Ganymede','Io'],fact:'Ganymede is larger than the planet Mercury!'},
+    {q:'Mars\'s Valles Marineris canyon is about…',a:'4,000 km long',opts:['500 km','1,000 km','4,000 km long','10,000 km'],fact:'Valles Marineris is as long as the United States is wide.'},
+  ],
+  mythology:[
+    {q:'In Akan mythology, stars are considered…',a:'Ancestors\' spirits',opts:['Gods\' eyes','Ancestors\' spirits','Fire sparks','Rain drops'],fact:'In Akan tradition, stars watch over the living as ancestral presences.'},
+    {q:'Ananse the spider trickster is from which Ghanaian tradition?',a:'Akan',opts:['Ewe','Ga','Akan','Hausa'],fact:'Ananse stories spread across West Africa and into the Caribbean.'},
+    {q:'The Moon in Ewe tales symbolizes…',a:'Wisdom',opts:['Strength','Wisdom','Love','War'],fact:'The Moon is a wise elder guiding communities in Ewe cosmology.'},
+    {q:'In Ga mythology, the Sun\'s daily journey represents…',a:'Daily rebirth',opts:['Battle','Sleep','Daily rebirth','Dance'],fact:'The Sun dying and rising again mirrors ideas of renewal in Ga belief.'},
+    {q:'The Milky Way in Akan lore is described as…',a:'A celestial river',opts:['Mountain path','Celestial river','Smoke from fires','Bridge of gods'],fact:'The Milky Way was seen as a great river connecting the living and ancestors.'},
+    {q:'Stars in Ga tradition guide…',a:'Fishermen',opts:['Warriors','Farmers','Fishermen','Priests'],fact:'Ga coastal communities used stars to navigate the Atlantic Ocean.'},
+    {q:'In Ghanaian mythology, the Pleiades cluster represents…',a:'Seven sisters',opts:['Seven warriors','Seven sisters','Seven gods','Seven kings'],fact:'The Pleiades appear in many West African harvest and seasonal traditions.'},
+    {q:'Ananse stories were told to teach…',a:'Wisdom & morality',opts:['Magic spells','Farming','Wisdom & morality','Warfare'],fact:'Anansi tales carry moral lessons through clever and sometimes humorous plots.'},
+    {q:'The Sun deity in some Akan traditions is called…',a:'Nyame',opts:['Anansi','Nyame','Okomfo','Asase Ya'],fact:'Nyame is the supreme being in Akan cosmology, associated with the sky and Sun.'},
+    {q:'Moon phases in Akan tradition symbolize…',a:'Life cycles',opts:['Seasons','Battles','Life cycles','Harvests'],fact:'The waxing and waning Moon mirrors birth, growth, aging and death.'},
+    {q:'In Ewe stories, Orion\'s Belt represents…',a:'A hunter\'s path',opts:['River crossing','Hunter\'s path','Three brothers','Sky bridge'],fact:'Many African cultures use Orion to time agricultural and hunting seasons.'},
+    {q:'Ghanaian farmers historically used stars to…',a:'Time planting seasons',opts:['Predict rain','Navigate seas','Time planting seasons','Find gold'],fact:'The appearance of certain stars marks the start of planting seasons.'},
+    {q:'In Akan myth, Asase Ya is…',a:'Earth goddess',opts:['Moon goddess','Sun deity','Earth goddess','Rain spirit'],fact:'Asase Ya is the spirit of the Earth, honored on Thursdays in Akan tradition.'},
+    {q:'The Big Dipper in Ewe lore is compared to…',a:'A fishnet',opts:['A spear','A fishnet','A crown','A cooking pot'],fact:'The fishing communities of coastal Ghana saw celestial objects through their work.'},
+    {q:'Ananse uses his web to connect…',a:'Sky and Earth',opts:['Sea and land','Sky and Earth','Past and future','Men and gods'],fact:'Ananse\'s web is a metaphor for the interconnectedness of all things.'},
+  ]
+};
+
+// ===== MISSIONS =====
+const MISSIONS_DEF = [
+  {id:'sol_tour', name:'Solar Tour', desc:'Visit all 8 planets and answer at least one question on each.', steps:PLANET_DATA.map(p=>p.name+' visited'), reward:'200 bonus points + Solar Scout badge', difficulty:'easy', requiredScore:0},
+  {id:'inner_worlds', name:'Inner Worlds', desc:'Answer 5 questions about Mercury, Venus, Earth & Mars correctly.', steps:['5 inner planet questions correct'], reward:'100 points + Inner Explorer token', difficulty:'easy', requiredScore:0},
+  {id:'gas_giant', name:'Gas Giant Champion', desc:'Score 3-question streak on Jupiter & Saturn.', steps:['3× streak on Jupiter','3× streak on Saturn'], reward:'150 points + Gas Giant badge', difficulty:'medium', requiredScore:50},
+  {id:'speed_run', name:'Speed Runner', desc:'Answer 10 questions correctly within 40 seconds.', steps:['10 correct in 40s'], reward:'300 points + Speed Demon skin', difficulty:'hard', requiredScore:100},
+  {id:'myth_master', name:'Myth Master', desc:'Answer 8 mythology questions correctly.', steps:['8 mythology correct'], reward:'200 points + Starweaver badge', difficulty:'medium', requiredScore:50},
+  {id:'perfect_run', name:'Perfect Run', desc:'Complete 15 questions with zero wrong answers.', steps:['15 correct, 0 wrong'], reward:'500 points + Golden Explorer skin', difficulty:'hard', requiredScore:200},
+];
+
+// ===== SKINS =====
+const SKINS = [
+  {id:'default',name:'Explorer',icon:'🧑‍🚀',req:'Starter',reqScore:0},
+  {id:'solar_scout',name:'Solar Scout',icon:'🌟',req:'Complete Solar Tour mission',reqScore:0,reqMission:'sol_tour'},
+  {id:'inner_explorer',name:'Inner Explorer',icon:'🪐',req:'Score 100 points',reqScore:100},
+  {id:'speed_demon',name:'Speed Demon',icon:'⚡',req:'Speed Runner mission',reqScore:0,reqMission:'speed_run'},
+  {id:'gas_champ',name:'Gas Champion',icon:'🌀',req:'Score 200 points',reqScore:200},
+  {id:'golden_explorer',name:'Golden Explorer',icon:'🏆',req:'Perfect Run mission or 500 pts',reqScore:500,reqMission:'perfect_run'},
+];
+
+// ===== GAME STATE =====
+let GS = {
+  mode: 'quick', // 'quick' | 'mission'
+  difficulty: 'easy',
+  theme: 'science',
+  score: 0,
+  streak: 0,
+  bestStreak: 0,
+  timeLeft: 60,
+  tokens: 0, // knowledge tokens collected
+  planetsVisited: new Set(),
+  correctAnswers: 0,
+  wrongAnswers: 0,
+  consecutiveCorrect: 0,
+  active: false,
+  currentMission: null,
+  missionProgress: {},
+  achievements: new Set(),
+};
+
+let timerInterval = null;
+let quizTimer = null;
+let currentQuizData = null;
+let hoveredPlanet = null;
+let lastNpcMsg = 0;
+let orbitChallengeActive = false;
+let orbitChallengeSequence = [];
+let orbitChallengeClicked = [];
+let npcVisible = false;
+
+// ===== THREE.JS PLANET MESHES =====
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+const planetMeshes = [];
+const orbitLines = [];
+const planetAngles = [];
+const planetGlows = [];
+
+// Sun
+const sunGeo = new THREE.SphereGeometry(3,64,64);
+const sunMat = new THREE.MeshStandardMaterial({color:0xffdd44,emissive:0xffaa00,emissiveIntensity:1.2,roughness:0.5,metalness:0});
+const sunMesh = new THREE.Mesh(sunGeo,sunMat);
+scene.add(sunMesh);
+const sunHalo = new THREE.Mesh(new THREE.SphereGeometry(3.5,32,32),new THREE.MeshBasicMaterial({color:0xffcc44,transparent:true,opacity:0.08,side:THREE.BackSide}));
+scene.add(sunHalo);
+
+// Planet creation
+PLANET_DATA.forEach((pd,i)=>{
+  const angle = Math.random()*Math.PI*2;
+  planetAngles.push(angle);
+  const geo = new THREE.SphereGeometry(pd.radius,48,48);
+  // procedural texture
+  const canvas = document.createElement('canvas');
+  canvas.width=256;canvas.height=256;
+  const ctx = canvas.getContext('2d');
+  const r=(pd.color>>16)&255, g=(pd.color>>8)&255, b=pd.color&255;
+  for(let px=0;px<256;px+=4){
+    for(let py=0;py<256;py+=4){
+      const v=Math.random()*40-20;
+      const band = Math.sin(py*0.15+px*0.02)*20;
+      ctx.fillStyle=`rgba(${Math.min(255,r+v+band*0.5)},${Math.min(255,g+v)},${Math.min(255,b+v)},1)`;
+      ctx.fillRect(px,py,4,4);
+    }
+  }
+  const tex = new THREE.CanvasTexture(canvas);
+  const mat = new THREE.MeshStandardMaterial({map:tex,roughness:pd.roughness,metalness:0.1});
+  const mesh = new THREE.Mesh(geo,mat);
+  mesh.castShadow=true; mesh.receiveShadow=true;
+  mesh.position.set(pd.distance*Math.cos(angle),pd.distance*Math.sin(angle)*Math.sin(pd.inclination*Math.PI/180),pd.distance*Math.sin(angle)*Math.cos(pd.inclination*Math.PI/180));
+  mesh.userData = {...pd, index:i};
+  scene.add(mesh);
+  planetMeshes.push(mesh);
+
+  // Saturn rings
+  if(pd.name==='Saturn'){
+    const ringGeo = new THREE.RingGeometry(pd.radius*1.3,pd.radius*2.2,64);
+    const ringMat = new THREE.MeshBasicMaterial({color:0xc8a87a,side:THREE.DoubleSide,transparent:true,opacity:0.5});
+    const ring = new THREE.Mesh(ringGeo,ringMat);
+    ring.rotation.x = Math.PI/2.5;
+    mesh.add(ring);
+  }
+
+  // Glow light per planet
+  const glow = new THREE.PointLight(pd.color,0,pd.radius*3);
+  scene.add(glow);
+  planetGlows.push(glow);
+
+  // Orbit path
+  const pts=[];
+  for(let t=0;t<=128;t++){
+    const a=(t/128)*Math.PI*2;
+    pts.push(new THREE.Vector3(pd.distance*Math.cos(a),pd.distance*Math.sin(a)*Math.sin(pd.inclination*Math.PI/180),pd.distance*Math.sin(a)*Math.cos(pd.inclination*Math.PI/180)));
+  }
+  const orbitGeo=new THREE.BufferGeometry().setFromPoints(pts);
+  const orbitMat=new THREE.LineBasicMaterial({color:pd.color,transparent:true,opacity:0.12});
+  const orbitLine=new THREE.Line(orbitGeo,orbitMat);
+  scene.add(orbitLine);
+  orbitLines.push(orbitLine);
+});
+
+const confettiEngine = new JSConfetti();
+
+// ===== AUDIO =====
+let audioCtx;
+function getAudio(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
+function playTone(freq,dur,type='sine',vol=0.3){
+  try{
+    const a=getAudio();
+    const o=a.createOscillator(),g=a.createGain();
+    o.connect(g);g.connect(a.destination);
+    o.frequency.value=freq;o.type=type;
+    g.gain.setValueAtTime(vol,a.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+dur);
+    o.start();o.stop(a.currentTime+dur);
+  }catch(e){}
+}
+function playCorrect(){playTone(600,0.05,'triangle');setTimeout(()=>playTone(800,0.1,'triangle'),60);setTimeout(()=>playTone(1000,0.15,'triangle'),130);}
+function playWrong(){playTone(200,0.3,'sawtooth',0.15);}
+function playClick(){playTone(400,0.05,'sine',0.1);}
+
+// ===== SCREEN MANAGEMENT =====
+const screens = ['menu-screen','missions-screen','scores-screen','skins-screen','gameover-screen'];
+function showScreen(id){
+  screens.forEach(s=>{
+    const el=document.getElementById(s);
+    if(s===id){el.classList.add('active');el.classList.remove('screen-hidden');}
+    else{el.classList.remove('active');el.classList.add('screen-hidden');}
+  });
+  if(id==='scores-screen') renderScores();
+  if(id==='skins-screen') renderSkins();
+  if(id==='missions-screen') renderMissions();
+  if(id==='menu-screen') updateMenuPreview();
+}
+
+// ===== THEME =====
+let currentTheme = 'science';
+function setTheme(t,btn){
+  currentTheme=t;
+  document.querySelectorAll('.theme-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// ===== QUICK PLAY =====
+function startQuickPlay(diff){
+  GS.mode='quick';
+  GS.difficulty=diff;
+  GS.theme=currentTheme;
+  GS.timeLeft = diff==='easy'?60:diff==='medium'?45:30;
+  initGame();
+}
+
+// ===== MISSION MODE =====
+function startMission(missionId){
+  const m = MISSIONS_DEF.find(m=>m.id===missionId);
+  if(!m)return;
+  const saved = getSavedMissions();
+  if(m.requiredScore > (getBestScore()||0)){showToast('⚠️ Score '+m.requiredScore+' points first!','');return;}
+  GS.mode='mission';
+  GS.difficulty='medium';
+  GS.theme=currentTheme;
+  GS.timeLeft=120;
+  GS.currentMission=m;
+  GS.missionProgress={};
+  initGame();
+  document.getElementById('mission-hud-text').textContent=m.desc;
+}
+
+// ===== INIT GAME =====
+function initGame(){
+  GS.score=0; GS.streak=0; GS.bestStreak=0; GS.tokens=0;
+  GS.planetsVisited=new Set(); GS.correctAnswers=0; GS.wrongAnswers=0;
+  GS.consecutiveCorrect=0; GS.active=true;
+  showScreen('__none__');
+  document.getElementById('hud').style.display='block';
+  document.getElementById('npc-guide').style.display='flex';
+  screens.forEach(s=>{
+    document.getElementById(s).classList.remove('active');
+    document.getElementById(s).classList.add('screen-hidden');
+  });
+  updateHUD();
+  renderTokens();
+  updateMissionHUD();
+  startTimer();
+  npcSay("Welcome, Explorer! Click any planet to answer a quiz question. Build streaks to multiply your score!");
+}
+
+// ===== TIMER =====
+function startTimer(){
+  clearInterval(timerInterval);
+  timerInterval = setInterval(()=>{
+    if(!GS.active) return;
+    GS.timeLeft--;
+    updateHUD();
+    const el = document.getElementById('hud-timer');
+    if(GS.timeLeft<=10){el.classList.add('danger');}else{el.classList.remove('danger');}
+    if(GS.timeLeft<=0){clearInterval(timerInterval);endGame(false);}
+  },1000);
+}
+
+// ===== HUD =====
+function updateHUD(){
+  document.getElementById('hud-score').innerHTML = GS.score+'<span>Score</span>';
+  document.getElementById('hud-timer').innerHTML = GS.timeLeft+'<span>Seconds</span>';
+  document.getElementById('streak-val').textContent = GS.streak+'×';
+  if(GS.streak>=5) document.getElementById('streak-val').style.color='#ffd700';
+  else if(GS.streak>=3) document.getElementById('streak-val').style.color='#ff6b2b';
+  else document.getElementById('streak-val').style.color='#ff6b2b';
+}
+
+function renderTokens(){
+  const d=document.getElementById('token-display');
+  const max=10;
+  let html='';
+  for(let i=0;i<max;i++) html+=`<div class="token${i<GS.tokens?' active':''}"></div>`;
+  d.innerHTML=html;
+}
+
+function updateMissionHUD(){
+  const b=document.getElementById('mission-bar');
+  if(GS.mode==='mission'&&GS.currentMission){
+    const total=GS.currentMission.steps.length;
+    const done=Object.values(GS.missionProgress).filter(Boolean).length;
+    b.style.width=((done/total)*100)+'%';
+    document.getElementById('mission-hud-text').textContent=GS.currentMission.name+': '+done+'/'+total;
+  } else {
+    b.style.width=((GS.correctAnswers/10)*100)+'%';
+    document.getElementById('mission-hud-text').textContent=GS.correctAnswers+' questions answered';
+  }
+}
+
+// ===== RAYCASTER / MOUSE =====
+function onMouseMove(e){
+  mouse.x=(e.clientX/innerWidth)*2-1;
+  mouse.y=-(e.clientY/innerHeight)*2+1;
+  raycaster.setFromCamera(mouse,camera);
+  const hits=raycaster.intersectObjects(planetMeshes);
+  if(hits.length>0){
+    const pd=hits[0].object.userData;
+    const tt=document.getElementById('planet-tooltip');
+    tt.style.display='block';
+    tt.style.left=(e.clientX+14)+'px';
+    tt.style.top=(e.clientY-20)+'px';
+    tt.textContent=pd.emoji+' '+pd.name+' — click to explore';
+    if(hoveredPlanet!==hits[0].object){
+      hoveredPlanet=hits[0].object;
+      const idx=hoveredPlanet.userData.index;
+      planetGlows[idx].intensity=1.5;
+      renderer.domElement.style.cursor='pointer';
+    }
+    updateGravityRing(e,hits[0].object.userData);
+  } else {
+    document.getElementById('planet-tooltip').style.display='none';
+    if(hoveredPlanet){
+      planetGlows[hoveredPlanet.userData.index].intensity=0;
+      hoveredPlanet=null;
+    }
+    renderer.domElement.style.cursor='default';
+    document.getElementById('gravity-ring').style.display='none';
+  }
+}
+
+function onClick(e){
+  if(isDragging) return;
+  if(!GS.active) return;
+  if(document.getElementById('quiz-overlay').style.display==='flex') return;
+  if(orbitChallengeActive){handleOrbitClick(e);return;}
+  mouse.x=(e.clientX/innerWidth)*2-1;
+  mouse.y=-(e.clientY/innerHeight)*2+1;
+  raycaster.setFromCamera(mouse,camera);
+  const hits=raycaster.intersectObjects(planetMeshes);
+  if(hits.length>0){
+    const pd=hits[0].object.userData;
+    playClick();
+    GS.planetsVisited.add(pd.name);
+    showQuiz(pd);
+    zoomToPlanet(hits[0].object);
+  }
+}
+
+function zoomToPlanet(mesh){
+  const pos=mesh.position.clone().normalize().multiplyScalar(mesh.userData.distance+mesh.userData.radius*4+10);
+  const angle=Math.atan2(pos.z,pos.x);
+  const dist=pos.length();
+  targetTheta=-angle;
+  targetRadius=dist;
+}
+
+// ===== GRAVITY RING =====
+function updateGravityRing(e, pd){
+  if(!pd) return;
+  const ring=document.getElementById('gravity-ring');
+  const size=pd.gravityFactor*100;
+  ring.style.display='block';
+  ring.style.width=size+'px';
+  ring.style.height=size+'px';
+  ring.style.left=e.clientX+'px';
+  ring.style.top=e.clientY+'px';
+  ring.style.transform='translate(-50%,-50%)';
+  ring.style.borderColor=`rgba(0,229,255,${pd.gravityFactor*0.3})`;
+  const speedFactor=2/pd.gravityFactor;
+  ring.style.animation=`ringPulse ${speedFactor}s ease-in-out infinite`;
+}
+
+// ===== QUIZ SYSTEM =====
+let answeredQIdxByPlanet = {};
+let quizTimerInterval = null;
+let quizTimeLeft = 15;
+
+function getQuestion(pd){
+  const pool = GS.theme==='mythology' ? QB.mythology : QB.science.filter((_,i)=>Math.floor(i/3)===pd.index%10 || true);
+  if(!answeredQIdxByPlanet[pd.name]) answeredQIdxByPlanet[pd.name]=[];
+  const avail = pool.map((_,i)=>i).filter(i=>!answeredQIdxByPlanet[pd.name].includes(i));
+  if(avail.length===0) answeredQIdxByPlanet[pd.name]=[];
+  const idx=avail.length>0?avail[Math.floor(Math.random()*avail.length)]:Math.floor(Math.random()*pool.length);
+  answeredQIdxByPlanet[pd.name].push(idx);
+  return pool[idx];
+}
+
+function showQuiz(pd){
+  const q=getQuestion(pd);
+  currentQuizData={q,pd};
+  const numOpts = GS.difficulty==='easy'?Math.min(3,q.opts.length):GS.difficulty==='medium'?Math.min(4,q.opts.length):q.opts.length;
+  let opts=[...q.opts];
+  if(!opts.includes(q.a)) opts.push(q.a);
+  opts=shuffleArr(opts).slice(0,numOpts);
+  if(!opts.includes(q.a)) opts[opts.length-1]=q.a;
+  opts=shuffleArr(opts);
+
+  document.getElementById('quiz-header').textContent=GS.theme==='mythology'?'🌙 Mythology Quiz':'🔭 '+pd.name+' Quiz';
+  document.getElementById('quiz-planet-name').textContent=pd.emoji+' '+pd.name;
+  document.getElementById('quiz-question').textContent=q.q;
+  document.getElementById('quiz-fact').className='quiz-fact';
+  document.getElementById('quiz-continue').className='quiz-continue-btn';
+  const qo=document.getElementById('quiz-options');
+  qo.innerHTML='';
+  opts.forEach(o=>{
+    const b=document.createElement('button');
+    b.className='quiz-opt';
+    b.textContent=o;
+    b.onclick=()=>checkAnswer(o,q.a,q.fact,pd,b);
+    qo.appendChild(b);
+  });
+
+  // quiz timer
+  quizTimeLeft = GS.difficulty==='hard'?10:GS.difficulty==='medium'?12:15;
+  clearInterval(quizTimerInterval);
+  const fill=document.getElementById('quiz-timer-fill');
+  fill.style.width='100%';
+  fill.style.background='linear-gradient(90deg,#00ff88,#00e5ff)';
+  quizTimerInterval=setInterval(()=>{
+    quizTimeLeft--;
+    const pct=(quizTimeLeft/(GS.difficulty==='hard'?10:GS.difficulty==='medium'?12:15))*100;
+    fill.style.width=pct+'%';
+    if(pct<30) fill.style.background='linear-gradient(90deg,#ff3355,#ff6b2b)';
+    if(quizTimeLeft<=0){clearInterval(quizTimerInterval);autoFailQuiz(q);}
+  },1000);
+
+  document.getElementById('quiz-overlay').style.display='flex';
+}
+
+function autoFailQuiz(q){
+  GS.streak=0; GS.wrongAnswers++;
+  GS.timeLeft=Math.max(0,GS.timeLeft-3);
+  updateHUD();
+  const opts=document.querySelectorAll('.quiz-opt');
+  opts.forEach(b=>{if(b.textContent===q.a)b.classList.add('correct');});
+  const factEl=document.getElementById('quiz-fact');
+  factEl.textContent='⏱ Time\'s up! '+q.fact;
+  factEl.classList.add('show');
+  document.getElementById('quiz-continue').classList.add('show');
+  playWrong();
+}
+
+function checkAnswer(selected,correct,fact,pd,btn){
+  clearInterval(quizTimerInterval);
+  document.querySelectorAll('.quiz-opt').forEach(b=>b.onclick=null);
+  if(selected===correct){
+    btn.classList.add('correct');
+    GS.streak++; GS.consecutiveCorrect++;
+    if(GS.streak>GS.bestStreak) GS.bestStreak=GS.streak;
+    const multi=GS.streak>=5?3:GS.streak>=3?2:1;
+    const pts=10*multi;
+    GS.score+=pts; GS.timeLeft+=5; GS.correctAnswers++;
+    // token reward
+    if(GS.correctAnswers%3===0){GS.tokens=Math.min(10,GS.tokens+1);renderTokens();}
+    // token score bonus
+    if(GS.tokens>=10){GS.score+=50;GS.tokens=0;renderTokens();showToast('🔋 Full power! +50 bonus!','green');}
+    updateHUD();
+    playCorrect();
+    showParticles(btn,'#00ff88');
+    if(GS.streak>=5) confettiEngine.addConfetti({emojis:['⭐','🌟','💥'],confettiNumber:80});
+    else if(GS.streak>=3) confettiEngine.addConfetti({emojis:['✨'],confettiNumber:40});
+    // streak toast
+    if(GS.streak===3) showToast('🔥 3× Streak! Double points!','green');
+    if(GS.streak===5) showToast('⚡ 5× Streak! Triple points!','gold');
+    if(GS.streak===10) showToast('🌌 LEGENDARY 10× Streak!','gold');
+    showFactCard(pd,fact);
+    checkAchievements();
+    updateMissionProgress(pd, true);
+    npcReact(true,pd);
+  } else {
+    btn.classList.add('wrong');
+    document.querySelectorAll('.quiz-opt').forEach(b=>{if(b.textContent===correct)b.classList.add('correct');});
+    GS.streak=0; GS.consecutiveCorrect=0; GS.wrongAnswers++;
+    GS.timeLeft=Math.max(0,GS.timeLeft-3);
+    updateHUD();
+    playWrong();
+    npcReact(false,pd);
+    updateMissionProgress(pd,false);
+  }
+  updateMissionHUD();
+  const factEl=document.getElementById('quiz-fact');
+  factEl.textContent=(selected===correct?'✅ ':'❌ ')+fact;
+  factEl.classList.add('show');
+  document.getElementById('quiz-continue').classList.add('show');
+}
+
+function closeQuiz(){
+  clearInterval(quizTimerInterval);
+  document.getElementById('quiz-overlay').style.display='none';
+  // maybe trigger orbit challenge
+  if(GS.correctAnswers>0&&GS.correctAnswers%5===0&&!orbitChallengeActive){
+    setTimeout(()=>startOrbitChallenge(),500);
+  }
+}
+
+// ===== FACT CARD =====
+function showFactCard(pd,fact){
+  const fc=document.getElementById('fact-card');
+  document.getElementById('fc-title').innerHTML=pd.emoji+' '+pd.name+' Data';
+  const f=pd.facts;
+  let html=`<div style="margin-bottom:0.8rem;font-style:italic;color:rgba(200,220,255,0.7);">"${fact}"</div>`;
+  html+=Object.entries(f).map(([k,v])=>`<div class="fact-stat"><span class="fact-stat-label">${k.charAt(0).toUpperCase()+k.slice(1)}</span><span class="fact-stat-value">${v}</span></div>`).join('');
+  // comparison bar
+  const earthDiam=12742; const diam=parseFloat((f.diameter||'').replace(/[^0-9.]/g,''))||earthDiam;
+  const pct=Math.min(100,Math.max(5,(diam/139820)*100));
+  html+=`<div class="fact-compare"><div class="compare-bar-label">Size vs Jupiter</div><div class="compare-bar"><div class="compare-fill" style="width:${pct}%;background:linear-gradient(90deg,#${(pd.color).toString(16).padStart(6,'0')},#00e5ff);"></div></div></div>`;
+  document.getElementById('fc-body').innerHTML=html;
+  fc.style.display='block';
+  fc.style.left=(Math.random()<0.5?'2rem':'auto')+'';
+  fc.style.right=(Math.random()<0.5?'2rem':'auto')+'';
+  fc.style.top='30%';
+  makeDraggable(fc);
+}
+function closeFactCard(){document.getElementById('fact-card').style.display='none';}
+
+function makeDraggable(el){
+  let ox=0,oy=0,x=0,y=0;
+  el.onmousedown=function(e){
+    if(e.target.classList.contains('fact-close'))return;
+    e.preventDefault();
+    el.classList.add('dragging');
+    ox=e.clientX; oy=e.clientY;
+    document.onmousemove=function(e){
+      x=e.clientX-ox; y=e.clientY-oy;
+      ox=e.clientX; oy=e.clientY;
+      el.style.left=(el.offsetLeft+x)+'px';
+      el.style.top=(el.offsetTop+y)+'px';
+      el.style.right='auto';
+    };
+    document.onmouseup=function(){el.classList.remove('dragging');document.onmousemove=null;document.onmouseup=null;};
+  };
+}
+
+// ===== ORBIT CHALLENGE =====
+function startOrbitChallenge(){
+  orbitChallengeActive=true;
+  orbitChallengeSequence=[...PLANET_DATA].sort(()=>Math.random()-0.5).slice(0,5).sort((a,b)=>a.distance-b.distance);
+  orbitChallengeClicked=[];
+  const ui=document.getElementById('orbit-challenge-ui');
+  ui.classList.add('active');
+  const seq=document.getElementById('orbit-seq-display');
+  seq.innerHTML=orbitChallengeSequence.map((p,i)=>`<span id="oc-${i}" style="padding:0.3rem 0.6rem;border-radius:6px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);font-size:0.75rem;font-family:var(--hud-font);">${p.emoji} ?</span>`).join('');
+  npcSay('Orbit Challenge! Click the planets in order from closest to farthest from the Sun. '+orbitChallengeSequence.map(p=>p.emoji).join('→'));
+  showToast('⚡ Orbit Challenge! Click planets Sun → outward','');
+}
+
+function handleOrbitClick(e){
+  mouse.x=(e.clientX/innerWidth)*2-1;
+  mouse.y=-(e.clientY/innerHeight)*2+1;
+  raycaster.setFromCamera(mouse,camera);
+  const hits=raycaster.intersectObjects(planetMeshes);
+  if(!hits.length)return;
+  const clicked=hits[0].object.userData;
+  const expected=orbitChallengeSequence[orbitChallengeClicked.length];
+  if(clicked.name===expected.name){
+    orbitChallengeClicked.push(clicked);
+    const idx=orbitChallengeClicked.length-1;
+    const span=document.getElementById('oc-'+idx);
+    if(span){span.textContent=clicked.emoji+' '+clicked.name;span.style.borderColor='var(--green-ok)';span.style.color='var(--green-ok)';}
+    playTone(600+idx*100,0.1,'triangle');
+    if(orbitChallengeClicked.length===orbitChallengeSequence.length){
+      // success
+      GS.score+=75;GS.timeLeft+=10;updateHUD();
+      confettiEngine.addConfetti({emojis:['🌌','🚀','⭐'],confettiNumber:150});
+      showToast('🚀 Orbit Challenge Complete! +75 pts +10s','gold');
+      npcSay('Excellent! You know your orbital distances perfectly!');
+      endOrbitChallenge();
+    }
+  } else {
+    showToast('❌ Wrong order! Try again','');
+    playWrong();
+    orbitChallengeClicked=[];
+    orbitChallengeSequence.forEach((_,i)=>{
+      const span=document.getElementById('oc-'+i);
+      if(span){span.textContent=orbitChallengeSequence[i].emoji+' ?';span.style.borderColor='rgba(255,255,255,0.1)';span.style.color='var(--star-white)';}
+    });
+  }
+}
+
+function endOrbitChallenge(){
+  orbitChallengeActive=false;
+  document.getElementById('orbit-challenge-ui').classList.remove('active');
+}
+
+// ===== ACHIEVEMENTS =====
+function checkAchievements(){
+  const saved=JSON.parse(localStorage.getItem('ssq_achievements')||'[]');
+  function unlock(id,msg){
+    if(!saved.includes(id)){saved.push(id);localStorage.setItem('ssq_achievements',JSON.stringify(saved));showToast('🏆 Achievement: '+msg,'gold');}}
+  if(GS.score>=100) unlock('score100','Centurion! (100 pts)');
+  if(GS.score>=500) unlock('score500','Space Legend! (500 pts)');
+  if(GS.bestStreak>=5) unlock('streak5','Hot Streak! (5×)');
+  if(GS.bestStreak>=10) unlock('streak10','Unstoppable! (10×)');
+  if(GS.planetsVisited.size>=8) unlock('all_planets','Solar Tourist! (all planets)');
+  if(GS.correctAnswers>=20) unlock('scholar','Scholar (20 correct)');
+}
+
+// ===== MISSION PROGRESS =====
+function updateMissionProgress(pd, correct){
+  if(GS.mode!=='mission'||!GS.currentMission) return;
+  const m=GS.currentMission;
+  if(m.id==='sol_tour') GS.missionProgress[pd.name]=true;
+  if(m.id==='inner_worlds'&&correct&&['Mercury','Venus','Earth','Mars'].includes(pd.name)){
+    GS.missionProgress.count=(GS.missionProgress.count||0)+1;
+    if(GS.missionProgress.count>=5) completeMission(m);
+  }
+  if(m.id==='myth_master'&&correct&&GS.theme==='mythology'){
+    GS.missionProgress.count=(GS.missionProgress.count||0)+1;
+    if(GS.missionProgress.count>=8) completeMission(m);
+  }
+  if(m.id==='speed_run'&&correct){
+    GS.missionProgress.count=(GS.missionProgress.count||0)+1;
+    if(GS.missionProgress.count>=10&&GS.timeLeft>=(120-40)) completeMission(m);
+  }
+  if(m.id==='perfect_run'&&correct&&GS.wrongAnswers===0){
+    GS.missionProgress.count=(GS.missionProgress.count||0)+1;
+    if(GS.missionProgress.count>=15) completeMission(m);
+  }
+  if(m.id==='sol_tour'&&GS.planetsVisited.size>=8) completeMission(m);
+}
+
+function completeMission(m){
+  if(GS.missionProgress.completed) return;
+  GS.missionProgress.completed=true;
+  GS.score+=parseInt(m.reward)||200;
+  // save completed mission
+  const saved=JSON.parse(localStorage.getItem('ssq_missions')||'{}');
+  saved[m.id]=true;
+  localStorage.setItem('ssq_missions',JSON.stringify(saved));
+  showToast('🚀 MISSION COMPLETE: '+m.name+'! '+m.reward,'gold');
+  confettiEngine.addConfetti({emojis:['🚀','🌟','🎉'],confettiNumber:200});
+  npcSay('Outstanding! Mission "'+m.name+'" complete! You\'ve earned: '+m.reward);
+}
+
+function getSavedMissions(){return JSON.parse(localStorage.getItem('ssq_missions')||'{}');}
+function getBestScore(){const s=JSON.parse(localStorage.getItem('ssq_scores')||'[]');return s.length?s[0].score:0;}
+
+// ===== NPC GUIDE =====
+const npcMessages={
+  intro:['Welcome, Explorer! Click any planet to begin!','I\'m NOVA, your AI space guide. Let\'s explore!','The cosmos awaits — where shall we go first?'],
+  correct:['Brilliant! Your knowledge is stellar!','That\'s correct! You\'re becoming a true astronomer!','Excellent! Your streak is growing!','Well done! Every correct answer fuels our journey!','You nailed it! Science is your superpower!'],
+  wrong:['Not quite — but every mistake teaches us! Try again.','Don\'t worry — even astronauts need to study!','Keep going! The stars believe in you.','Close! Check the fact card for hints.'],
+  planet:{
+    Mercury:['Mercury is tiny but mighty — closest to the Sun!','No atmosphere means extreme temperature swings on Mercury!'],
+    Venus:['Venus is the hottest planet despite not being closest to the Sun!','A day on Venus is longer than its year — mind-blowing!'],
+    Earth:['Home sweet home! Earth is the only known planet with life.','71% of Earth is covered in water — our blue jewel!'],
+    Mars:['Mars could be humanity\'s next home! NASA is planning missions!','Olympus Mons on Mars is the tallest volcano in the solar system!'],
+    Jupiter:['Jupiter is SO big it could fit 1,300 Earths inside!','Jupiter\'s storm has been raging for centuries — the Great Red Spot!'],
+    Saturn:['Saturn\'s rings are made of ice and rock particles!','Saturn is so light it could float in a bathtub — if you had a big enough one!'],
+    Uranus:['Uranus rotates on its side — scientists think something massive hit it!','Uranus has 13 rings, but they\'re faint and hard to see.'],
+    Neptune:['Neptune\'s winds are the fastest in the solar system at 2,100 km/h!','Neptune has only completed one orbit since its discovery in 1846!'],
+  }
+};
+function npcSay(msg){
+  const bubble=document.getElementById('npc-bubble');
+  document.getElementById('npc-text').textContent=msg;
+  bubble.classList.add('show');
+  if(!npcVisible) setTimeout(()=>bubble.classList.remove('show'),6000);
+}
+function toggleNpc(){
+  npcVisible=!npcVisible;
+  const bubble=document.getElementById('npc-bubble');
+  if(npcVisible) bubble.classList.add('show');
+  else bubble.classList.remove('show');
+}
+function npcReact(correct,pd){
+  const now=Date.now();
+  if(now-lastNpcMsg<3000) return;
+  lastNpcMsg=now;
+  const pool=correct?npcMessages.correct:npcMessages.wrong;
+  const planet=pd.name;
+  let msg;
+  if(correct&&npcMessages.planet[planet]&&Math.random()<0.4){
+    msg=npcMessages.planet[planet][Math.floor(Math.random()*npcMessages.planet[planet].length)];
+  } else {
+    msg=pool[Math.floor(Math.random()*pool.length)];
+  }
+  npcSay(msg);
+}
+
+// ===== PARTICLES =====
+function showParticles(el,color){
+  const rect=el.getBoundingClientRect();
+  const cx=rect.left+rect.width/2, cy=rect.top+rect.height/2;
+  for(let i=0;i<12;i++){
+    const p=document.createElement('div');
+    p.className='particle';
+    const size=4+Math.random()*6;
+    p.style.cssText=`width:${size}px;height:${size}px;background:${color};left:${cx}px;top:${cy}px;--tx:${(Math.random()-0.5)*120}px;--ty:${-30-Math.random()*80}px;animation-delay:${Math.random()*0.2}s;`;
+    document.body.appendChild(p);
+    setTimeout(()=>p.remove(),1000);
+  }
+}
+
+// ===== TOASTS =====
+function showToast(msg,type=''){
+  const t=document.createElement('div');
+  t.className='toast'+( type?' '+type:'');
+  t.innerHTML=msg;
+  const tc=document.getElementById('toast-container');
+  tc.appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity 0.4s';setTimeout(()=>t.remove(),400);},3000);
+}
+
+// ===== GAME OVER =====
+function endGame(manual=false){
+  GS.active=false;
+  clearInterval(timerInterval);
+  clearInterval(quizTimerInterval);
+  document.getElementById('quiz-overlay').style.display='none';
+  document.getElementById('hud').style.display='none';
+  document.getElementById('npc-guide').style.display='none';
+  document.getElementById('fact-card').style.display='none';
+  endOrbitChallenge();
+  saveScore();
+  document.getElementById('go-score').textContent=GS.score;
+  document.getElementById('go-correct').textContent=GS.correctAnswers;
+  document.getElementById('go-best-streak').textContent=GS.bestStreak+'×';
+  document.getElementById('go-tokens').textContent=GS.tokens;
+  document.getElementById('go-planets').textContent=GS.planetsVisited.size;
+  let title='Mission Complete!';
+  if(GS.score>=500) title='🌌 Legendary Explorer!';
+  else if(GS.score>=200) title='⭐ Space Champion!';
+  else if(GS.score>=100) title='🚀 Rising Astronomer!';
+  else if(manual) title='Mission Aborted';
+  document.getElementById('go-title').textContent=title;
+  showScreen('gameover-screen');
+  if(!manual&&GS.score>0) confettiEngine.addConfetti({emojis:['🌟','🚀','⭐'],confettiNumber:100});
+}
+
+function restartGame(){
+  if(GS.mode==='mission'&&GS.currentMission) startMission(GS.currentMission.id);
+  else startQuickPlay(GS.difficulty);
+}
+
+// ===== SCORES =====
+function saveScore(){
+  const scores=JSON.parse(localStorage.getItem('ssq_scores')||'[]');
+  scores.push({score:GS.score,mode:GS.mode,diff:GS.difficulty,theme:GS.theme,correct:GS.correctAnswers,streak:GS.bestStreak,date:new Date().toLocaleDateString()});
+  scores.sort((a,b)=>b.score-a.score);
+  localStorage.setItem('ssq_scores',JSON.stringify(scores.slice(0,15)));
+}
+function renderScores(){
+  const scores=JSON.parse(localStorage.getItem('ssq_scores')||'[]');
+  const medals=['🥇','🥈','🥉'];
+  document.getElementById('scores-body').innerHTML=scores.length?scores.map((s,i)=>`<tr><td class="rank-badge">${medals[i]||'#'+(i+1)}</td><td style="color:var(--gold);font-family:var(--hud-font);">${s.score}</td><td>${s.mode} • ${s.theme}</td><td>${s.diff}</td><td style="opacity:0.5;font-size:0.75rem;">${s.date}</td></tr>`).join(''):'<tr><td colspan="5" style="opacity:0.4;padding:1rem;">No scores yet — play to earn your place!</td></tr>';
+}
+
+// ===== MISSIONS RENDER =====
+function renderMissions(){
+  const saved=getSavedMissions();
+  const bestScore=getBestScore();
+  document.getElementById('missions-list').innerHTML=MISSIONS_DEF.map(m=>{
+    const done=saved[m.id];
+    const locked=m.requiredScore>bestScore;
+    return`<div class="mission-card ${done?'completed':locked?'locked':'available'}" onclick="${locked?'':'startMission(\''+m.id+'\')'}">
+      <div class="mc-header"><div class="mc-name">${m.name}</div><div class="mc-badge ${done?'done':locked?'locked':'new'}">${done?'✓ Done':locked?'🔒 Need '+m.requiredScore+' pts':'▶ Ready'}</div></div>
+      <div class="mc-desc">${m.desc}</div>
+      <div class="mc-steps">${m.steps.map(s=>`<span class="mc-step ${done?'done':''}">${s}</span>`).join('')}</div>
+      <div class="mc-reward">🎁 ${m.reward}</div>
+    </div>`;
+  }).join('');
+}
+
+// ===== SKINS RENDER =====
+function renderSkins(){
+  const scores=JSON.parse(localStorage.getItem('ssq_scores')||'[]');
+  const best=scores.length?scores[0].score:0;
+  const savedM=getSavedMissions();
+  document.getElementById('skins-grid').innerHTML=SKINS.map(s=>{
+    const unlocked=best>=(s.reqScore||0)&&(!s.reqMission||savedM[s.reqMission]);
+    return`<div class="skin-card ${unlocked?'unlocked':''}"><div class="skin-icon">${s.icon}</div><div class="skin-name">${s.name}</div><div class="skin-req" style="color:${unlocked?'var(--gold)':'rgba(200,220,255,0.3)'};">${unlocked?'✓ Unlocked':s.req}</div></div>`;
+  }).join('');
+}
+
+// ===== MENU PREVIEW =====
+function updateMenuPreview(){
+  const scores=JSON.parse(localStorage.getItem('ssq_scores')||'[]');
+  const el=document.getElementById('top-score-preview');
+  if(scores.length) el.innerHTML=`Best: <strong style="color:var(--gold);font-family:var(--hud-font);">${scores[0].score}</strong> pts — ${scores[0].mode} / ${scores[0].diff} — ${scores[0].date}`;
+  else el.textContent='No scores yet — start exploring!';
+}
+
+// ===== UTILITIES =====
+function shuffleArr(a){return [...a].sort(()=>Math.random()-0.5);}
+
+// ===== ANIMATION LOOP =====
+let frame=0;
+function animate(){
+  requestAnimationFrame(animate);
+  frame++;
+  controls.update();
+
+  // Sun pulse
+  const pulse=1+Math.sin(frame*0.03)*0.04;
+  sunMesh.scale.setScalar(pulse);
+  sunHalo.scale.setScalar(pulse+0.05);
+  sunMesh.rotation.y+=0.005;
+
+  // Planet orbits
+  PLANET_DATA.forEach((pd,i)=>{
+    if(!planetMeshes[i]) return;
+    planetAngles[i]+=pd.speed*0.016;
+    const a=planetAngles[i];
+    const inc=pd.inclination*Math.PI/180;
+    planetMeshes[i].position.set(
+      pd.distance*Math.cos(a),
+      pd.distance*Math.sin(a)*Math.sin(inc),
+      pd.distance*Math.sin(a)*Math.cos(inc)
+    );
+    planetMeshes[i].rotation.y+=0.01+i*0.002;
+    planetGlows[i].position.copy(planetMeshes[i].position);
+  });
+
+  // Star twinkle
+  if(frame%3===0){
+    const starMat=scene.children.find(c=>c instanceof THREE.Points)?.material;
+    if(starMat) starMat.opacity=0.7+Math.sin(frame*0.02)*0.1;
+  }
+
+  renderer.render(scene,camera);
+}
+animate();
+
+// ===== INIT =====
+updateMenuPreview();
+</script>
+</body>
+</html>

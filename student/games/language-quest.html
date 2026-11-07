@@ -1,0 +1,1453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ghana Language Quest — Learn Twi, Ga, Ewe & Hausa</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&family=Righteous&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/js-confetti@0.12.0/dist/js-confetti.browser.js"></script>
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --surface2: #1a2235;
+    --border: rgba(255,255,255,0.08);
+    --text: #f0f4ff;
+    --text-muted: #8896b3;
+    --accent: #f59e0b;
+    --ghana-red: #CE1126;
+    --ghana-gold: #FCD116;
+    --ghana-green: #006B3F;
+    --twi-color: #E67E22;
+    --ga-color: #3498DB;
+    --ewe-color: #27AE60;
+    --hausa-color: #8E44AD;
+    --correct: #10b981;
+    --wrong: #ef4444;
+    --card-shadow: 0 8px 40px rgba(0,0,0,0.5);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    font-family: 'Space Grotesk', sans-serif;
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  #bg-canvas {
+    position: fixed; top:0; left:0; width:100%; height:100%;
+    pointer-events: none; z-index: 0;
+  }
+
+  .screen {
+    position: fixed; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 10; padding: 1rem;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    transform: translateY(20px);
+    overflow-y: auto;
+  }
+  .screen.active {
+    opacity: 1; pointer-events: all; transform: translateY(0);
+  }
+
+  .card {
+    background: linear-gradient(145deg, rgba(17,24,39,0.95), rgba(26,34,53,0.95));
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 2rem;
+    width: 100%; max-width: 600px;
+    box-shadow: var(--card-shadow), inset 0 1px 0 rgba(255,255,255,0.05);
+    position: relative; overflow: hidden;
+  }
+
+  .logo {
+    font-family: 'Righteous', cursive;
+    font-size: clamp(2rem, 5vw, 2.8rem);
+    background: linear-gradient(135deg, var(--ghana-red), var(--ghana-gold), var(--ghana-green));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .language-selector {
+    display: grid; grid-template-columns: repeat(2, 1fr);
+    gap: 1rem; margin: 1.5rem 0;
+  }
+
+  .lang-card {
+    background: var(--surface2);
+    border: 2px solid var(--border);
+    border-radius: 16px;
+    padding: 1.2rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .lang-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+  }
+  .lang-card.selected {
+    border-color: var(--ghana-gold);
+    box-shadow: 0 0 0 3px rgba(252,209,22,0.2);
+  }
+  .lang-card.twi { border-left: 4px solid var(--twi-color); }
+  .lang-card.ga { border-left: 4px solid var(--ga-color); }
+  .lang-card.ewe { border-left: 4px solid var(--ewe-color); }
+  .lang-card.hausa { border-left: 4px solid var(--hausa-color); }
+
+  .lang-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+  .lang-name { font-weight: 700; font-size: 1.1rem; }
+  .lang-region { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem; }
+
+  .btn-primary {
+    width: 100%; padding: 1rem;
+    background: linear-gradient(135deg, var(--ghana-gold), #f59e0b);
+    border: none; border-radius: 14px;
+    color: #0a0e1a; font-weight: 800;
+    font-size: 1.05rem; cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Space Grotesk', sans-serif;
+    box-shadow: 0 4px 20px rgba(252,209,22,0.3);
+  }
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(252,209,22,0.5);
+  }
+
+  /* Game Screen Styles */
+  .game-header {
+    display: flex; justify-content: space-between;
+    align-items: center; margin-bottom: 1.5rem;
+    flex-wrap: wrap; gap: 0.5rem;
+  }
+
+  .stat-pill {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0.4rem 0.9rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    display: flex; align-items: center; gap: 0.4rem;
+  }
+
+  .progress-wrap { margin-bottom: 1.2rem; }
+  .progress-track {
+    height: 8px; background: var(--surface2);
+    border-radius: 999px; overflow: hidden;
+    margin-top: 0.3rem;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--ghana-red), var(--ghana-gold), var(--ghana-green));
+    border-radius: 999px; transition: width 0.5s ease;
+  }
+
+  .quest-type-badge {
+    display: inline-block;
+    padding: 0.3rem 0.8rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 1rem;
+  }
+  .quest-type-badge.vocabulary { background: rgba(230,126,34,0.2); color: var(--twi-color); }
+  .quest-type-badge.grammar { background: rgba(52,152,219,0.2); color: var(--ga-color); }
+  .quest-type-badge.conversation { background: rgba(39,174,96,0.2); color: var(--ewe-color); }
+  .quest-type-badge.proverb { background: rgba(142,68,173,0.2); color: var(--hausa-color); }
+  .quest-type-badge.culture { background: rgba(252,209,22,0.2); color: var(--ghana-gold); }
+
+  .question-display {
+    background: linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    font-size: 1.1rem;
+    line-height: 1.6;
+  }
+  .word-highlight {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--ghana-gold);
+    font-family: 'Righteous', cursive;
+    display: block;
+    margin: 0.5rem 0;
+  }
+  .pronunciation {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  .options-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 0.7rem; margin-bottom: 1rem;
+  }
+  .option-btn {
+    background: var(--surface2);
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    padding: 0.9rem;
+    color: var(--text);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Space Grotesk', sans-serif;
+    text-align: left;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .option-btn:hover:not(:disabled) {
+    border-color: var(--ghana-gold);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(252,209,22,0.15);
+  }
+  .option-btn.correct {
+    border-color: var(--correct);
+    background: rgba(16,185,129,0.1);
+    animation: correctPop 0.4s ease;
+  }
+  .option-btn.wrong {
+    border-color: var(--wrong);
+    background: rgba(239,68,68,0.1);
+    animation: shake 0.4s ease;
+  }
+  .option-btn.dimmed { opacity: 0.35; }
+
+  @keyframes correctPop {
+    0%,100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    25% { transform: translateX(-8px); }
+    75% { transform: translateX(8px); }
+  }
+
+  .feedback-area {
+    text-align: center; min-height: 2.5rem;
+    padding: 0.5rem; font-weight: 600;
+    transition: all 0.3s;
+  }
+  .feedback-area.correct { color: var(--correct); }
+  .feedback-area.wrong { color: var(--wrong); }
+
+  .culture-note {
+    background: rgba(252,209,22,0.05);
+    border: 1px solid rgba(252,209,22,0.2);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-top: 1rem;
+    display: none;
+  }
+  .culture-note.show { display: block; animation: fadeSlide 0.3s ease; }
+  .culture-note .cn-title {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ghana-gold);
+    font-weight: 700;
+    margin-bottom: 0.3rem;
+  }
+
+  @keyframes fadeSlide {
+    from { opacity:0; transform: translateY(10px); }
+    to { opacity:1; transform: translateY(0); }
+  }
+
+  .vocab-list {
+    display: grid; gap: 0.5rem;
+    margin: 1rem 0;
+    max-height: 300px; overflow-y: auto;
+  }
+  .vocab-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 0.8rem 1rem;
+    display: flex; justify-content: space-between;
+    align-items: center;
+    transition: all 0.2s;
+  }
+  .vocab-item.learned {
+    border-color: var(--correct);
+    background: rgba(16,185,129,0.05);
+  }
+  .vocab-item .vi-native {
+    font-weight: 700;
+    font-size: 1.1rem;
+  }
+  .vocab-item .vi-english {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+  }
+  .vocab-item .vi-status {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+  }
+  .vi-status.learned { background: rgba(16,185,129,0.2); color: var(--correct); }
+  .vi-status.new { background: rgba(245,158,11,0.2); color: var(--accent); }
+
+  .achievement-toast {
+    position: fixed; bottom: 2rem; right: 1rem; z-index: 999;
+    background: var(--surface);
+    border: 2px solid var(--ghana-gold);
+    border-radius: 16px;
+    padding: 1rem 1.5rem;
+    display: flex; align-items: center; gap: 1rem;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+    transform: translateX(120%);
+    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  .achievement-toast.show { transform: translateX(0); }
+
+  .speech-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.5rem 1rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 0.85rem;
+    display: inline-flex; align-items: center; gap: 0.4rem;
+  }
+  .speech-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .speech-btn.recording {
+    border-color: var(--wrong);
+    color: var(--wrong);
+    animation: pulse 1s ease infinite;
+  }
+  @keyframes pulse {
+    0%,100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+
+  .map-marker {
+    display: inline-block;
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    margin-right: 0.5rem;
+  }
+  .map-marker.twi { background: var(--twi-color); }
+  .map-marker.ga { background: var(--ga-color); }
+  .map-marker.ewe { background: var(--ewe-color); }
+  .map-marker.hausa { background: var(--hausa-color); }
+
+  @media (max-width: 480px) {
+    .card { padding: 1.5rem 1rem; }
+    .language-selector { grid-template-columns: 1fr; }
+    .options-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+
+<!-- ==================== MAIN MENU ==================== -->
+<div class="screen active" id="menu-screen">
+  <div class="card">
+    <div class="text-center" style="margin-bottom:1.5rem;">
+      <div class="logo">Ghana Language Quest</div>
+      <div style="color:var(--text-muted);margin-top:0.5rem;">
+        Master Twi, Ga, Ewe & Hausa through adventure!
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-bottom:1rem;color:var(--text-muted);font-weight:600;">
+      Choose Your Language Journey
+    </div>
+
+    <div class="language-selector" id="language-selector">
+      <div class="lang-card twi" data-lang="twi" onclick="selectLanguage(this)">
+        <div class="lang-icon">🌿</div>
+        <div class="lang-name">Twi</div>
+        <div class="lang-region">Ashanti Region</div>
+      </div>
+      <div class="lang-card ga" data-lang="ga" onclick="selectLanguage(this)">
+        <div class="lang-icon">🌊</div>
+        <div class="lang-name">Ga</div>
+        <div class="lang-region">Greater Accra</div>
+      </div>
+      <div class="lang-card ewe" data-lang="ewe" onclick="selectLanguage(this)">
+        <div class="lang-icon">🏔️</div>
+        <div class="lang-name">Ewe</div>
+        <div class="lang-region">Volta Region</div>
+      </div>
+      <div class="lang-card hausa" data-lang="hausa" onclick="selectLanguage(this)">
+        <div class="lang-icon">🏜️</div>
+        <div class="lang-name">Hausa</div>
+        <div class="lang-region">Northern Ghana</div>
+      </div>
+    </div>
+
+    <div style="margin:1rem 0;">
+      <div style="font-size:0.85rem;color:var(--text-muted);font-weight:600;margin-bottom:0.5rem;">
+        Difficulty Level
+      </div>
+      <div style="display:flex;gap:0.5rem;">
+        <button class="stat-pill difficulty-btn selected" data-diff="beginner" onclick="selectDifficulty(this)" style="cursor:pointer;">
+          🌱 Beginner
+        </button>
+        <button class="stat-pill difficulty-btn" data-diff="intermediate" onclick="selectDifficulty(this)" style="cursor:pointer;">
+          ⚡ Intermediate
+        </button>
+        <button class="stat-pill difficulty-btn" data-diff="advanced" onclick="selectDifficulty(this)" style="cursor:pointer;">
+          🔥 Advanced
+        </button>
+      </div>
+    </div>
+
+    <div style="margin:1rem 0;">
+      <div style="font-size:0.85rem;color:var(--text-muted);font-weight:600;margin-bottom:0.5rem;">
+        Quest Type
+      </div>
+      <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+        <button class="stat-pill quest-btn selected" data-quest="all" onclick="selectQuestType(this)" style="cursor:pointer;">
+          🎯 All Types
+        </button>
+        <button class="stat-pill quest-btn" data-quest="vocabulary" onclick="selectQuestType(this)" style="cursor:pointer;">
+          📝 Vocabulary
+        </button>
+        <button class="stat-pill quest-btn" data-quest="grammar" onclick="selectQuestType(this)" style="cursor:pointer;">
+          📐 Grammar
+        </button>
+        <button class="stat-pill quest-btn" data-quest="conversation" onclick="selectQuestType(this)" style="cursor:pointer;">
+          💬 Conversation
+        </button>
+        <button class="stat-pill quest-btn" data-quest="proverb" onclick="selectQuestType(this)" style="cursor:pointer;">
+          🦉 Proverbs
+        </button>
+      </div>
+    </div>
+
+    <button class="btn-primary" onclick="startAdventure()">
+      Begin Language Adventure 🗺️
+    </button>
+
+    <div style="text-align:center;margin-top:1rem;">
+      <button class="speech-btn" onclick="showScreen('progress-screen')">
+        📊 My Progress
+      </button>
+      <button class="speech-btn" onclick="showScreen('vocabulary-screen')" style="margin-left:0.5rem;">
+        📚 Vocabulary Book
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== GAME SCREEN ==================== -->
+<div class="screen" id="game-screen">
+  <div class="card">
+    <div class="game-header">
+      <div>
+        <span class="map-marker" id="current-lang-marker"></span>
+        <strong id="current-lang-name">Twi</strong>
+      </div>
+      <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+        <div class="stat-pill">⭐ <span id="score-display">0</span></div>
+        <div class="stat-pill">🔥 <span id="streak-display">0</span></div>
+        <div class="stat-pill">❤️ <span id="lives-display">3</span></div>
+        <div class="stat-pill">📚 <span id="words-learned-display">0</span></div>
+      </div>
+    </div>
+
+    <div class="progress-wrap">
+      <div style="display:flex;justify-content:space-between;font-size:0.8rem;color:var(--text-muted);">
+        <span id="quest-progress">Quest 1 of 10</span>
+        <span id="quest-category">Vocabulary</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progress-bar" style="width:0%"></div>
+      </div>
+    </div>
+
+    <div id="quest-type-display" class="quest-type-badge vocabulary">Vocabulary</div>
+
+    <div class="question-display" id="question-container">
+      <span id="context-text"></span>
+      <span class="word-highlight" id="target-word"></span>
+      <span class="pronunciation" id="pronunciation-text"></span>
+    </div>
+
+    <div class="options-grid" id="options-container"></div>
+
+    <div class="feedback-area" id="feedback-display"></div>
+
+    <div class="culture-note" id="culture-note">
+      <div class="cn-title">🌍 Cultural Note</div>
+      <div id="culture-text"></div>
+    </div>
+
+    <div style="display:flex;gap:0.5rem;margin-top:1rem;justify-content:center;">
+      <button class="speech-btn" id="listen-btn" onclick="speakWord()">
+        🔊 Listen
+      </button>
+      <button class="speech-btn" id="record-btn" onclick="toggleRecording()">
+        🎤 Practice Pronunciation
+      </button>
+      <button class="speech-btn" onclick="useHint()">
+        💡 Hint <span id="hints-remaining">(3)</span>
+      </button>
+    </div>
+
+    <div style="text-align:center;margin-top:0.5rem;font-size:0.75rem;color:var(--text-muted);">
+      Press 1-4 to answer quickly
+    </div>
+  </div>
+</div>
+
+<!-- ==================== VOCABULARY SCREEN ==================== -->
+<div class="screen" id="vocabulary-screen">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+      <h2 style="font-family:'Righteous',cursive;">📚 My Vocabulary Book</h2>
+      <button class="speech-btn" onclick="showScreen('menu-screen')">← Back</button>
+    </div>
+    
+    <div style="margin-bottom:1rem;">
+      <select id="vocab-filter" onchange="displayVocabulary()" style="background:var(--surface2);color:var(--text);border:1px solid var(--border);padding:0.5rem;border-radius:8px;font-family:inherit;">
+        <option value="all">All Languages</option>
+        <option value="twi">Twi</option>
+        <option value="ga">Ga</option>
+        <option value="ewe">Ewe</option>
+        <option value="hausa">Hausa</option>
+      </select>
+    </div>
+
+    <div class="vocab-list" id="vocab-list"></div>
+    
+    <div style="text-align:center;margin-top:1rem;font-size:0.85rem;color:var(--text-muted);">
+      <span id="vocab-count">0 words collected</span>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== PROGRESS SCREEN ==================== -->
+<div class="screen" id="progress-screen">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+      <h2 style="font-family:'Righteous',cursive;">📊 Learning Progress</h2>
+      <button class="speech-btn" onclick="showScreen('menu-screen')">← Back</button>
+    </div>
+
+    <div id="progress-stats"></div>
+    
+    <div style="margin-top:1.5rem;">
+      <h3 style="font-size:0.85rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.8rem;">
+        Language Mastery
+      </h3>
+      <div id="language-progress"></div>
+    </div>
+
+    <div style="margin-top:1.5rem;">
+      <h3 style="font-size:0.85rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.8rem;">
+        Achievements
+      </h3>
+      <div id="achievements-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Achievement Toast -->
+<div class="achievement-toast" id="achievement-toast">
+  <div style="font-size:2rem;" id="toast-icon">🏆</div>
+  <div>
+    <div style="font-weight:700;color:var(--ghana-gold);" id="toast-title"></div>
+    <div style="font-size:0.85rem;color:var(--text-muted);" id="toast-desc"></div>
+  </div>
+</div>
+
+<script>
+const confetti = new JSConfetti();
+
+// ==================== GAME STATE ====================
+const gameState = {
+  selectedLanguage: 'twi',
+  difficulty: 'beginner',
+  questType: 'all',
+  score: 0,
+  streak: 0,
+  bestStreak: 0,
+  lives: 5,
+  currentQuest: 0,
+  totalQuests: 15,
+  answered: false,
+  wordsLearned: [],
+  hintsRemaining: 3,
+  mediaRecorder: null,
+  audioChunks: [],
+  isRecording: false
+};
+
+// ==================== LANGUAGE DATABASE ====================
+const languageDB = {
+  twi: {
+    name: 'Twi',
+    region: 'Ashanti Region',
+    marker: 'twi',
+    icon: '🌿',
+    vocabulary: {
+      beginner: [
+        { native: 'Maakye', english: 'Good morning', pronunciation: 'Mah-chay', context: 'Used as morning greeting' },
+        { native: 'Maaha', english: 'Good afternoon', pronunciation: 'Mah-hah', context: 'Afternoon greeting' },
+        { native: 'Maadwo', english: 'Good evening', pronunciation: 'Mah-jwoh', context: 'Evening greeting' },
+        { native: 'Medaase', english: 'Thank you', pronunciation: 'Meh-dah-seh', context: 'Expression of gratitude' },
+        { native: 'Aane', english: 'Yes', pronunciation: 'Ah-neh', context: 'Affirmation' },
+        { native: 'Daabi', english: 'No', pronunciation: 'Dah-bee', context: 'Negation' },
+        { native: 'Wo ho te sɛn?', english: 'How are you?', pronunciation: 'Wo ho teh sen', context: 'Common greeting question' },
+        { native: 'Me ho yɛ', english: 'I am fine', pronunciation: 'Meh ho yeh', context: 'Response to how are you' },
+        { native: 'Ɛyɛ', english: 'It is good', pronunciation: 'Eh-yeh', context: 'General positive statement' },
+        { native: 'Mepa wo kyɛw', english: 'Please', pronunciation: 'Meh-pah wo ch-eh-oo', context: 'Polite request' },
+      ],
+      intermediate: [
+        { native: 'Akwaaba', english: 'Welcome', pronunciation: 'Ah-kwah-bah', context: 'Used to welcome guests' },
+        { native: 'Ɛte sɛn?', english: 'How is it?', pronunciation: 'Eh-teh sen', context: 'Asking about situation' },
+        { native: 'Me din de...', english: 'My name is...', pronunciation: 'Meh din deh', context: 'Self introduction' },
+        { native: 'Wofiri he?', english: 'Where are you from?', pronunciation: 'Wo-fee-ree heh', context: 'Asking origin' },
+        { native: 'Mefiri Accra', english: 'I am from Accra', pronunciation: 'Meh-fee-ree Accra', context: 'Stating origin' },
+        { native: 'Ɛyɛ fɛ', english: 'It is beautiful', pronunciation: 'Eh-yeh feh', context: 'Compliment' },
+        { native: 'Me pɛ', english: 'I want/like', pronunciation: 'Meh peh', context: 'Expressing desire' },
+        { native: 'Ɛbɛn?', english: 'How much?', pronunciation: 'Eh-ben', context: 'Asking price' },
+      ],
+      advanced: [
+        { native: 'Obi nnim akyɛ', english: 'No one knows tomorrow', pronunciation: 'Oh-bee n-neem ah-cheh', context: 'Proverb about uncertainty' },
+        { native: 'Ɛbaako nkɔ', english: 'Unity is strength', pronunciation: 'Eh-bah-koh n-koh', context: 'Proverb about togetherness' },
+        { native: 'Anoma antu a, obua da', english: 'If a bird doesn\'t fly, it goes hungry', pronunciation: 'Ah-noh-mah ahn-too ah oh-boo-ah dah', context: 'Proverb about effort' },
+      ]
+    },
+    grammar: {
+      beginner: [
+        { question: '"Me" in Twi means:', correct: 'I/Me', options: ['I/Me', 'You', 'They', 'We'], explanation: 'Me is the first person singular pronoun in Twi' },
+        { question: 'To make a sentence negative in Twi, add:', correct: 'nnyɛ', options: ['nnyɛ', 'paa', 'nso', 'deɛ'], explanation: 'Nnyɛ is used for negation' },
+      ]
+    },
+    conversation: {
+      beginner: [
+        { scenario: 'At the market', question: 'How do you ask "How much is this?"', correct: 'Ɛyɛ sɛn?', options: ['Ɛyɛ sɛn?', 'Wo ho te sɛn?', 'Ɛte sɛn?', 'Wofiri he?'] },
+        { scenario: 'Meeting someone', question: 'What is the proper response to "Maakye"?', correct: 'Yaa agya/ena', options: ['Yaa agya/ena', 'Maakye', 'Medaase', 'Aane'] },
+      ]
+    },
+    proverbs: [
+      { proverb: 'Anoma antu a, obua da', meaning: 'If a bird doesn\'t fly, it goes hungry', lesson: 'Hard work is necessary for success' },
+      { proverb: 'Ɛbaako nkɔ', meaning: 'One person doesn\'t fight', lesson: 'Teamwork and unity are important' },
+    ],
+    culture: [
+      'Twi is spoken by about 9 million people in Ghana',
+      'The Ashanti Kingdom, where Twi originates, is known for Kente cloth',
+      'Twi uses tones to distinguish word meanings',
+      'The Golden Stool is a sacred symbol of the Ashanti people',
+    ]
+  },
+  
+  ga: {
+    name: 'Ga',
+    region: 'Greater Accra',
+    marker: 'ga',
+    icon: '🌊',
+    vocabulary: {
+      beginner: [
+        { native: 'Ojekoo', english: 'Good morning', pronunciation: 'Oh-jeh-koh', context: 'Morning greeting' },
+        { native: 'Oshwiee', english: 'Good afternoon', pronunciation: 'Oh-shwee-eh', context: 'Afternoon greeting' },
+        { native: 'Wɔjɔɔ', english: 'Good evening', pronunciation: 'Woh-joh', context: 'Evening greeting' },
+        { native: 'Oyiwala dɔŋŋ', english: 'Thank you very much', pronunciation: 'Oh-yee-wah-lah dong', context: 'Expression of deep gratitude' },
+        { native: 'Hɛɛ', english: 'Yes', pronunciation: 'Heh', context: 'Affirmation' },
+        { native: 'Dabi', english: 'No', pronunciation: 'Dah-bee', context: 'Negation' },
+        { native: 'Te tɛŋŋ?', english: 'How are you?', pronunciation: 'Teh teng', context: 'Common greeting' },
+        { native: 'Mi yɛ jogbaŋŋ', english: 'I am fine', pronunciation: 'Mee yeh jog-bang', context: 'Well-being response' },
+      ],
+      intermediate: [
+        { native: 'Akwaba', english: 'Welcome', pronunciation: 'Ah-kwah-bah', context: 'Welcoming guests' },
+        { native: 'Mi tse...', english: 'My name is...', pronunciation: 'Mee cheh', context: 'Introduction' },
+        { native: 'Nɛgbɛ?', english: 'How much?', pronunciation: 'Nehg-beh', context: 'Asking price' },
+        { native: 'Mi sumɔ', english: 'I like/love', pronunciation: 'Mee soo-moh', context: 'Expressing preference' },
+      ],
+    },
+    grammar: {
+      beginner: [
+        { question: '"Mi" in Ga means:', correct: 'I/Me', options: ['I/Me', 'You', 'They', 'We'], explanation: 'Mi is first person singular' },
+      ]
+    },
+    conversation: {
+      beginner: [
+        { scenario: 'Greeting elder', question: 'How do you greet an elder in Ga?', correct: 'Ojekoo Naa', options: ['Ojekoo Naa', 'Wɔjɔɔ', 'Oshwiee', 'Hɛɛ'] },
+      ]
+    },
+    proverbs: [
+      { proverb: 'Ablekuma aba kuma wo', meaning: 'Unity can overcome any challenge', lesson: 'Togetherness brings strength' },
+    ],
+    culture: [
+      'Ga is the language of the Ga-Dangme people of Greater Accra',
+      'The Homowo festival is a major Ga celebration',
+      'Ga fishermen have traditional songs and chants',
+      'The Ga people are known for their elaborate naming ceremonies',
+    ]
+  },
+
+  ewe: {
+    name: 'Ewe',
+    region: 'Volta Region',
+    marker: 'ewe',
+    icon: '🏔️',
+    vocabulary: {
+      beginner: [
+        { native: 'Ŋdi', english: 'Good morning', pronunciation: 'N-dee', context: 'Morning greeting' },
+        { native: 'Ŋdɔ', english: 'Good afternoon', pronunciation: 'N-doh', context: 'Afternoon greeting' },
+        { native: 'Fiɛyi', english: 'Good evening', pronunciation: 'Fee-eh-yee', context: 'Evening greeting' },
+        { native: 'Akpe', english: 'Thank you', pronunciation: 'Ah-kpeh', context: 'Gratitude' },
+        { native: 'Ɛ̃', english: 'Yes', pronunciation: 'Eh', context: 'Affirmation' },
+        { native: 'Ao', english: 'No', pronunciation: 'Ah-oh', context: 'Negation' },
+        { native: 'Efɔ̃a?', english: 'How are you?', pronunciation: 'Eh-foh-ah', context: 'Wellness check' },
+        { native: 'Me fɔ', english: 'I am well', pronunciation: 'Meh foh', context: 'Response to greeting' },
+      ],
+    },
+    grammar: {
+      beginner: [
+        { question: 'In Ewe, the pronoun "I" is:', correct: 'Me', options: ['Me', 'E', 'Wo', 'Mi'], explanation: 'Me is the first person pronoun' },
+      ]
+    },
+    conversation: {
+      beginner: [
+        { scenario: 'At home', question: 'How do you say "Good morning" to family?', correct: 'Ŋdi loo', options: ['Ŋdi loo', 'Ŋdɔ', 'Fiɛyi', 'Akpe'] },
+      ]
+    },
+    proverbs: [
+      { proverb: 'Ameɖeka me wɔa du o', meaning: 'One person does not build a town', lesson: 'Community effort is essential' },
+    ],
+    culture: [
+      'Ewe is spoken by about 5 million people in Ghana and Togo',
+      'The Agbadza dance is a famous Ewe cultural expression',
+      'Ewe has a complex system of honorifics for respect',
+      'Ewe drumming traditions are recognized worldwide',
+    ]
+  },
+
+  hausa: {
+    name: 'Hausa',
+    region: 'Northern Ghana',
+    marker: 'hausa',
+    icon: '🏜️',
+    vocabulary: {
+      beginner: [
+        { native: 'Ina kwana', english: 'Good morning', pronunciation: 'Ee-nah kwah-nah', context: 'Morning greeting' },
+        { native: 'Ina wuni', english: 'Good afternoon', pronunciation: 'Ee-nah woo-nee', context: 'Afternoon greeting' },
+        { native: 'Barka da yamma', english: 'Good evening', pronunciation: 'Bar-kah dah yam-mah', context: 'Evening greeting' },
+        { native: 'Na gode', english: 'Thank you', pronunciation: 'Nah goh-deh', context: 'Gratitude' },
+        { native: 'Ee', english: 'Yes', pronunciation: 'Eh', context: 'Affirmation' },
+        { native: 'A\'a', english: 'No', pronunciation: 'Ah-ah', context: 'Negation' },
+        { native: 'Yaya kake?', english: 'How are you?', pronunciation: 'Yah-yah kah-keh', context: 'Wellness inquiry' },
+        { native: 'Lafiya lau', english: 'I am fine', pronunciation: 'Lah-fee-yah la-oo', context: 'Wellness response' },
+      ],
+    },
+    grammar: {
+      beginner: [
+        { question: 'The Hausa word for "I" is:', correct: 'Ni', options: ['Ni', 'Ka', 'Shi', 'Mu'], explanation: 'Ni means I/me in Hausa' },
+      ]
+    },
+    conversation: {
+      beginner: [
+        { scenario: 'Market buying', question: 'How do you ask price in Hausa?', correct: 'Nawa ne?', options: ['Nawa ne?', 'Yaya kake?', 'Ina kwana', 'Barka'] },
+      ]
+    },
+    proverbs: [
+      { proverb: 'Karamin sani kukumi ne', meaning: 'Little knowledge is dangerous', lesson: 'Seek full understanding' },
+    ],
+    culture: [
+      'Hausa is widely spoken across West Africa',
+      'The Hausa are known for their elaborate Durbar festivals',
+      'Hausa traders have historic trade routes across the Sahel',
+      'Hausa architecture features distinctive mud-brick buildings',
+    ]
+  }
+};
+
+// ==================== SELECTION HANDLERS ====================
+function selectLanguage(element) {
+  document.querySelectorAll('.lang-card').forEach(c => c.classList.remove('selected'));
+  element.classList.add('selected');
+  gameState.selectedLanguage = element.dataset.lang;
+}
+
+function selectDifficulty(element) {
+  document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('selected'));
+  element.classList.add('selected');
+  gameState.difficulty = element.dataset.diff;
+}
+
+function selectQuestType(element) {
+  document.querySelectorAll('.quest-btn').forEach(b => b.classList.remove('selected'));
+  element.classList.add('selected');
+  gameState.questType = element.dataset.quest;
+}
+
+// ==================== SCREEN MANAGEMENT ====================
+function showScreen(screenId) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(screenId).classList.add('active');
+  
+  if (screenId === 'vocabulary-screen') displayVocabulary();
+  if (screenId === 'progress-screen') displayProgress();
+}
+
+// ==================== GAME LOGIC ====================
+function startAdventure() {
+  const lang = gameState.selectedLanguage;
+  gameState.score = 0;
+  gameState.streak = 0;
+  gameState.bestStreak = 0;
+  gameState.lives = 5;
+  gameState.currentQuest = 0;
+  gameState.totalQuests = gameState.difficulty === 'beginner' ? 10 : gameState.difficulty === 'intermediate' ? 15 : 20;
+  gameState.wordsLearned = [];
+  gameState.hintsRemaining = 3;
+  gameState.answered = false;
+
+  document.getElementById('current-lang-name').textContent = languageDB[lang].name;
+  document.getElementById('current-lang-marker').className = `map-marker ${lang}`;
+  
+  updateHUD();
+  showScreen('game-screen');
+  presentQuest();
+}
+
+function presentQuest() {
+  if (gameState.currentQuest >= gameState.totalQuests) {
+    endAdventure();
+    return;
+  }
+
+  gameState.answered = false;
+  const lang = gameState.selectedLanguage;
+  const diff = gameState.difficulty;
+  const langData = languageDB[lang];
+  
+  // Determine quest type
+  let questType;
+  if (gameState.questType === 'all') {
+    const types = ['vocabulary', 'grammar', 'conversation', 'proverb'];
+    questType = types[Math.floor(Math.random() * types.length)];
+  } else {
+    questType = gameState.questType;
+  }
+
+  // Get quest data
+  let questData;
+  switch(questType) {
+    case 'vocabulary':
+      questData = getVocabularyQuest(langData, diff);
+      break;
+    case 'grammar':
+      questData = getGrammarQuest(langData, diff);
+      break;
+    case 'conversation':
+      questData = getConversationQuest(langData, diff);
+      break;
+    case 'proverb':
+      questData = getProverbQuest(langData, diff);
+      break;
+    default:
+      questData = getVocabularyQuest(langData, diff);
+  }
+
+  displayQuest(questData, questType);
+  updateHUD();
+}
+
+function getVocabularyQuest(langData, difficulty) {
+  const vocab = langData.vocabulary[difficulty] || langData.vocabulary.beginner;
+  const word = vocab[Math.floor(Math.random() * vocab.length)];
+  
+  // Generate wrong options
+  const allWords = [...vocab].filter(w => w.native !== word.native);
+  const wrongOptions = allWords.sort(() => Math.random() - 0.5).slice(0, 3).map(w => w.english);
+  
+  return {
+    type: 'vocabulary',
+    context: `What does this word mean?`,
+    target: word.native,
+    pronunciation: word.pronunciation,
+    correct: word.english,
+    options: shuffleArray([word.english, ...wrongOptions]),
+    explanation: `"${word.native}" means "${word.english}". ${word.context}`,
+    cultureNote: langData.culture[Math.floor(Math.random() * langData.culture.length)],
+    wordData: word
+  };
+}
+
+function getGrammarQuest(langData, difficulty) {
+  const grammar = langData.grammar[difficulty] || langData.grammar.beginner;
+  if (!grammar || grammar.length === 0) {
+    return getVocabularyQuest(langData, difficulty);
+  }
+  const quest = grammar[Math.floor(Math.random() * grammar.length)];
+  
+  return {
+    type: 'grammar',
+    context: 'Grammar Challenge',
+    target: quest.question,
+    pronunciation: '',
+    correct: quest.correct,
+    options: quest.options || [quest.correct, ...generateWrongGrammar(quest.correct)],
+    explanation: quest.explanation,
+    cultureNote: 'Grammar is the foundation of language mastery!',
+    wordData: null
+  };
+}
+
+function getConversationQuest(langData, difficulty) {
+  const conv = langData.conversation[difficulty] || langData.conversation.beginner;
+  if (!conv || conv.length === 0) {
+    return getVocabularyQuest(langData, difficulty);
+  }
+  const quest = conv[Math.floor(Math.random() * conv.length)];
+  
+  return {
+    type: 'conversation',
+    context: `🗣️ Scenario: ${quest.scenario}`,
+    target: quest.question,
+    pronunciation: '',
+    correct: quest.correct,
+    options: quest.options || [quest.correct, ...generateWrongOptions(quest.correct)],
+    explanation: `Correct response: "${quest.correct}"`,
+    cultureNote: 'Practice these phrases in real conversations!',
+    wordData: null
+  };
+}
+
+function getProverbQuest(langData, difficulty) {
+  const proverbs = langData.proverbs;
+  if (!proverbs || proverbs.length === 0 || difficulty === 'beginner') {
+    return getVocabularyQuest(langData, difficulty);
+  }
+  const proverb = proverbs[Math.floor(Math.random() * proverbs.length)];
+  
+  const wrongMeanings = ['Good fortune comes to all', 'Patience is always rewarded', 'The early bird catches the worm'];
+  const filtered = wrongMeanings.filter(m => m !== proverb.meaning);
+  
+  return {
+    type: 'proverb',
+    context: '🦉 Traditional Wisdom',
+    target: `"${proverb.proverb}"`,
+    pronunciation: '',
+    correct: proverb.meaning,
+    options: shuffleArray([proverb.meaning, ...filtered.slice(0, 3)]),
+    explanation: `Lesson: ${proverb.lesson}`,
+    cultureNote: 'Ghanaian proverbs carry deep wisdom passed through generations',
+    wordData: null
+  };
+}
+
+function displayQuest(quest, questType) {
+  document.getElementById('quest-type-display').textContent = questType.charAt(0).toUpperCase() + questType.slice(1);
+  document.getElementById('quest-type-display').className = `quest-type-badge ${questType}`;
+  document.getElementById('quest-category').textContent = questType;
+  
+  document.getElementById('context-text').textContent = quest.context;
+  document.getElementById('target-word').textContent = quest.target;
+  document.getElementById('pronunciation-text').textContent = quest.pronunciation ? `(${quest.pronunciation})` : '';
+  
+  const optionsContainer = document.getElementById('options-container');
+  optionsContainer.innerHTML = '';
+  
+  quest.options.forEach((option, index) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = `<span style="font-weight:700;color:var(--text-muted);">${index + 1}.</span> ${option}`;
+    btn.onclick = () => checkAnswer(option, quest, btn);
+    optionsContainer.appendChild(btn);
+  });
+  
+  document.getElementById('feedback-display').textContent = '';
+  document.getElementById('feedback-display').className = 'feedback-area';
+  
+  const cultureNote = document.getElementById('culture-note');
+  cultureNote.classList.remove('show');
+  document.getElementById('culture-text').textContent = quest.cultureNote || '';
+  
+  document.getElementById('quest-progress').textContent = `Quest ${gameState.currentQuest + 1} of ${gameState.totalQuests}`;
+  document.getElementById('progress-bar').style.width = `${(gameState.currentQuest / gameState.totalQuests) * 100}%`;
+  
+  // Store quest data for later use
+  gameState.currentQuestData = quest;
+}
+
+function checkAnswer(selected, quest, clickedBtn) {
+  if (gameState.answered) return;
+  gameState.answered = true;
+  
+  const isCorrect = selected === quest.correct;
+  const allButtons = document.querySelectorAll('.option-btn');
+  
+  allButtons.forEach(btn => {
+    btn.disabled = true;
+    if (btn.textContent.includes(quest.correct)) {
+      btn.classList.add('correct');
+    } else if (btn === clickedBtn && !isCorrect) {
+      btn.classList.add('wrong');
+    } else {
+      btn.classList.add('dimmed');
+    }
+  });
+  
+  const feedback = document.getElementById('feedback-display');
+  
+  if (isCorrect) {
+    gameState.score += gameState.difficulty === 'beginner' ? 10 : gameState.difficulty === 'intermediate' ? 20 : 30;
+    gameState.streak++;
+    if (gameState.streak > gameState.bestStreak) {
+      gameState.bestStreak = gameState.streak;
+    }
+    
+    // Add word to learned list if it's a vocabulary quest
+    if (quest.wordData && !gameState.wordsLearned.find(w => w.native === quest.wordData.native)) {
+      gameState.wordsLearned.push(quest.wordData);
+    }
+    
+    feedback.textContent = `✅ Correct! ${quest.explanation}`;
+    feedback.className = 'feedback-area correct';
+    
+    // Show culture note
+    document.getElementById('culture-note').classList.add('show');
+    
+    // Confetti for streaks
+    if (gameState.streak >= 5) {
+      confetti.addConfetti({ particleCount: 50, spread: 60 });
+    }
+    
+    // Check achievements
+    checkAchievements();
+    
+  } else {
+    gameState.streak = 0;
+    gameState.lives = Math.max(0, gameState.lives - 1);
+    
+    feedback.textContent = `❌ Not quite! The correct answer is: ${quest.correct}. ${quest.explanation}`;
+    feedback.className = 'feedback-area wrong';
+    
+    if (gameState.lives <= 0) {
+      setTimeout(() => endAdventure(), 2000);
+      return;
+    }
+  }
+  
+  updateHUD();
+  
+  setTimeout(() => {
+    gameState.currentQuest++;
+    presentQuest();
+  }, 2500);
+}
+
+function useHint() {
+  if (gameState.hintsRemaining <= 0 || gameState.answered) return;
+  
+  gameState.hintsRemaining--;
+  document.getElementById('hints-remaining').textContent = `(${gameState.hintsRemaining})`;
+  
+  // Remove one wrong answer
+  const buttons = [...document.querySelectorAll('.option-btn:not(:disabled)')];
+  const wrongButtons = buttons.filter(b => !b.textContent.includes(gameState.currentQuestData.correct));
+  
+  if (wrongButtons.length > 0) {
+    const toRemove = wrongButtons[Math.floor(Math.random() * wrongButtons.length)];
+    toRemove.classList.add('dimmed');
+    toRemove.disabled = true;
+    
+    const feedback = document.getElementById('feedback-display');
+    feedback.textContent = '💡 Hint: One wrong answer has been removed!';
+    feedback.className = 'feedback-area';
+  }
+}
+
+function speakWord() {
+  const word = document.getElementById('target-word').textContent;
+  if ('speechSynthesis' in window) {
+    const utterance = new SpeechSynthesisUtterance(word);
+    utterance.rate = 0.8;
+    utterance.pitch = 1;
+    
+    // Try to use appropriate voice based on language
+    const voices = speechSynthesis.getVoices();
+    const langVoice = voices.find(v => v.lang.startsWith('en'));
+    if (langVoice) utterance.voice = langVoice;
+    
+    speechSynthesis.speak(utterance);
+  } else {
+    alert('Speech synthesis not supported in your browser');
+  }
+}
+
+function toggleRecording() {
+  const recordBtn = document.getElementById('record-btn');
+  
+  if (!gameState.isRecording) {
+    // Start recording
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(stream => {
+          gameState.mediaRecorder = new MediaRecorder(stream);
+          gameState.audioChunks = [];
+          
+          gameState.mediaRecorder.ondataavailable = event => {
+            gameState.audioChunks.push(event.data);
+          };
+          
+          gameState.mediaRecorder.onstop = () => {
+            const audioBlob = new Blob(gameState.audioChunks, { type: 'audio/wav' });
+            const audioUrl = URL.createObjectURL(audioBlob);
+            const audio = new Audio(audioUrl);
+            
+            // Play back the recording
+            audio.play();
+            
+            const feedback = document.getElementById('feedback-display');
+            feedback.textContent = '🎤 Great effort! Keep practicing your pronunciation.';
+            feedback.className = 'feedback-area correct';
+          };
+          
+          gameState.mediaRecorder.start();
+          gameState.isRecording = true;
+          recordBtn.classList.add('recording');
+          recordBtn.textContent = '⏹️ Stop Recording';
+        })
+        .catch(err => {
+          console.error('Error accessing microphone:', err);
+          alert('Unable to access microphone. Please check your permissions.');
+        });
+    } else {
+      alert('Speech recording not supported in your browser');
+    }
+  } else {
+    // Stop recording
+    gameState.mediaRecorder.stop();
+    gameState.isRecording = false;
+    recordBtn.classList.remove('recording');
+    recordBtn.textContent = '🎤 Practice Pronunciation';
+    
+    // Stop all tracks
+    gameState.mediaRecorder.stream.getTracks().forEach(track => track.stop());
+  }
+}
+
+function checkAchievements() {
+  const achievements = [];
+  
+  if (gameState.wordsLearned.length >= 10) {
+    achievements.push({ icon: '📚', title: 'Word Collector', desc: 'Learned 10 new words!' });
+  }
+  
+  if (gameState.bestStreak >= 7) {
+    achievements.push({ icon: '🔥', title: 'Unstoppable', desc: '7 correct answers in a row!' });
+  }
+  
+  if (gameState.score >= 100) {
+    achievements.push({ icon: '⭐', title: 'Century Club', desc: 'Reached 100 points!' });
+  }
+  
+  if (achievements.length > 0) {
+    const achievement = achievements[achievements.length - 1];
+    showAchievement(achievement.icon, achievement.title, achievement.desc);
+  }
+}
+
+function showAchievement(icon, title, desc) {
+  const toast = document.getElementById('achievement-toast');
+  document.getElementById('toast-icon').textContent = icon;
+  document.getElementById('toast-title').textContent = title;
+  document.getElementById('toast-desc').textContent = desc;
+  
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+function updateHUD() {
+  document.getElementById('score-display').textContent = gameState.score;
+  document.getElementById('streak-display').textContent = gameState.streak;
+  document.getElementById('lives-display').textContent = '❤️'.repeat(gameState.lives) + '🖤'.repeat(5 - gameState.lives);
+  document.getElementById('words-learned-display').textContent = gameState.wordsLearned.length;
+  document.getElementById('hints-remaining').textContent = `(${gameState.hintsRemaining})`;
+}
+
+function endAdventure() {
+  confetti.addConfetti({ particleCount: 150, spread: 80 });
+  
+  // Save progress
+  saveProgress();
+  
+  setTimeout(() => {
+    showScreen('progress-screen');
+  }, 2000);
+}
+
+// ==================== VOCABULARY DISPLAY ====================
+function displayVocabulary() {
+  const filter = document.getElementById('vocab-filter')?.value || 'all';
+  const container = document.getElementById('vocab-list');
+  const countDisplay = document.getElementById('vocab-count');
+  
+  let words = [];
+  if (filter === 'all') {
+    Object.values(languageDB).forEach(langData => {
+      Object.values(langData.vocabulary).forEach(vocabList => {
+        words.push(...vocabList);
+      });
+    });
+  } else {
+    const langData = languageDB[filter];
+    if (langData) {
+      Object.values(langData.vocabulary).forEach(vocabList => {
+        words.push(...vocabList.map(w => ({...w, language: filter})));
+      });
+    }
+  }
+  
+  container.innerHTML = words.map(word => {
+    const isLearned = gameState.wordsLearned.some(w => w.native === word.native);
+    return `
+      <div class="vocab-item ${isLearned ? 'learned' : ''}">
+        <div>
+          <div class="vi-native">${word.native}</div>
+          <div class="vi-english">${word.english} ${word.pronunciation ? `(${word.pronunciation})` : ''}</div>
+        </div>
+        <div class="vi-status ${isLearned ? 'learned' : 'new'}">
+          ${isLearned ? '✓ Learned' : 'New'}
+        </div>
+      </div>
+    `;
+  }).join('');
+  
+  countDisplay.textContent = `${words.length} words available · ${gameState.wordsLearned.length} learned`;
+}
+
+// ==================== PROGRESS DISPLAY ====================
+function displayProgress() {
+  const statsContainer = document.getElementById('progress-stats');
+  const langProgressContainer = document.getElementById('language-progress');
+  const achievementsContainer = document.getElementById('achievements-list');
+  
+  // Overall stats
+  statsContainer.innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:0.8rem;">
+      <div style="background:var(--surface2);padding:1rem;border-radius:12px;text-align:center;">
+        <div style="font-size:1.5rem;font-weight:800;color:var(--ghana-gold);">${gameState.score}</div>
+        <div style="font-size:0.8rem;color:var(--text-muted);">Total Points</div>
+      </div>
+      <div style="background:var(--surface2);padding:1rem;border-radius:12px;text-align:center;">
+        <div style="font-size:1.5rem;font-weight:800;color:var(--correct);">${gameState.wordsLearned.length}</div>
+        <div style="font-size:0.8rem;color:var(--text-muted);">Words Learned</div>
+      </div>
+      <div style="background:var(--surface2);padding:1rem;border-radius:12px;text-align:center;">
+        <div style="font-size:1.5rem;font-weight:800;color:#fbbf24;">${gameState.bestStreak}</div>
+        <div style="font-size:0.8rem;color:var(--text-muted);">Best Streak</div>
+      </div>
+      <div style="background:var(--surface2);padding:1rem;border-radius:12px;text-align:center;">
+        <div style="font-size:1.5rem;font-weight:800;color:var(--accent);">${gameState.difficulty}</div>
+        <div style="font-size:0.8rem;color:var(--text-muted);">Level</div>
+      </div>
+    </div>
+  `;
+  
+  // Language progress bars
+  langProgressContainer.innerHTML = Object.entries(languageDB).map(([key, langData]) => {
+    const totalWords = Object.values(langData.vocabulary).flat().length;
+    const learned = gameState.wordsLearned.filter(w => 
+      Object.values(langData.vocabulary).flat().some(v => v.native === w.native)
+    ).length;
+    const percent = totalWords > 0 ? Math.round((learned / totalWords) * 100) : 0;
+    
+    return `
+      <div style="margin-bottom:0.8rem;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:0.3rem;">
+          <span style="font-weight:600;"><span class="map-marker ${key}"></span>${langData.name}</span>
+          <span style="color:var(--text-muted);">${learned}/${totalWords} words</span>
+        </div>
+        <div style="height:6px;background:var(--surface2);border-radius:999px;overflow:hidden;">
+          <div style="height:100%;width:${percent}%;background:linear-gradient(90deg,var(--correct),var(--accent));border-radius:999px;transition:width 1s;"></div>
+        </div>
+      </div>
+    `;
+  }).join('');
+  
+  // Achievements
+  const achievements = [];
+  if (gameState.wordsLearned.length >= 5) achievements.push('📚 First Words: Learned 5 words');
+  if (gameState.wordsLearned.length >= 20) achievements.push('📚 Word Master: Learned 20 words');
+  if (gameState.bestStreak >= 5) achievements.push('🔥 Hot Streak: 5 correct in a row');
+  if (gameState.bestStreak >= 10) achievements.push('🔥 Legendary Streak: 10 correct in a row');
+  if (gameState.score >= 50) achievements.push('⭐ Rising Star: 50 points earned');
+  if (gameState.score >= 200) achievements.push('⭐ Language Champion: 200 points');
+  
+  achievementsContainer.innerHTML = achievements.length > 0 
+    ? achievements.map(a => `
+        <div style="background:var(--surface2);padding:0.8rem;border-radius:10px;margin-bottom:0.5rem;font-size:0.9rem;">
+          ${a}
+        </div>
+      `).join('')
+    : '<p style="color:var(--text-muted);">Complete quests to earn achievements!</p>';
+}
+
+// ==================== PROGRESS SAVING ====================
+function saveProgress() {
+  const progress = {
+    score: gameState.score,
+    wordsLearned: gameState.wordsLearned,
+    bestStreak: gameState.bestStreak,
+    difficulty: gameState.difficulty,
+    language: gameState.selectedLanguage
+  };
+  
+  localStorage.setItem('ghanaLanguageQuest', JSON.stringify(progress));
+}
+
+function loadProgress() {
+  const saved = localStorage.getItem('ghanaLanguageQuest');
+  if (saved) {
+    const progress = JSON.parse(saved);
+    gameState.score = progress.score || 0;
+    gameState.wordsLearned = progress.wordsLearned || [];
+    gameState.bestStreak = progress.bestStreak || 0;
+    gameState.difficulty = progress.difficulty || 'beginner';
+    gameState.selectedLanguage = progress.language || 'twi';
+  }
+}
+
+// ==================== UTILITY FUNCTIONS ====================
+function shuffleArray(array) {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
+function generateWrongOptions(correct) {
+  const wrongs = ['Incorrect option A', 'Wrong answer B', 'Not correct C'];
+  return wrongs.filter(w => w !== correct).slice(0, 3);
+}
+
+function generateWrongGrammar(correct) {
+  const grammarOptions = ['Noun', 'Verb', 'Adjective', 'Pronoun', 'Adverb'];
+  return grammarOptions.filter(g => g !== correct).slice(0, 3);
+}
+
+// ==================== KEYBOARD SHORTCUTS ====================
+document.addEventListener('keydown', (e) => {
+  const gameScreen = document.getElementById('game-screen');
+  if (!gameScreen.classList.contains('active')) return;
+  
+  const keys = ['1', '2', '3', '4'];
+  const index = keys.indexOf(e.key);
+  
+  if (index !== -1) {
+    const buttons = document.querySelectorAll('.option-btn:not(:disabled)');
+    if (buttons[index]) {
+      buttons[index].click();
+    }
+  }
+  
+  if (e.key === 'l' || e.key === 'L') {
+    speakWord();
+  }
+  
+  if (e.key === 'h' || e.key === 'H') {
+    useHint();
+  }
+});
+
+// ==================== BACKGROUND ANIMATION ====================
+(function initBackground() {
+  const canvas = document.getElementById('bg-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H;
+  const particles = [];
+
+  function resize() {
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  // Create particles with Ghana flag colors
+  const colors = ['#CE1126', '#FCD116', '#006B3F', '#E67E22', '#3498DB', '#27AE60', '#8E44AD'];
+  
+  for (let i = 0; i < 70; i++) {
+    particles.push({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      r: Math.random() * 2 + 0.5,
+      vx: (Math.random() - 0.5) * 0.4,
+      vy: (Math.random() - 0.5) * 0.4,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      alpha: Math.random() * 0.5 + 0.2
+    });
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    particles.forEach(p => {
+      p.x += p.vx;
+      p.y += p.vy;
+      
+      if (p.x < 0) p.x = W;
+      if (p.x > W) p.x = 0;
+      if (p.y < 0) p.y = H;
+      if (p.y > H) p.y = 0;
+      
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = p.color.replace(')', `, ${p.alpha})`).replace('rgb', 'rgba');
+      if (p.color.startsWith('#')) {
+        const hex = p.color.replace('#', '');
+        const r = parseInt(hex.substring(0, 2), 16);
+        const g = parseInt(hex.substring(2, 4), 16);
+        const b = parseInt(hex.substring(4, 6), 16);
+        ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${p.alpha})`;
+      }
+      ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ==================== INITIALIZATION ====================
+window.onload = function() {
+  loadProgress();
+  
+  // Initialize voice list
+  if ('speechSynthesis' in window) {
+    speechSynthesis.getVoices();
+  }
+  
+  // Pre-select first language
+  document.querySelector('.lang-card.twi').classList.add('selected');
+  
+  console.log('🌍 Ghana Language Quest initialized!');
+  console.log('📚 Learn Twi, Ga, Ewe, and Hausa');
+  console.log('🎮 Features: Vocabulary, Grammar, Conversation, Proverbs');
+  console.log('🎤 Voice recording and playback enabled');
+  console.log('💡 Hint system and keyboard shortcuts available');
+};
+</script>
+</body>
+</html>

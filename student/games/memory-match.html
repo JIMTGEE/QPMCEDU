@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Match Mastery — Ghana Edition</title>
+    <script src="https://cdn.jsdelivr.net/npm/js-confetti@0.12.0/dist/js-confetti.browser.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #FF6B35;
+            --primary-dark: #E55A2B;
+            --secondary: #0F172A;
+            --surface: #1E293B;
+            --surface-light: #334155;
+            --text: #F1F5F9;
+            --text-muted: #94A3B8;
+            --accent-gold: #F59E0B;
+            --accent-green: #10B981;
+            --accent-red: #EF4444;
+            --accent-blue: #3B82F6;
+            --accent-purple: #8B5CF6;
+            --accent-pink: #EC4899;
+            --glass-bg: rgba(30, 41, 59, 0.85);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --radius: 24px;
+            --radius-sm: 14px;
+            --shadow-lg: 0 25px 50px rgba(0,0,0,0.5);
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--secondary);
+            font-family: 'Nunito', sans-serif;
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated Background */
+        .bg-particles {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            animation: floatUp 8s ease-in infinite;
+            opacity: 0;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(100vh) scale(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+        }
+
+        /* Main Container */
+        .main-container {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .game-wrapper {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 30px;
+            padding: 2.5rem;
+            max-width: 1000px;
+            width: 100%;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-wrapper::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #FF6B35, #F59E0B, #10B981, #3B82F6, #8B5CF6);
+            animation: gradientShift 3s ease infinite;
+        }
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        /* Typography */
+        .game-title {
+            font-family: 'Fredoka One', cursive;
+            font-size: clamp(2rem, 4vw, 2.8rem);
+            background: linear-gradient(135deg, #FF6B35, #F59E0B, #10B981);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .game-subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 1.05rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            font-family: 'Nunito', sans-serif;
+            font-weight: 800;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 0; height: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        .btn:hover::after {
+            width: 300px; height: 300px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #FF6B35, #FF8C42);
+            color: white;
+            box-shadow: 0 5px 20px rgba(255,107,53,0.4);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(255,107,53,0.6);
+        }
+        .btn-secondary {
+            background: var(--surface-light);
+            color: var(--text);
+            border: 1px solid var(--glass-border);
+        }
+        .btn-secondary:hover {
+            background: var(--surface);
+            transform: translateY(-2px);
+        }
+        .btn-success {
+            background: linear-gradient(135deg, #10B981, #059669);
+            color: white;
+        }
+        .btn-danger {
+            background: linear-gradient(135deg, #EF4444, #DC2626);
+            color: white;
+        }
+
+        /* Select */
+        .custom-select {
+            background: var(--surface);
+            border: 2px solid var(--glass-border);
+            border-radius: 50px;
+            padding: 0.8rem 1.5rem;
+            color: var(--text);
+            font-family: 'Nunito', sans-serif;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            outline: none;
+            transition: var(--transition);
+            width: 100%;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+        }
+        .custom-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(255,107,53,0.1);
+        }
+
+        /* Stats Bar */
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-sm);
+            padding: 0.8rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+        }
+        .stat-card.score::before { background: var(--accent-gold); }
+        .stat-card.matches::before { background: var(--accent-green); }
+        .stat-card.streak::before { background: var(--accent-red); }
+        .stat-card.timer::before { background: var(--accent-blue); }
+        .stat-value {
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.6rem;
+            margin-bottom: 0.1rem;
+        }
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            background: var(--surface-light);
+            border-radius: 50px;
+            height: 12px;
+            margin: 1rem 0;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #FF6B35, #F59E0B, #10B981);
+            border-radius: 50px;
+            transition: width 0.5s ease;
+            position: relative;
+        }
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* Card Grid */
+        .memory-grid {
+            display: grid;
+            gap: 0.7rem;
+            justify-content: center;
+            margin: 1.5rem auto;
+            perspective: 1000px;
+        }
+        .memory-grid.easy { grid-template-columns: repeat(4, 1fr); max-width: 500px; }
+        .memory-grid.medium { grid-template-columns: repeat(6, 1fr); max-width: 700px; }
+        .memory-grid.hard { grid-template-columns: repeat(8, 1fr); max-width: 900px; }
+
+        /* Memory Card */
+        .memory-card {
+            aspect-ratio: 3/4;
+            cursor: pointer;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .memory-card.flipped {
+            transform: rotateY(180deg);
+        }
+        .memory-card.matched {
+            transform: rotateY(180deg) scale(1.05);
+            animation: matchBounce 0.6s ease;
+        }
+        @keyframes matchBounce {
+            0% { transform: rotateY(180deg) scale(1); }
+            40% { transform: rotateY(180deg) scale(1.15); }
+            70% { transform: rotateY(180deg) scale(0.95); }
+            100% { transform: rotateY(180deg) scale(1.05); }
+        }
+
+        .card-face {
+            position: absolute;
+            inset: 0;
+            backface-visibility: hidden;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem;
+            border: 2px solid var(--glass-border);
+        }
+        .card-front {
+            background: var(--surface-light);
+            font-size: 2rem;
+        }
+        .card-back {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            transform: rotateY(180deg);
+            font-weight: 700;
+            font-size: 0.8rem;
+            text-align: center;
+            line-height: 1.3;
+        }
+        .card-back.term-card {
+            background: linear-gradient(135deg, #8B5CF6, #6D28D9);
+            font-size: 0.9rem;
+            font-weight: 800;
+        }
+        .card-back.def-card {
+            background: linear-gradient(135deg, #06B6D4, #0891B2);
+            font-size: 0.7rem;
+        }
+
+        /* Theme-specific card colors */
+        .theme-science .card-back.term-card { background: linear-gradient(135deg, #10B981, #059669); }
+        .theme-science .card-back.def-card { background: linear-gradient(135deg, #34D399, #10B981); }
+        .theme-english .card-back.term-card { background: linear-gradient(135deg, #3B82F6, #1D4ED8); }
+        .theme-english .card-back.def-card { background: linear-gradient(135deg, #60A5FA, #3B82F6); }
+        .theme-history .card-back.term-card { background: linear-gradient(135deg, #F59E0B, #D97706); }
+        .theme-history .card-back.def-card { background: linear-gradient(135deg, #FBBF24, #F59E0B); }
+        .theme-wellbeing .card-back.term-card { background: linear-gradient(135deg, #EC4899, #BE185D); }
+        .theme-wellbeing .card-back.def-card { background: linear-gradient(135deg, #F472B6, #EC4899); }
+
+        .theme-science .memory-card.matched .card-back { box-shadow: 0 0 20px rgba(16, 185, 129, 0.5); }
+        .theme-english .memory-card.matched .card-back { box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); }
+        .theme-history .memory-card.matched .card-back { box-shadow: 0 0 20px rgba(245, 158, 11, 0.5); }
+        .theme-wellbeing .memory-card.matched .card-back { box-shadow: 0 0 20px rgba(236, 72, 153, 0.5); }
+
+        /* Feedback Toast */
+        .feedback-toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--surface);
+            border: 2px solid var(--glass-border);
+            border-radius: 50px;
+            padding: 1rem 2rem;
+            font-weight: 800;
+            font-size: 1rem;
+            z-index: 1000;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .feedback-toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+        .feedback-toast.success {
+            border-color: var(--accent-green);
+            background: rgba(16, 185, 129, 0.2);
+        }
+        .feedback-toast.error {
+            border-color: var(--accent-red);
+            background: rgba(239, 68, 68, 0.2);
+        }
+
+        /* Achievement Popup */
+        .achievement-popup {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            z-index: 1000;
+            background: linear-gradient(135deg, var(--accent-gold), #F59E0B);
+            color: #1a1a2e;
+            padding: 1rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 800;
+            font-family: 'Fredoka One', cursive;
+            box-shadow: 0 10px 40px rgba(245, 158, 11, 0.5);
+            animation: slideInRight 0.5s ease, slideOutRight 0.5s 2.5s forwards;
+        }
+        @keyframes slideInRight {
+            from { transform: translateX(120%); }
+            to { transform: translateX(0); }
+        }
+        @keyframes slideOutRight {
+            from { transform: translateX(0); }
+            to { transform: translateX(120%); }
+        }
+
+        /* High Scores */
+        .score-item {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-sm);
+            padding: 1rem 1.5rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: var(--transition);
+        }
+        .score-item:hover {
+            transform: translateX(5px);
+            border-color: var(--accent-gold);
+        }
+        .score-rank {
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 900;
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.2rem;
+        }
+        .score-rank.gold { background: linear-gradient(135deg, #F59E0B, #D97706); color: white; }
+        .score-rank.silver { background: linear-gradient(135deg, #94A3B8, #64748B); color: white; }
+        .score-rank.bronze { background: linear-gradient(135deg, #B45309, #92400E); color: white; }
+
+        /* Dark Mode Toggle */
+        .dark-toggle {
+            position: fixed;
+            top: 1.5rem; right: 1.5rem;
+            z-index: 100;
+            width: 50px; height: 50px;
+            border-radius: 50%;
+            background: var(--surface);
+            border: 2px solid var(--glass-border);
+            color: var(--text);
+            font-size: 1.3rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .dark-toggle:hover {
+            transform: scale(1.1) rotate(15deg);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+
+        @media (max-width: 768px) {
+            .game-wrapper { padding: 1.5rem; }
+            .memory-grid.easy { grid-template-columns: repeat(4, 1fr); }
+            .memory-grid.medium { grid-template-columns: repeat(4, 1fr); }
+            .memory-grid.hard { grid-template-columns: repeat(4, 1fr); }
+            .card-back { font-size: 0.65rem !important; }
+            .card-back.term-card { font-size: 0.75rem !important; }
+            .stats-bar { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 480px) {
+            .memory-grid.easy,
+            .memory-grid.medium,
+            .memory-grid.hard { grid-template-columns: repeat(3, 1fr); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Particles -->
+    <div class="bg-particles" id="bgParticles"></div>
+
+    <!-- Dark Mode Toggle -->
+    <button class="dark-toggle" onclick="toggleDarkMode()" title="Toggle Dark Mode">🌙</button>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Menu Screen -->
+        <div id="menu-screen" class="game-wrapper">
+            <h1 class="game-title">🧠 Memory Match Mastery</h1>
+            <p class="game-subtitle">Flip cards & match terms with definitions! Ghanaian-inspired learning themes.</p>
+            
+            <div style="margin-bottom:1.5rem;">
+                <label style="display:block;font-weight:700;margin-bottom:0.5rem;color:var(--text-muted);">Select Theme</label>
+                <select id="theme-select" class="custom-select">
+                    <option value="science">🔬 Science Vocabulary</option>
+                    <option value="english">📖 English Terms</option>
+                    <option value="history">🏛️ Ghanaian History</option>
+                    <option value="wellbeing">🧘 Wellbeing Concepts</option>
+                </select>
+            </div>
+
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem;margin-bottom:1.5rem;">
+                <button onclick="startGame('easy')" class="btn btn-success">
+                    🌱 Easy<br><small style="font-size:0.65rem;">4×4 · 8 Pairs</small>
+                </button>
+                <button onclick="startGame('medium')" class="btn btn-primary">
+                    ⚡ Medium<br><small style="font-size:0.65rem;">6×6 · 18 Pairs</small>
+                </button>
+                <button onclick="startGame('hard')" class="btn btn-danger">
+                    🔥 Hard<br><small style="font-size:0.65rem;">8×8 · 32 Pairs</small>
+                </button>
+            </div>
+
+            <div style="display:flex;gap:0.75rem;">
+                <button onclick="showHighScores()" class="btn btn-secondary" style="flex:1;">
+                    🏆 High Scores
+                </button>
+                <button onclick="showInstructions()" class="btn btn-secondary" style="flex:1;">
+                    📖 How to Play
+                </button>
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="game-screen" class="game-wrapper" style="display:none;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem;">
+                <h2 style="font-family:'Fredoka One',cursive;font-size:1.3rem;">
+                    <span id="current-theme-icon"></span> <span id="current-theme"></span>
+                </h2>
+                <span class="btn btn-secondary" style="font-size:0.75rem;padding:0.3rem 0.8rem;">
+                    <span id="current-difficulty"></span>
+                </span>
+            </div>
+
+            <!-- Stats Bar -->
+            <div class="stats-bar">
+                <div class="stat-card score">
+                    <div class="stat-value" id="score" style="color:var(--accent-gold);">0</div>
+                    <div class="stat-label">Points</div>
+                </div>
+                <div class="stat-card matches">
+                    <div class="stat-value" id="matches" style="color:var(--accent-green);">0/<span id="total-pairs">8</span></div>
+                    <div class="stat-label">Matched</div>
+                </div>
+                <div class="stat-card streak">
+                    <div class="stat-value" id="streak" style="color:var(--accent-red);">0</div>
+                    <div class="stat-label">Streak 🔥</div>
+                </div>
+                <div class="stat-card timer">
+                    <div class="stat-value" id="timer" style="color:var(--accent-blue);">120</div>
+                    <div class="stat-label">Seconds</div>
+                </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="progress-container">
+                <div class="progress-fill" id="progress-fill" style="width:0%;"></div>
+            </div>
+
+            <!-- Memory Grid -->
+            <div class="memory-grid" id="memory-grid"></div>
+
+            <div style="display:flex;gap:0.75rem;margin-top:1.5rem;justify-content:center;">
+                <button onclick="backToMenu()" class="btn btn-secondary">↩️ Back</button>
+                <button onclick="reshuffleCards()" class="btn btn-secondary">🎲 Reshuffle</button>
+            </div>
+        </div>
+
+        <!-- High Scores Screen -->
+        <div id="scores-screen" class="game-wrapper" style="display:none;">
+            <h1 class="game-title">🏆 Hall of Fame</h1>
+            <div id="scores-list" style="margin:1.5rem 0;"></div>
+            <button onclick="backToMenu()" class="btn btn-secondary" style="width:100%;">↩️ Back to Menu</button>
+        </div>
+    </div>
+
+    <!-- Feedback Toast -->
+    <div class="feedback-toast" id="feedback-toast"></div>
+
+    <script>
+        const confetti = new JSConfetti();
+        
+        // Game State
+        let cards = [], selectedCards = [], matchedPairs = 0, totalPairs = 8;
+        let score = 0, streak = 0, bestStreak = 0, timeLeft = 120;
+        let currentTheme = 'science', currentDifficulty = 'easy';
+        let timerInterval, isProcessing = false;
+
+        // Theme Icons
+        const themeIcons = {
+            science: '🔬', english: '📖', history: '🏛️', wellbeing: '🧘'
+        };
+
+        // Enhanced Card Data
+        const themeData = {
+            science: [
+                { term: 'Photosynthesis', def: 'Plants convert sunlight to energy' },
+                { term: 'Gravity', def: 'Force pulling objects together' },
+                { term: 'Atom', def: 'Smallest unit of matter' },
+                { term: 'DNA', def: 'Molecule carrying genetic info' },
+                { term: 'Ecosystem', def: 'Community of living organisms' },
+                { term: 'Volcano', def: 'Mountain erupting lava' },
+                { term: 'Magnetism', def: 'Force of attraction/repulsion' },
+                { term: 'Cell', def: 'Basic unit of life' },
+                { term: 'Circuit', def: 'Path for electric current' },
+                { term: 'Friction', def: 'Force opposing motion' },
+                { term: 'Habitat', def: 'Natural home of organism' },
+                { term: 'Inertia', def: 'Resistance to change in motion' },
+                { term: 'Osmosis', def: 'Water movement through membrane' },
+                { term: 'Neuron', def: 'Nerve cell' },
+                { term: 'Molecule', def: 'Group of bonded atoms' },
+                { term: 'Biology', def: 'Study of life' },
+                { term: 'Chemistry', def: 'Study of matter' },
+                { term: 'Physics', def: 'Study of energy & matter' },
+                { term: 'Astronomy', def: 'Study of stars & space' },
+                { term: 'Geology', def: 'Study of Earth' },
+                { term: 'Ecology', def: 'Study of environments' },
+                { term: 'Genetics', def: 'Study of heredity' },
+                { term: 'Quantum', def: 'Physics of tiny particles' },
+                { term: 'Thermodynamics', def: 'Study of heat & energy' },
+                { term: 'Optics', def: 'Study of light' },
+                { term: 'Acoustics', def: 'Study of sound' },
+                { term: 'Botany', def: 'Study of plants' },
+                { term: 'Zoology', def: 'Study of animals' },
+                { term: 'Virology', def: 'Study of viruses' },
+                { term: 'Immunology', def: 'Study of immune system' },
+                { term: 'Algebra', def: 'Math with variables' },
+                { term: 'Geometry', def: 'Study of shapes' }
+            ],
+            english: [
+                { term: 'Metaphor', def: 'Comparison without like/as' },
+                { term: 'Simile', def: 'Comparison using like or as' },
+                { term: 'Alliteration', def: 'Repeated initial sounds' },
+                { term: 'Onomatopoeia', def: 'Word imitating sound' },
+                { term: 'Hyperbole', def: 'Exaggeration for effect' },
+                { term: 'Personification', def: 'Human traits to non-humans' },
+                { term: 'Idiom', def: 'Figurative expression' },
+                { term: 'Synonym', def: 'Word with similar meaning' },
+                { term: 'Antonym', def: 'Word with opposite meaning' },
+                { term: 'Noun', def: 'Person, place, or thing' },
+                { term: 'Verb', def: 'Action word' },
+                { term: 'Adjective', def: 'Describes a noun' },
+                { term: 'Adverb', def: 'Describes a verb' },
+                { term: 'Pronoun', def: 'Replaces a noun' },
+                { term: 'Preposition', def: 'Shows relationship' },
+                { term: 'Conjunction', def: 'Joins words/phrases' },
+                { term: 'Irony', def: 'Opposite of expected' },
+                { term: 'Satire', def: 'Mocking through writing' },
+                { term: 'Allegory', def: 'Symbolic story' },
+                { term: 'Protagonist', def: 'Main character' },
+                { term: 'Antagonist', def: 'Opposing character' },
+                { term: 'Climax', def: 'Turning point in story' },
+                { term: 'Foreshadowing', def: 'Hint of future events' },
+                { term: 'Symbolism', def: 'Using symbols to represent' },
+                { term: 'Tone', def: 'Author\'s attitude' },
+                { term: 'Mood', def: 'Atmosphere of writing' },
+                { term: 'Sonnet', def: '14-line poem' },
+                { term: 'Haiku', def: '3-line Japanese poem' },
+                { term: 'Dialogue', def: 'Character conversation' },
+                { term: 'Monologue', def: 'Extended speech' },
+                { term: 'Fiction', def: 'Imaginary story' },
+                { term: 'Biography', def: 'Life story of someone' }
+            ],
+            history: [
+                { term: 'Ashanti', def: 'Powerful Ghanaian kingdom' },
+                { term: 'Nkrumah', def: 'First president of Ghana' },
+                { term: 'Independence', def: 'Ghana gained in 1957' },
+                { term: 'Gold Coast', def: 'Former name of Ghana' },
+                { term: 'Accra', def: 'Capital city of Ghana' },
+                { term: 'Kente', def: 'Traditional Ghanaian cloth' },
+                { term: 'Ananse', def: 'Folktale spider trickster' },
+                { term: 'Yaa Asantewaa', def: 'Ashanti queen warrior' },
+                { term: 'Cocoa', def: 'Major Ghanaian export' },
+                { term: 'Lake Volta', def: 'Largest man-made lake' },
+                { term: 'Black Star', def: 'Symbol on Ghana flag' },
+                { term: 'Pan-Africanism', def: 'Unity movement led by Nkrumah' },
+                { term: 'Adinkra', def: 'Symbolic prints' },
+                { term: 'Sankofa', def: 'Learning from the past' },
+                { term: 'Big Six', def: 'Independence movement leaders' },
+                { term: 'Highlife', def: 'Traditional Ghanaian music' },
+                { term: 'Jollof Rice', def: 'Popular West African dish' },
+                { term: 'Fufu', def: 'Staple Ghanaian food' },
+                { term: 'Banku', def: 'Fermented corn dish' },
+                { term: 'Kenkey', def: 'Fermented maize dough' },
+                { term: 'Akosombo Dam', def: 'Created Lake Volta' },
+                { term: 'Cape Coast Castle', def: 'Historic slave trade site' },
+                { term: 'Elmina Castle', def: 'Oldest European building in Africa' },
+                { term: 'Mole Park', def: 'National park with elephants' },
+                { term: 'Kakum Park', def: 'Famous canopy walkway' },
+                { term: 'Azonto', def: 'Popular dance style' },
+                { term: 'Hiplife', def: 'Modern Ghanaian music genre' },
+                { term: 'Kelewele', def: 'Spicy fried plantains' },
+                { term: 'Waakye', def: 'Rice and beans dish' },
+                { term: 'Kente Weaving', def: 'Traditional cloth making' },
+                { term: 'Ewe', def: 'Ethnic group in Volta region' },
+                { term: 'Ga', def: 'People of Greater Accra' }
+            ],
+            wellbeing: [
+                { term: 'Mindfulness', def: 'Being present in the moment' },
+                { term: 'Meditation', def: 'Practice for mental clarity' },
+                { term: 'Yoga', def: 'Physical & mental exercise' },
+                { term: 'Gratitude', def: 'Appreciating what you have' },
+                { term: 'Resilience', def: 'Bouncing back from setbacks' },
+                { term: 'Empathy', def: 'Understanding others feelings' },
+                { term: 'Self-Care', def: 'Taking care of oneself' },
+                { term: 'Stress Management', def: 'Handling life pressures' },
+                { term: 'Sleep Hygiene', def: 'Good sleep habits' },
+                { term: 'Nutrition', def: 'Healthy eating practices' },
+                { term: 'Exercise', def: 'Physical activity for health' },
+                { term: 'Hydration', def: 'Drinking enough water' },
+                { term: 'Journaling', def: 'Writing thoughts & feelings' },
+                { term: 'Boundaries', def: 'Setting personal limits' },
+                { term: 'Compassion', def: 'Kindness to self & others' },
+                { term: 'Balance', def: 'Harmony in life areas' },
+                { term: 'Patience', def: 'Waiting without frustration' },
+                { term: 'Confidence', def: 'Belief in oneself' },
+                { term: 'Integrity', def: 'Being honest & principled' },
+                { term: 'Perseverance', def: 'Persistence despite obstacles' },
+                { term: 'Optimism', def: 'Positive outlook on life' },
+                { term: 'Forgiveness', def: 'Letting go of resentment' },
+                { term: 'Creativity', def: 'Expressing new ideas' },
+                { term: 'Goal Setting', def: 'Planning future achievements' },
+                { term: 'Time Management', def: 'Organizing time effectively' },
+                { term: 'Self-Esteem', def: 'Sense of self-worth' },
+                { term: 'Active Listening', def: 'Fully focusing on speaker' },
+                { term: 'Growth Mindset', def: 'Belief in ability to improve' },
+                { term: 'Digital Detox', def: 'Taking break from screens' },
+                { term: 'Affirmations', def: 'Positive self-statements' },
+                { term: 'Nature Therapy', def: 'Healing through outdoors' },
+                { term: 'Art Therapy', def: 'Healing through creativity' }
+            ]
+        };
+
+        // Initialize background particles
+        function initParticles() {
+            const container = document.getElementById('bgParticles');
+            const colors = ['#FF6B35', '#F59E0B', '#10B981', '#3B82F6', '#8B5CF6', '#EC4899'];
+            
+            for (let i = 0; i < 40; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.width = particle.style.height = (Math.random() * 8 + 3) + 'px';
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                particle.style.animationDuration = (Math.random() * 10 + 6) + 's';
+                particle.style.animationDelay = Math.random() * 8 + 's';
+                container.appendChild(particle);
+            }
+        }
+
+        // Start Game
+        function startGame(difficulty) {
+            currentDifficulty = difficulty;
+            currentTheme = document.getElementById('theme-select').value;
+            
+            matchedPairs = 0;
+            score = 0;
+            streak = 0;
+            bestStreak = 0;
+            isProcessing = false;
+            
+            const timeMap = { easy: 180, medium: 240, hard: 300 };
+            const pairsMap = { easy: 8, medium: 18, hard: 32 };
+            timeLeft = timeMap[difficulty];
+            totalPairs = pairsMap[difficulty];
+            
+            document.getElementById('menu-screen').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'block';
+            document.getElementById('scores-screen').style.display = 'none';
+            
+            document.getElementById('current-theme').textContent = currentTheme.charAt(0).toUpperCase() + currentTheme.slice(1);
+            document.getElementById('current-theme-icon').textContent = themeIcons[currentTheme];
+            document.getElementById('current-difficulty').textContent = difficulty.toUpperCase();
+            document.getElementById('total-pairs').textContent = totalPairs;
+            
+            setupCards();
+            updateStats();
+            startTimer();
+        }
+
+        function setupCards() {
+            const data = themeData[currentTheme];
+            const shuffled = [...data].sort(() => Math.random() - 0.5).slice(0, totalPairs);
+            
+            cards = [];
+            shuffled.forEach(pair => {
+                cards.push({ type: 'term', content: pair.term, pairKey: pair.def, matched: false });
+                cards.push({ type: 'def', content: pair.def, pairKey: pair.term, matched: false });
+            });
+            
+            // Shuffle cards
+            for (let i = cards.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [cards[i], cards[j]] = [cards[j], cards[i]];
+            }
+            
+            renderCards();
+        }
+
+        function renderCards() {
+            const grid = document.getElementById('memory-grid');
+            grid.className = `memory-grid ${currentDifficulty} theme-${currentTheme}`;
+            grid.innerHTML = '';
+            
+            cards.forEach((card, index) => {
+                const cardEl = document.createElement('div');
+                cardEl.className = 'memory-card';
+                cardEl.dataset.index = index;
+                if (card.matched) cardEl.classList.add('matched');
+                
+                cardEl.innerHTML = `
+                    <div class="card-face card-front">❓</div>
+                    <div class="card-face card-back ${card.type === 'term' ? 'term-card' : 'def-card'}">
+                        ${card.content}
+                    </div>
+                `;
+                
+                cardEl.addEventListener('click', () => flipCard(index, cardEl));
+                grid.appendChild(cardEl);
+            });
+        }
+
+        function flipCard(index, cardEl) {
+            if (isProcessing) return;
+            if (cardEl.classList.contains('flipped') || cardEl.classList.contains('matched')) return;
+            if (selectedCards.length >= 2) return;
+            
+            cardEl.classList.add('flipped');
+            selectedCards.push({ index, element: cardEl, data: cards[index] });
+            
+            if (selectedCards.length === 2) {
+                isProcessing = true;
+                setTimeout(checkMatch, 800);
+            }
+        }
+
+        function checkMatch() {
+            const [card1, card2] = selectedCards;
+            const isMatch = (card1.data.type === 'term' && card1.data.pairKey === card2.data.content) ||
+                           (card1.data.type === 'def' && card1.data.pairKey === card2.data.content);
+            
+            if (isMatch) {
+                // Correct match
+                card1.element.classList.add('matched');
+                card2.element.classList.add('matched');
+                cards[card1.index].matched = true;
+                cards[card2.index].matched = true;
+                matchedPairs++;
+                streak++;
+                if (streak > bestStreak) bestStreak = streak;
+                
+                const points = 10 + (streak * 5);
+                score += points;
+                
+                showFeedback(`✅ Match! +${points} pts`, 'success');
+                confetti.addConfetti({ emojis: ['🧠', '⭐', '🎯'], confettiNumber: 60 });
+                
+                checkAchievements();
+                
+                if (matchedPairs >= totalPairs) {
+                    setTimeout(() => {
+                        clearInterval(timerInterval);
+                        confetti.addConfetti({ particleCount: 200, spread: 100 });
+                        showAchievement('🏆 Perfect Game!', 'All pairs matched!');
+                        saveHighScore();
+                        setTimeout(() => alert(`🎉 Congratulations!\n\nAll ${totalPairs} pairs matched!\nScore: ${score}\nBest Streak: ${bestStreak}`), 500);
+                        setTimeout(backToMenu, 2000);
+                    }, 300);
+                }
+            } else {
+                // Wrong match
+                streak = 0;
+                timeLeft = Math.max(0, timeLeft - 5);
+                
+                showFeedback('❌ Not a match! Try again.', 'error');
+                
+                setTimeout(() => {
+                    card1.element.classList.remove('flipped');
+                    card2.element.classList.remove('flipped');
+                }, 500);
+            }
+            
+            selectedCards = [];
+            isProcessing = false;
+            updateStats();
+        }
+
+        function checkAchievements() {
+            if (streak === 3) showAchievement('🔥 Hot Streak!', '3 matches in a row!');
+            if (streak === 5) showAchievement('⚡ Unstoppable!', '5 consecutive matches!');
+            if (matchedPairs === Math.floor(totalPairs / 2)) showAchievement('🎯 Halfway!', `${matchedPairs} of ${totalPairs} pairs!`);
+            if (score >= 100 && score < 200) showAchievement('💯 Century!', 'Reached 100 points!');
+            if (score >= 500) showAchievement('👑 Master!', 'Over 500 points!');
+        }
+
+        function showAchievement(title, message) {
+            const popup = document.createElement('div');
+            popup.className = 'achievement-popup';
+            popup.innerHTML = `<div style="font-size:0.75rem;">Achievement!</div><div>${title}</div><div style="font-size:0.7rem;">${message}</div>`;
+            document.body.appendChild(popup);
+            setTimeout(() => popup.remove(), 3000);
+        }
+
+        function showFeedback(message, type) {
+            const toast = document.getElementById('feedback-toast');
+            toast.textContent = message;
+            toast.className = `feedback-toast ${type} show`;
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+
+        function updateStats() {
+            document.getElementById('score').textContent = score;
+            document.getElementById('matches').textContent = matchedPairs;
+            document.getElementById('streak').textContent = streak;
+            document.getElementById('timer').textContent = timeLeft;
+            
+            const progress = (matchedPairs / totalPairs) * 100;
+            document.getElementById('progress-fill').style.width = progress + '%';
+            
+            if (timeLeft <= 30) {
+                document.getElementById('timer').style.color = '#EF4444';
+                document.getElementById('timer').style.animation = 'pulse 0.5s infinite alternate';
+            } else {
+                document.getElementById('timer').style.color = 'var(--accent-blue)';
+                document.getElementById('timer').style.animation = '';
+            }
+        }
+
+        function reshuffleCards() {
+            if (isProcessing) return;
+            cards.forEach(c => c.matched = false);
+            matchedPairs = 0;
+            score = Math.max(0, score - 50);
+            streak = 0;
+            selectedCards = [];
+            isProcessing = false;
+            
+            // Reshuffle unmatched cards
+            for (let i = cards.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [cards[i], cards[j]] = [cards[j], cards[i]];
+            }
+            
+            renderCards();
+            updateStats();
+            showFeedback('🎲 Cards reshuffled! -50 pts', 'error');
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateStats();
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    alert(`⏰ Time's up!\n\nScore: ${score}\nPairs Found: ${matchedPairs}/${totalPairs}`);
+                    saveHighScore();
+                    backToMenu();
+                }
+            }, 1000);
+        }
+
+        function saveHighScore() {
+            const scores = JSON.parse(localStorage.getItem('memoryMatchScoresV2') || '[]');
+            scores.push({
+                score,
+                theme: currentTheme,
+                difficulty: currentDifficulty,
+                pairs: matchedPairs,
+                totalPairs,
+                streak: bestStreak,
+                date: new Date().toLocaleDateString()
+            });
+            scores.sort((a, b) => b.score - a.score);
+            localStorage.setItem('memoryMatchScoresV2', JSON.stringify(scores.slice(0, 10)));
+        }
+
+        function showHighScores() {
+            document.getElementById('menu-screen').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'none';
+            document.getElementById('scores-screen').style.display = 'block';
+            
+            const scores = JSON.parse(localStorage.getItem('memoryMatchScoresV2') || '[]');
+            const list = document.getElementById('scores-list');
+            
+            if (scores.length === 0) {
+                list.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:2rem;">No scores yet! Start playing! 🎮</p>';
+                return;
+            }
+            
+            list.innerHTML = scores.slice(0, 10).map((s, i) => {
+                const rankClass = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
+                return `
+                    <div class="score-item">
+                        <div style="display:flex;align-items:center;gap:1rem;">
+                            <div class="score-rank ${rankClass}">${i + 1}</div>
+                            <div>
+                                <div style="font-weight:800;">${s.score} points</div>
+                                <div style="font-size:0.8rem;color:var(--text-muted);">
+                                    ${themeIcons[s.theme]} ${s.theme} · ${s.difficulty} · ${s.pairs}/${s.totalPairs} pairs · 🔥${s.streak}
+                                </div>
+                            </div>
+                        </div>
+                        <div style="color:var(--text-muted);font-size:0.8rem;">${s.date}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function showInstructions() {
+            alert(`📖 How to Play Memory Match:\n\n` +
+                  `1. Click cards to flip them over\n` +
+                  `2. Match terms with their definitions\n` +
+                  `3. Term cards are PURPLE, definition cards are CYAN\n` +
+                  `4. Find all pairs before time runs out!\n\n` +
+                  `🔥 Streaks give bonus points!\n` +
+                  `⏰ Wrong matches cost 5 seconds!\n` +
+                  `🎲 Reshuffle costs 50 points but resets cards!`);
+        }
+
+        function toggleDarkMode() {
+            document.body.style.background = 
+                document.body.style.background === 'white' ? 
+                'var(--secondary)' : 'white';
+        }
+
+        function backToMenu() {
+            clearInterval(timerInterval);
+            document.getElementById('menu-screen').style.display = 'block';
+            document.getElementById('game-screen').style.display = 'none';
+            document.getElementById('scores-screen').style.display = 'none';
+            resetGame();
+        }
+
+        function resetGame() {
+            cards = [];
+            selectedCards = [];
+            matchedPairs = 0;
+            score = 0;
+            streak = 0;
+            bestStreak = 0;
+            timeLeft = 120;
+            isProcessing = false;
+        }
+
+        // Initialize
+        initParticles();
+        console.log('🧠 Memory Match Mastery Ready!');
+        console.log('🎮 Features: 3 difficulties, 4 themes, animations');
+        console.log('🏆 Achievements, high scores, and confetti celebrations!');
+    </script>
+</body>
+</html>

@@ -1,0 +1,2310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QueensPa Virtual Lab</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0e1a;
+  --surface: #111827;
+  --surface2: #1a2235;
+  --surface3: #1f2b40;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.13);
+  --text: #e8edf5;
+  --text2: #8a9ab5;
+  --text3: #4a5a72;
+  --accent: #00d4a8;
+  --accent2: #0099ff;
+  --accent3: #ff6b35;
+  --danger: #ff4757;
+  --warn: #ffa502;
+  --success: #00d4a8;
+  --purple: #a855f7;
+  --pink: #ec4899;
+  --radius: 14px;
+  --radius-sm: 8px;
+  --radius-lg: 20px;
+  --mono: 'Space Mono', monospace;
+  --sans: 'DM Sans', sans-serif;
+  --trans: 0.22s cubic-bezier(.4,0,.2,1);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { font-size: 15px; }
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  line-height: 1.5;
+}
+
+/* ─── Scanline texture overlay ─── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.03) 2px,
+    rgba(0,0,0,0.03) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* ─── Screen transitions ─── */
+.screen { display: none; min-height: 100vh; }
+.screen.active { display: flex; }
+
+/* ════════════════════════════════════════
+   INTRO / TITLE SCREEN
+════════════════════════════════════════ */
+#screen-intro {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.intro-bg-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0,212,168,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,212,168,0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+  animation: gridScroll 20s linear infinite;
+}
+@keyframes gridScroll { from { transform: translateY(0); } to { transform: translateY(48px); } }
+
+.intro-glow {
+  position: absolute;
+  width: 600px; height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0,212,168,0.08) 0%, transparent 70%);
+  top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  animation: breathe 4s ease-in-out infinite;
+}
+@keyframes breathe { 0%,100% { transform: translate(-50%,-50%) scale(1); } 50% { transform: translate(-50%,-50%) scale(1.2); } }
+
+.intro-content {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  max-width: 560px;
+}
+
+.lab-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0,212,168,0.1);
+  border: 1px solid rgba(0,212,168,0.25);
+  border-radius: 99px;
+  padding: 6px 16px;
+  font-size: 11px;
+  font-family: var(--mono);
+  color: var(--accent);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 2rem;
+  animation: fadeUp 0.6s ease both;
+}
+.lab-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: blink 1.2s step-end infinite; }
+@keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+
+.intro-title {
+  font-family: var(--mono);
+  font-size: clamp(2.4rem, 6vw, 4rem);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin-bottom: 1rem;
+  animation: fadeUp 0.6s 0.1s ease both;
+}
+.intro-title .line1 { color: var(--text); display: block; }
+.intro-title .line2 {
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  display: block;
+}
+
+.intro-sub {
+  color: var(--text2);
+  font-size: 1.05rem;
+  margin-bottom: 2.5rem;
+  animation: fadeUp 0.6s 0.2s ease both;
+}
+
+.intro-name-form {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 2rem;
+  animation: fadeUp 0.6s 0.3s ease both;
+}
+.intro-name-form input {
+  flex: 1;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  font-family: var(--sans);
+  font-size: 1rem;
+  color: var(--text);
+  outline: none;
+  transition: border-color var(--trans);
+}
+.intro-name-form input::placeholder { color: var(--text3); }
+.intro-name-form input:focus { border-color: var(--accent); }
+
+.btn-primary {
+  background: var(--accent);
+  color: #001a14;
+  border: none;
+  border-radius: var(--radius);
+  padding: 14px 28px;
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all var(--trans);
+  white-space: nowrap;
+}
+.btn-primary:hover { background: #00eabb; transform: translateY(-1px); }
+.btn-primary:active { transform: translateY(0) scale(0.98); }
+
+.intro-modules {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+  animation: fadeUp 0.6s 0.4s ease both;
+}
+.intro-mod-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: all var(--trans);
+}
+.intro-mod-card:hover { border-color: var(--border2); background: var(--surface3); transform: translateY(-2px); }
+.intro-mod-card .mod-icon { font-size: 2rem; margin-bottom: 8px; }
+.intro-mod-card .mod-name { font-size: 12px; font-weight: 500; color: var(--text); }
+.intro-mod-card .mod-count { font-size: 11px; color: var(--text3); font-family: var(--mono); margin-top: 2px; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ════════════════════════════════════════
+   MAIN GAME SCREEN
+════════════════════════════════════════ */
+#screen-game {
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ─── Top HUD ─── */
+.hud {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 20px;
+  height: 56px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  flex-shrink: 0;
+  z-index: 10;
+}
+.hud-logo {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+.hud-sep { width: 1px; height: 24px; background: var(--border2); }
+.hud-student { font-size: 13px; color: var(--text2); }
+.hud-student span { color: var(--text); font-weight: 500; }
+
+.hud-score {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0,212,168,0.08);
+  border: 1px solid rgba(0,212,168,0.2);
+  border-radius: 99px;
+  padding: 5px 14px;
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--accent);
+}
+.hud-score .score-val { font-weight: 700; font-size: 15px; }
+
+.hud-xp-bar-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.hud-xp-label { font-size: 11px; color: var(--text3); font-family: var(--mono); white-space: nowrap; }
+.hud-xp-bar {
+  flex: 1;
+  height: 4px;
+  background: var(--surface3);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.hud-xp-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  border-radius: 99px;
+  transition: width 0.6s cubic-bezier(.4,0,.2,1);
+}
+.hud-level {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--accent2);
+  white-space: nowrap;
+}
+
+.hud-right { display: flex; gap: 8px; margin-left: auto; }
+.hud-btn {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  width: 34px; height: 34px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  color: var(--text2);
+  font-size: 16px;
+  transition: all var(--trans);
+}
+.hud-btn:hover { border-color: var(--accent); color: var(--accent); }
+.hud-btn svg { width: 16px; height: 16px; }
+
+/* ─── Main layout ─── */
+.game-body {
+  display: grid;
+  grid-template-columns: 220px 1fr 300px;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ─── Left panel: experiment nav ─── */
+.exp-nav {
+  border-right: 1px solid var(--border);
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.exp-nav-header {
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.exp-nav-header h3 {
+  font-size: 10px;
+  font-family: var(--mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text3);
+}
+.exp-list { flex: 1; overflow-y: auto; padding: 8px; }
+.exp-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--trans);
+  margin-bottom: 4px;
+  border: 1px solid transparent;
+}
+.exp-item:hover { background: var(--surface2); }
+.exp-item.active { background: var(--surface3); border-color: var(--border2); }
+.exp-item.locked { opacity: 0.4; cursor: not-allowed; }
+.exp-icon {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+.exp-meta { flex: 1; min-width: 0; }
+.exp-meta .exp-name { font-size: 12px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.exp-meta .exp-progress { font-size: 10px; color: var(--text3); font-family: var(--mono); margin-top: 2px; }
+.exp-item .lock-icon { font-size: 12px; color: var(--text3); }
+
+.exp-progress-bar {
+  height: 2px;
+  background: var(--surface3);
+  border-radius: 99px;
+  margin-top: 5px;
+  overflow: hidden;
+}
+.exp-progress-fill {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 0.5s ease;
+}
+
+.sidebar-footer {
+  border-top: 1px solid var(--border);
+  padding: 12px;
+}
+.achievements-mini {
+  font-size: 11px;
+  color: var(--text3);
+  font-family: var(--mono);
+  margin-bottom: 8px;
+}
+.achievement-bubbles { display: flex; gap: 4px; flex-wrap: wrap; }
+.ach-bubble {
+  width: 28px; height: 28px;
+  border-radius: 99px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  cursor: pointer;
+  position: relative;
+  transition: transform var(--trans);
+}
+.ach-bubble.earned { border-color: var(--accent); background: rgba(0,212,168,0.1); }
+.ach-bubble:hover { transform: scale(1.2); }
+
+/* ─── Center: Lab bench ─── */
+.lab-center {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg);
+  position: relative;
+}
+
+.lab-banner {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--surface);
+  flex-shrink: 0;
+}
+.lab-banner-icon {
+  width: 40px; height: 40px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem;
+}
+.lab-banner-text h2 { font-size: 15px; font-weight: 600; color: var(--text); }
+.lab-banner-text p { font-size: 12px; color: var(--text2); margin-top: 1px; }
+.lab-banner-hint {
+  margin-left: auto;
+  background: rgba(255,165,2,0.1);
+  border: 1px solid rgba(255,165,2,0.25);
+  border-radius: 99px;
+  padding: 5px 12px;
+  font-size: 11px;
+  color: var(--warn);
+  font-family: var(--mono);
+}
+
+.bench {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ─── Reagent shelf ─── */
+.reagent-shelf {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+}
+.shelf-label {
+  font-size: 10px;
+  font-family: var(--mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.shelf-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+.reagent-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.reagent-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 99px;
+  cursor: grab;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text);
+  transition: all var(--trans);
+  user-select: none;
+  position: relative;
+}
+.reagent-chip:hover { border-color: var(--accent); transform: translateY(-2px); }
+.reagent-chip:active { cursor: grabbing; }
+.reagent-chip.dragging { opacity: 0.3; }
+.reagent-chip.used { opacity: 0.5; }
+.reagent-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.reagent-chip .chip-qty {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text3);
+  margin-left: 2px;
+}
+
+/* ─── Workbench ─── */
+.workbench {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 16px;
+  align-items: center;
+}
+
+.vessel-zone { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+
+/* Beaker SVG-style */
+.beaker-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.beaker-svg-wrap {
+  position: relative;
+  width: 110px;
+}
+.beaker-body {
+  width: 100px;
+  height: 130px;
+  border: 2px solid var(--border2);
+  border-top: none;
+  border-radius: 0 0 18px 18px;
+  background: rgba(255,255,255,0.02);
+  position: relative;
+  overflow: hidden;
+  margin: 0 auto;
+  transition: border-color 0.3s;
+}
+.beaker-body.drag-over { border-color: var(--accent); background: rgba(0,212,168,0.05); }
+.beaker-body.drag-over::before {
+  content: '+';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  color: var(--accent);
+  opacity: 0.5;
+}
+.beaker-lip {
+  width: 110px;
+  height: 10px;
+  border: 2px solid var(--border2);
+  border-bottom: none;
+  border-radius: 4px 4px 0 0;
+  margin: 0 auto;
+  background: rgba(255,255,255,0.03);
+}
+.beaker-label-tag {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text3);
+  margin-top: 6px;
+}
+
+.liquid-fill {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  border-radius: 0 0 16px 16px;
+  transition: height 0.5s cubic-bezier(.4,0,.2,1), background 0.4s ease;
+  height: 0;
+}
+.liquid-surface {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  opacity: 0.6;
+  border-radius: 99px;
+}
+
+/* Bubbles */
+.bubble {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.35);
+  animation: bubbleRise var(--dur, 1.2s) ease-in infinite;
+  animation-delay: var(--delay, 0s);
+}
+@keyframes bubbleRise {
+  0% { transform: translateY(0) scale(1); opacity: 0.8; }
+  100% { transform: translateY(-120px) scale(0.5); opacity: 0; }
+}
+
+/* Smoke */
+.smoke {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(200,200,200,0.25);
+  animation: smokeRise 2s ease-out forwards;
+}
+@keyframes smokeRise {
+  0% { transform: translateY(0) scale(1); opacity: 0.7; }
+  100% { transform: translateY(-80px) scale(4); opacity: 0; }
+}
+
+/* Sparkle on reaction */
+@keyframes sparkle {
+  0% { transform: scale(1); }
+  30% { transform: scale(1.08); }
+  60% { transform: scale(0.96); }
+  100% { transform: scale(1); }
+}
+.react-flash { animation: sparkle 0.5s ease; }
+
+.beaker-contents {
+  min-height: 40px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: center;
+}
+.content-tag {
+  background: var(--surface3);
+  border: 1px solid var(--border2);
+  border-radius: 99px;
+  padding: 3px 8px;
+  font-size: 10px;
+  color: var(--text2);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.content-tag .cdot { width: 6px; height: 6px; border-radius: 50%; }
+.beaker-clear-btn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 4px 10px;
+  font-size: 11px;
+  color: var(--text3);
+  cursor: pointer;
+  font-family: var(--mono);
+  transition: all var(--trans);
+}
+.beaker-clear-btn:hover { border-color: var(--danger); color: var(--danger); }
+
+/* ─── Action column (center) ─── */
+.action-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 0 4px;
+}
+.action-btn {
+  width: 70px;
+  padding: 10px 0;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  color: var(--text2);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  text-align: center;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  transition: all var(--trans);
+}
+.action-btn .ab-icon { font-size: 1.4rem; }
+.action-btn:hover { border-color: var(--accent2); color: var(--accent2); background: rgba(0,153,255,0.06); }
+.action-btn:active { transform: scale(0.96); }
+.action-btn.mix:hover { border-color: var(--accent); color: var(--accent); background: rgba(0,212,168,0.06); }
+.action-btn.heat:hover { border-color: var(--accent3); color: var(--accent3); background: rgba(255,107,53,0.06); }
+.action-btn.filter:hover { border-color: var(--purple); color: var(--purple); background: rgba(168,85,247,0.06); }
+
+/* ─── Result vessel ─── */
+.result-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  opacity: 0;
+  transform: scale(0.9);
+  transition: all 0.4s cubic-bezier(.4,0,.2,1);
+}
+.result-zone.visible { opacity: 1; transform: scale(1); }
+.result-badge {
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 4px 10px;
+  border-radius: 99px;
+  letter-spacing: 0.05em;
+}
+.result-badge.success { background: rgba(0,212,168,0.15); border: 1px solid rgba(0,212,168,0.3); color: var(--accent); }
+.result-badge.neutral { background: rgba(138,154,181,0.1); border: 1px solid rgba(138,154,181,0.2); color: var(--text2); }
+.result-badge.danger { background: rgba(255,71,87,0.1); border: 1px solid rgba(255,71,87,0.25); color: var(--danger); }
+
+/* ─── Observation panel ─── */
+.obs-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.obs-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+}
+.obs-tab {
+  flex: 1;
+  padding: 10px;
+  font-size: 11px;
+  font-family: var(--mono);
+  letter-spacing: 0.05em;
+  text-align: center;
+  cursor: pointer;
+  color: var(--text3);
+  border-bottom: 2px solid transparent;
+  transition: all var(--trans);
+}
+.obs-tab.active { color: var(--accent); border-bottom-color: var(--accent); background: rgba(0,212,168,0.03); }
+.obs-body { padding: 14px; min-height: 100px; }
+.obs-body.hidden { display: none; }
+
+.obs-reading {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.obs-icon-circle {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  border: 1px solid var(--border2);
+}
+.obs-main-text { font-size: 13px; color: var(--text); line-height: 1.6; }
+.obs-science-fact {
+  margin-top: 8px;
+  padding: 8px 10px;
+  background: rgba(0,153,255,0.06);
+  border-left: 2px solid var(--accent2);
+  border-radius: 0 6px 6px 0;
+  font-size: 11px;
+  color: var(--text2);
+  font-family: var(--mono);
+  line-height: 1.5;
+}
+.obs-empty { color: var(--text3); font-size: 13px; font-style: italic; }
+
+/* Temperature gauge */
+.temp-gauge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+.gauge-track {
+  flex: 1;
+  height: 6px;
+  background: var(--surface3);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.gauge-fill {
+  height: 100%;
+  border-radius: 99px;
+  background: linear-gradient(90deg, #85B7EB, #EF9F27, #E24B4A);
+  transition: width 1s ease;
+}
+.gauge-val { font-family: var(--mono); font-size: 11px; color: var(--warn); }
+
+/* Quiz panel */
+.quiz-card {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  padding: 14px;
+}
+.quiz-q { font-size: 13px; color: var(--text); margin-bottom: 12px; line-height: 1.5; }
+.quiz-options { display: flex; flex-direction: column; gap: 6px; }
+.quiz-opt {
+  padding: 9px 12px;
+  background: var(--surface3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all var(--trans);
+  color: var(--text2);
+}
+.quiz-opt:hover { border-color: var(--accent2); color: var(--text); }
+.quiz-opt.correct { border-color: var(--accent); background: rgba(0,212,168,0.1); color: var(--accent); }
+.quiz-opt.wrong { border-color: var(--danger); background: rgba(255,71,87,0.08); color: var(--danger); }
+.quiz-feedback { margin-top: 10px; font-size: 12px; color: var(--text2); line-height: 1.5; }
+.quiz-next-btn {
+  margin-top: 10px;
+  padding: 7px 14px;
+  background: var(--accent);
+  color: #001a14;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--trans);
+}
+.quiz-next-btn:hover { background: #00eabb; }
+
+/* ─── Right panel: notebook ─── */
+.notebook-panel {
+  border-left: 1px solid var(--border);
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.nb-header {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.nb-header h3 {
+  font-size: 10px;
+  font-family: var(--mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text3);
+}
+.nb-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+}
+.nb-tab {
+  flex: 1;
+  padding: 9px 4px;
+  font-size: 10px;
+  font-family: var(--mono);
+  letter-spacing: 0.06em;
+  text-align: center;
+  cursor: pointer;
+  color: var(--text3);
+  border-bottom: 2px solid transparent;
+  transition: all var(--trans);
+}
+.nb-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+.nb-body { flex: 1; overflow-y: auto; padding: 12px; }
+.nb-body.hidden { display: none; }
+
+/* Log entries */
+.log-entry {
+  display: flex;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  animation: logFadeIn 0.3s ease;
+}
+@keyframes logFadeIn { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } }
+.log-entry:last-child { border-bottom: none; }
+.log-time { font-family: var(--mono); font-size: 9px; color: var(--text3); white-space: nowrap; padding-top: 2px; }
+.log-text { font-size: 11px; color: var(--text2); line-height: 1.5; }
+.log-text strong { color: var(--text); font-weight: 500; }
+.log-pts {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+/* Objectives */
+.obj-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--text2);
+  line-height: 1.4;
+}
+.obj-item:last-child { border-bottom: none; }
+.obj-check {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  border: 1px solid var(--border2);
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px;
+  transition: all var(--trans);
+  margin-top: 1px;
+}
+.obj-item.done .obj-check { background: var(--accent); border-color: var(--accent); color: #001a14; }
+.obj-item.done .obj-text { color: var(--text3); text-decoration: line-through; }
+
+/* Theory tab */
+.theory-block {
+  margin-bottom: 14px;
+}
+.theory-block h4 {
+  font-size: 11px;
+  font-family: var(--mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent2);
+  margin-bottom: 6px;
+}
+.theory-block p { font-size: 12px; color: var(--text2); line-height: 1.65; }
+.theory-block .formula {
+  display: inline-block;
+  background: var(--surface3);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  padding: 4px 10px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--accent);
+  margin-top: 6px;
+}
+
+/* Stats tab */
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+.stat-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  text-align: center;
+}
+.stat-card .sv { font-size: 20px; font-weight: 600; font-family: var(--mono); color: var(--text); }
+.stat-card .sk { font-size: 10px; color: var(--text3); margin-top: 2px; letter-spacing: 0.05em; }
+.mastery-row { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--border); }
+.mastery-row:last-child { border-bottom: none; }
+.mastery-name { font-size: 11px; color: var(--text2); flex: 1; }
+.mastery-bar-wrap { width: 70px; height: 4px; background: var(--surface3); border-radius: 99px; overflow: hidden; }
+.mastery-bar-fill { height: 100%; border-radius: 99px; }
+.mastery-pct { font-family: var(--mono); font-size: 10px; color: var(--text3); width: 28px; text-align: right; }
+
+/* ════════════════════════════════════════
+   ACHIEVEMENT TOAST
+════════════════════════════════════════ */
+.toast-container {
+  position: fixed;
+  top: 70px;
+  right: 20px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+.toast {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  animation: toastIn 0.4s cubic-bezier(.4,0,.2,1) both;
+  pointer-events: auto;
+  max-width: 280px;
+}
+.toast.achievement { border-color: rgba(255,165,2,0.4); }
+.toast.score { border-color: rgba(0,212,168,0.4); }
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(60px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes toastOut {
+  from { opacity: 1; transform: translateX(0); }
+  to { opacity: 0; transform: translateX(60px); }
+}
+.toast.hide { animation: toastOut 0.3s ease forwards; }
+.toast-icon { font-size: 1.5rem; }
+.toast-body .toast-title { font-size: 12px; font-weight: 500; color: var(--text); }
+.toast-body .toast-sub { font-size: 11px; color: var(--text2); }
+
+/* ════════════════════════════════════════
+   COMPLETION MODAL
+════════════════════════════════════════ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  display: none;
+}
+.modal-overlay.open { display: flex; }
+.modal-box {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  max-width: 440px;
+  width: 90%;
+  text-align: center;
+  animation: modalIn 0.4s cubic-bezier(.4,0,.2,1);
+}
+@keyframes modalIn {
+  from { transform: scale(0.85); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+.modal-trophy { font-size: 4rem; margin-bottom: 12px; }
+.modal-box h2 { font-size: 1.4rem; font-family: var(--mono); font-weight: 700; margin-bottom: 6px; }
+.modal-box p { color: var(--text2); font-size: 14px; margin-bottom: 20px; }
+.modal-score { font-size: 2.5rem; font-family: var(--mono); font-weight: 700; color: var(--accent); }
+.modal-score-label { font-size: 12px; color: var(--text3); margin-top: 2px; }
+.modal-actions { display: flex; gap: 10px; justify-content: center; margin-top: 24px; }
+.btn-secondary {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  padding: 12px 22px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text);
+  cursor: pointer;
+  transition: all var(--trans);
+}
+.btn-secondary:hover { border-color: var(--accent2); }
+
+/* ─── Scrollbar style ─── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 99px; }
+
+/* ─── Tooltip ─── */
+[data-tip] { position: relative; }
+[data-tip]:hover::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  padding: 5px 10px;
+  font-size: 11px;
+  color: var(--text);
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 999;
+}
+
+/* ─── pH meter widget ─── */
+.ph-meter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--surface3);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+.ph-strip {
+  flex: 1;
+  height: 10px;
+  border-radius: 99px;
+  background: linear-gradient(90deg,
+    #E24B4A 0%,    /* pH 0-2 */
+    #EF9F27 20%,   /* pH 3-4 */
+    #FAC775 33%,   /* pH 5 */
+    #97C459 42%,   /* pH 6 */
+    #5DCAA5 50%,   /* pH 7 */
+    #378ADD 62%,   /* pH 8-9 */
+    #534AB7 80%,   /* pH 10-11 */
+    #26215C 100%   /* pH 12-14 */
+  );
+  position: relative;
+}
+.ph-indicator {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: white;
+  border: 2px solid rgba(0,0,0,0.3);
+  transition: left 0.8s cubic-bezier(.4,0,.2,1);
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.2);
+}
+.ph-val { font-family: var(--mono); font-size: 12px; font-weight: 700; color: var(--text); min-width: 36px; text-align: right; }
+.ph-label { font-size: 10px; color: var(--text3); }
+
+/* Reaction counter */
+.rxn-counter {
+  display: flex;
+  gap: 3px;
+  flex-wrap: wrap;
+}
+.rxn-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  border: 1px solid var(--border2);
+  transition: all var(--trans);
+}
+.rxn-dot.done { background: var(--accent); border-color: var(--accent); }
+</style>
+</head>
+<body>
+
+<!-- ════════════ INTRO SCREEN ════════════ -->
+<div id="screen-intro" class="screen active">
+  <div class="intro-bg-grid"></div>
+  <div class="intro-glow"></div>
+  <div class="intro-content">
+    <div class="lab-badge">
+      <span class="dot"></span>
+      QueensPa · Virtual Science Laboratory
+    </div>
+    <h1 class="intro-title">
+      <span class="line1">Explore. Mix.</span>
+      <span class="line2">Discover.</span>
+    </h1>
+    <p class="intro-sub">
+      A hands-on virtual lab where you run real experiments,<br>
+      observe reactions, and learn the science behind them.
+    </p>
+    <div class="intro-name-form">
+      <input type="text" id="nameInput" placeholder="Enter your name to begin..." maxlength="30" autocomplete="off">
+      <button class="btn-primary" onclick="startGame()">Enter Lab →</button>
+    </div>
+    <div class="intro-modules" id="introModCards"></div>
+  </div>
+</div>
+
+<!-- ════════════ GAME SCREEN ════════════ -->
+<div id="screen-game" class="screen">
+  <!-- HUD -->
+  <div class="hud">
+    <div class="hud-logo">⚗ QueensPa Lab</div>
+    <div class="hud-sep"></div>
+    <div class="hud-student">Scientist: <span id="hudName">—</span></div>
+    <div class="hud-sep"></div>
+    <div class="hud-score">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      <span id="hudScore" class="score-val">0</span> pts
+    </div>
+    <div class="hud-xp-bar-wrap">
+      <span class="hud-xp-label">LVL</span>
+      <div class="hud-xp-bar"><div class="hud-xp-fill" id="xpFill" style="width:0%"></div></div>
+      <span class="hud-level" id="hudLevel">1</span>
+    </div>
+    <div class="hud-right">
+      <div class="hud-btn" data-tip="Toggle fullscreen" onclick="toggleFullscreen()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/></svg>
+      </div>
+      <div class="hud-btn" data-tip="Back to menu" onclick="goHome()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div class="game-body">
+
+    <!-- Left: Experiment nav -->
+    <div class="exp-nav">
+      <div class="exp-nav-header"><h3>Experiments</h3></div>
+      <div class="exp-list" id="expList"></div>
+      <div class="sidebar-footer">
+        <div class="achievements-mini">Badges earned</div>
+        <div class="achievement-bubbles" id="achBubbles"></div>
+      </div>
+    </div>
+
+    <!-- Center: Lab bench -->
+    <div class="lab-center">
+      <!-- Banner -->
+      <div class="lab-banner">
+        <div class="lab-banner-icon" id="bannerIcon"></div>
+        <div class="lab-banner-text">
+          <h2 id="bannerTitle">—</h2>
+          <p id="bannerSub">—</p>
+        </div>
+        <div class="lab-banner-hint" id="bannerHint"></div>
+      </div>
+
+      <!-- Scrollable bench -->
+      <div class="bench">
+
+        <!-- Reagent shelf -->
+        <div class="reagent-shelf">
+          <div class="shelf-label">Available Reagents &amp; Equipment</div>
+          <div class="reagent-grid" id="reagentGrid"></div>
+        </div>
+
+        <!-- Instruments row (pH meter, temp) -->
+        <div id="instrumentRow" style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+          <div class="ph-meter" style="flex:1;min-width:200px;">
+            <span class="ph-label">pH</span>
+            <div class="ph-strip">
+              <div class="ph-indicator" id="phIndicator" style="left:50%"></div>
+            </div>
+            <span class="ph-val" id="phVal">7.0</span>
+          </div>
+          <div class="ph-meter" style="flex:1;min-width:160px;">
+            <span class="ph-label" style="white-space:nowrap;">Temp</span>
+            <div class="gauge-track" style="flex:1;"><div class="gauge-fill" id="gaugeBar" style="width:10%;"></div></div>
+            <span class="gauge-val" id="gaugeVal">25°C</span>
+          </div>
+          <div class="ph-meter" style="min-width:140px;gap:10px;">
+            <span class="ph-label">Reactions</span>
+            <div class="rxn-counter" id="rxnCounter"></div>
+          </div>
+        </div>
+
+        <!-- Workbench -->
+        <div class="workbench" id="workbench">
+          <!-- Beaker A -->
+          <div class="vessel-zone" id="vesselA">
+            <div class="beaker-wrapper">
+              <div class="beaker-lip"></div>
+              <div class="beaker-body" id="beakerA">
+                <div class="liquid-fill" id="fillA">
+                  <div class="liquid-surface" id="surfaceA"></div>
+                </div>
+              </div>
+            </div>
+            <div class="beaker-label-tag">Beaker A</div>
+            <div class="beaker-contents" id="contentsA"></div>
+            <button class="beaker-clear-btn" onclick="clearVessel('A')">Clear</button>
+          </div>
+
+          <!-- Action column -->
+          <div class="action-col">
+            <button class="action-btn mix" onclick="doAction('mix')" data-tip="Combine A + B">
+              <span class="ab-icon">🔀</span>MIX
+            </button>
+            <button class="action-btn heat" onclick="doAction('heat')" data-tip="Apply heat to A">
+              <span class="ab-icon">🔥</span>HEAT
+            </button>
+            <button class="action-btn filter" onclick="doAction('filter')" data-tip="Filter contents of A">
+              <span class="ab-icon">🔬</span>OBSERVE
+            </button>
+            <button class="action-btn" onclick="doAction('reset')" data-tip="Reset bench" style="color:var(--danger);border-color:rgba(255,71,87,0.3);">
+              <span class="ab-icon">🗑</span>RESET
+            </button>
+          </div>
+
+          <!-- Beaker B -->
+          <div class="vessel-zone" id="vesselB">
+            <div class="beaker-wrapper">
+              <div class="beaker-lip"></div>
+              <div class="beaker-body" id="beakerB">
+                <div class="liquid-fill" id="fillB">
+                  <div class="liquid-surface" id="surfaceB"></div>
+                </div>
+              </div>
+            </div>
+            <div class="beaker-label-tag">Beaker B</div>
+            <div class="beaker-contents" id="contentsB"></div>
+            <button class="beaker-clear-btn" onclick="clearVessel('B')">Clear</button>
+          </div>
+        </div>
+
+        <!-- Result zone (shows after action) -->
+        <div class="result-zone" id="resultZone">
+          <div class="result-badge" id="resultBadge"></div>
+          <div class="beaker-wrapper">
+            <div class="beaker-lip"></div>
+            <div class="beaker-body" id="beakerR" style="width:120px;height:140px;">
+              <div class="liquid-fill" id="fillR">
+                <div class="liquid-surface" id="surfaceR"></div>
+              </div>
+            </div>
+          </div>
+          <div style="font-size:11px;color:var(--text3);font-family:var(--mono);">Result</div>
+        </div>
+
+        <!-- Observation panel -->
+        <div class="obs-panel">
+          <div class="obs-tabs">
+            <div class="obs-tab active" onclick="switchObsTab('observation', this)">Observation</div>
+            <div class="obs-tab" onclick="switchObsTab('quiz', this)">Quick Quiz</div>
+          </div>
+          <div class="obs-body" id="obsObservation">
+            <div class="obs-reading">
+              <div class="obs-icon-circle" id="obsIcon">🔬</div>
+              <div>
+                <div class="obs-main-text" id="obsText">Select reagents and perform an action to begin your experiment.</div>
+                <div class="obs-science-fact" id="obsFact" style="display:none;"></div>
+              </div>
+            </div>
+          </div>
+          <div class="obs-body hidden" id="obsQuiz">
+            <div id="quizContainer"></div>
+          </div>
+        </div>
+
+      </div><!-- end bench -->
+    </div><!-- end lab-center -->
+
+    <!-- Right: Notebook -->
+    <div class="notebook-panel">
+      <div class="nb-header">
+        <h3>📓 Lab Notebook</h3>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--text3);" id="nbDate"></div>
+      </div>
+      <div class="nb-tabs">
+        <div class="nb-tab active" onclick="switchNbTab('log',this)">Log</div>
+        <div class="nb-tab" onclick="switchNbTab('objectives',this)">Goals</div>
+        <div class="nb-tab" onclick="switchNbTab('theory',this)">Theory</div>
+        <div class="nb-tab" onclick="switchNbTab('stats',this)">Stats</div>
+      </div>
+      <div class="nb-body" id="nbLog"><div style="color:var(--text3);font-size:12px;padding:8px 0;font-style:italic;">Your experiment log will appear here...</div></div>
+      <div class="nb-body hidden" id="nbObjectives"></div>
+      <div class="nb-body hidden" id="nbTheory"></div>
+      <div class="nb-body hidden" id="nbStats"></div>
+    </div>
+
+  </div><!-- end game-body -->
+</div>
+
+<!-- Toast container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Completion modal -->
+<div class="modal-overlay" id="completionModal">
+  <div class="modal-box">
+    <div class="modal-trophy">🏆</div>
+    <h2 id="modalTitle">Experiment Complete!</h2>
+    <p id="modalDesc">You've discovered all reactions in this experiment.</p>
+    <div class="modal-score" id="modalScore">0</div>
+    <div class="modal-score-label">points earned</div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal()">Continue</button>
+      <button class="btn-primary" onclick="nextExperiment()">Next Experiment →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════
+   DATA — All experiments, reactions, quizzes
+═══════════════════════════════════════════════ */
+const EXPERIMENTS = [
+  {
+    id: "acid_base",
+    name: "Acids & Bases",
+    icon: "🧪",
+    color: "#E24B4A",
+    bg: "rgba(226,75,74,0.1)",
+    subject: "Chemistry · pH & Indicators",
+    hint: "Use litmus to test each substance",
+    unlockAt: 0,
+    theory: [
+      { heading: "What is pH?", body: "pH (potential of Hydrogen) measures how acidic or basic a substance is. It ranges from 0 to 14. pH 7 is neutral, below 7 is acidic, and above 7 is basic (alkaline).", formula: "pH = -log[H⁺]" },
+      { heading: "Acid-Base indicators", body: "Indicators are substances that change colour depending on pH. Litmus turns red in acids and blue in bases. Natural dyes like hibiscus and turmeric work the same way." },
+      { heading: "Neutralisation", body: "When an acid and a base react, they neutralise each other to form a salt and water. CO₂ gas may also be produced.", formula: "Acid + Base → Salt + Water (+ CO₂)" }
+    ],
+    objectives: [
+      { id: "obj_litmus_vinegar", text: "Test vinegar with litmus indicator" },
+      { id: "obj_litmus_bicarb", text: "Test bicarbonate with litmus" },
+      { id: "obj_vinegar_bicarb", text: "Mix vinegar + bicarbonate to observe neutralisation" },
+      { id: "obj_litmus_water", text: "Confirm water is neutral (pH 7)" },
+      { id: "obj_lemon_bicarb", text: "Mix lemon juice + bicarbonate" },
+    ],
+    reagents: [
+      { id: "litmus", name: "Litmus indicator", color: "#7F77DD", ph: 7 },
+      { id: "vinegar", name: "Vinegar", color: "#EF9F27", ph: 2.5 },
+      { id: "bicarb", name: "Bicarbonate (NaHCO₃)", color: "#9FE1CB", ph: 8.3 },
+      { id: "water", name: "Water (H₂O)", color: "#85B7EB", ph: 7 },
+      { id: "lemon", name: "Lemon juice", color: "#FAC775", ph: 2.2 },
+      { id: "bleach", name: "Bleach solution", color: "#C0DD97", ph: 11 },
+    ],
+    reactions: {
+      "litmus|vinegar": { obs: "The litmus turns bright red! Vinegar is acidic.", fact: "Vinegar is acetic acid (CH₃COOH) with pH ~2.5. Acids turn litmus red.", color: "#E24B4A", ph: 2.5, bubbles: false, score: 10, completes: ["obj_litmus_vinegar"], icon: "🔴" },
+      "litmus|lemon": { obs: "Litmus turns red — lemon juice is strongly acidic!", fact: "Citric acid in lemons lowers the pH to around 2.2.", color: "#E24B4A", ph: 2.2, bubbles: false, score: 10, completes: [], icon: "🔴" },
+      "litmus|bicarb": { obs: "Litmus turns blue — bicarbonate is a base!", fact: "Sodium bicarbonate is weakly alkaline at pH ~8.3. Bases turn litmus blue.", color: "#378ADD", ph: 8.3, bubbles: false, score: 10, completes: ["obj_litmus_bicarb"], icon: "🔵" },
+      "litmus|water": { obs: "Litmus stays purple — water is neutral at pH 7.", fact: "Pure water has equal concentrations of H⁺ and OH⁻ ions, giving pH 7.", color: "#7F77DD", ph: 7, bubbles: false, score: 5, completes: ["obj_litmus_water"], icon: "🟣" },
+      "litmus|bleach": { obs: "Litmus turns deep blue — bleach is strongly alkaline.", fact: "Bleach solution (NaOCl) has a pH of around 11, making it a strong base.", color: "#185FA5", ph: 11, bubbles: false, score: 10, completes: [], icon: "🔵" },
+      "vinegar|bicarb": { obs: "FIZZ! Rapid bubbling — CO₂ gas is released!", fact: "Acid + Carbonate → Salt + Water + CO₂. This is neutralisation.", color: "#97C459", ph: 6.5, bubbles: true, score: 15, completes: ["obj_vinegar_bicarb"], icon: "⚗️" },
+      "lemon|bicarb": { obs: "Vigorous fizzing — CO₂ is produced again!", fact: "Citric acid (lemon) reacts with bicarbonate base. Same neutralisation reaction!", color: "#97C459", ph: 6.8, bubbles: true, score: 15, completes: ["obj_lemon_bicarb"], icon: "⚗️" },
+      "vinegar|bleach": { obs: "Warning! These produce harmful chlorine gas. In a real lab, NEVER mix bleach and acid.", fact: "Mixing bleach (NaOCl) with acid releases toxic Cl₂ gas. Lab safety is critical!", color: "#E24B4A", ph: 3, bubbles: true, score: 5, completes: [], icon: "⚠️" },
+      "bicarb|water": { obs: "Bicarbonate dissolves, forming a mildly alkaline solution.", fact: "NaHCO₃ + H₂O → very slightly raises pH above 7.", color: "#9FE1CB", ph: 8, bubbles: false, score: 5, completes: [], icon: "💧" },
+    },
+    quizzes: [
+      { q: "What colour does litmus turn in an acid?", opts: ["Blue", "Red", "Green", "Yellow"], correct: 1, explain: "Acids turn litmus red. This is because acids release H⁺ ions that interact with the litmus dye." },
+      { q: "What is the pH of pure water?", opts: ["0", "5", "7", "14"], correct: 2, explain: "Water is neutral at pH 7, meaning it has equal concentrations of H⁺ and OH⁻ ions." },
+      { q: "What gas is produced when an acid reacts with a carbonate?", opts: ["Oxygen", "Hydrogen", "Carbon dioxide", "Nitrogen"], correct: 2, explain: "Acid + carbonate → salt + water + CO₂. The fizzing you see IS carbon dioxide gas escaping." },
+      { q: "Which of these is a strong BASE?", opts: ["Vinegar", "Lemon juice", "Bleach solution", "Rain water"], correct: 2, explain: "Bleach solution has pH ~11, making it a strong base. Vinegar and lemon juice are acids." },
+    ]
+  },
+  {
+    id: "states_matter",
+    name: "States of Matter",
+    icon: "💧",
+    color: "#378ADD",
+    bg: "rgba(55,138,221,0.1)",
+    subject: "Chemistry · Physical Changes",
+    hint: "Heat substances to change their state",
+    unlockAt: 20,
+    theory: [
+      { heading: "The three states", body: "Matter exists as solid, liquid, or gas. In solids, particles vibrate in fixed positions. Liquids flow freely. Gases spread out to fill any container." },
+      { heading: "Heating & melting", body: "Adding heat energy breaks the bonds holding particles in a solid together. At the melting point, solids become liquids. At the boiling point, liquids become gases.", formula: "Solid →(heat) Liquid →(heat) Gas" },
+      { heading: "Dissolving", body: "When a solute (like salt) dissolves in a solvent (like water), it spreads as individual ions — forming a solution. This is a physical change: the salt can be recovered by evaporation." }
+    ],
+    objectives: [
+      { id: "obj_heat_ice", text: "Heat ice to observe melting (solid → liquid)" },
+      { id: "obj_heat_water", text: "Heat water to observe boiling (liquid → gas)" },
+      { id: "obj_salt_water", text: "Dissolve salt in water to form a solution" },
+      { id: "obj_heat_wax", text: "Melt candle wax to show it is reversible" },
+      { id: "obj_evap", text: "Evaporate salt water to recover crystals" },
+    ],
+    reagents: [
+      { id: "ice", name: "Ice (H₂O solid)", color: "#B5D4F4", ph: 7 },
+      { id: "salt", name: "Table salt (NaCl)", color: "#D3D1C7", ph: 7 },
+      { id: "water_s", name: "Water", color: "#85B7EB", ph: 7 },
+      { id: "wax", name: "Candle wax", color: "#FAC775", ph: 7 },
+      { id: "sugar", name: "Sugar (sucrose)", color: "#EF9F27", ph: 7 },
+      { id: "sand", name: "Sand", color: "#B4B2A9", ph: 7 },
+    ],
+    reactions: {
+      "heat|ice": { obs: "The ice melts into liquid water as heat breaks the crystal bonds.", fact: "Ice melts at 0°C. Adding heat gives particles enough energy to escape the rigid solid structure.", color: "#85B7EB", ph: 7, bubbles: false, score: 10, temp: 10, completes: ["obj_heat_ice"], icon: "💧" },
+      "heat|water_s": { obs: "Water boils! Bubbles of steam (water vapour) rise to the surface.", fact: "Water boils at 100°C at sea level. Boiling converts liquid to gas — but it's still water: H₂O.", color: "#B5D4F4", ph: 7, bubbles: true, score: 10, temp: 100, completes: ["obj_heat_water"], icon: "♨️" },
+      "heat|wax": { obs: "The wax softens and melts into a clear liquid.", fact: "Wax melts at 37–45°C. Melting is reversible — cooling restores the solid. This is a physical change.", color: "#EF9F27", ph: 7, bubbles: false, score: 10, temp: 45, completes: ["obj_heat_wax"], icon: "🕯" },
+      "heat|salt": { obs: "No visible change! Salt needs over 800°C to melt.", fact: "Ionic compounds like NaCl have very high melting points due to strong ionic bonds between Na⁺ and Cl⁻.", color: "#D3D1C7", ph: 7, bubbles: false, score: 5, temp: 30, completes: [], icon: "🧂" },
+      "heat|sugar": { obs: "The sugar melts then browns — it is caramelising!", fact: "Sugar melts at ~186°C, then decomposes. Caramelisation is a chemical change (unlike simple melting).", color: "#BA7517", ph: 6, bubbles: false, score: 10, temp: 186, completes: [], icon: "🍬" },
+      "salt|water_s": { obs: "The salt dissolves completely — forming a clear salt solution.", fact: "NaCl dissociates into Na⁺ and Cl⁻ ions in water. Dissolving is a physical change — salt can be recovered by evaporation.", color: "#9FE1CB", ph: 7, bubbles: false, score: 10, temp: 25, completes: ["obj_salt_water"], icon: "🌊" },
+      "sand|water_s": { obs: "Sand sinks and does NOT dissolve — it is insoluble.", fact: "Sand (SiO₂) is insoluble in water. The mixture is a suspension, not a solution.", color: "#B4B2A9", ph: 7, bubbles: false, score: 5, temp: 25, completes: [], icon: "🏖" },
+      "sugar|water_s": { obs: "The sugar dissolves quickly, forming a sweet solution.", fact: "Sucrose is very soluble in water. Its molecules bond with water molecules via hydrogen bonds.", color: "#EF9F27", ph: 7, bubbles: false, score: 8, temp: 25, completes: [], icon: "🍬" },
+      "ice|water_s": { obs: "Ice floats on water then slowly melts.", fact: "Ice is less dense than liquid water — an unusual property that allows icebergs to float and aquatic life to survive winter.", color: "#B5D4F4", ph: 7, bubbles: false, score: 5, temp: 5, completes: [], icon: "🧊" },
+      "heat|salt|water_s": { obs: "The solution evaporates — salt crystals remain!", fact: "When water evaporates, dissolved ions are left behind as solid salt crystals. This is how sea salt is made!", color: "#D3D1C7", ph: 7, bubbles: true, score: 15, temp: 100, completes: ["obj_evap"], icon: "✨" },
+    },
+    quizzes: [
+      { q: "At what temperature does pure water boil at sea level?", opts: ["50°C", "75°C", "100°C", "120°C"], correct: 2, explain: "Water boils at 100°C (212°F) at standard atmospheric pressure (sea level). At altitude, it boils at a lower temperature." },
+      { q: "Which of these is a PHYSICAL change?", opts: ["Burning wood", "Digesting food", "Dissolving salt in water", "Rusting iron"], correct: 2, explain: "Dissolving salt is physical — no new substances form, and you can get the salt back by evaporating the water." },
+      { q: "Why does ice float on water?", opts: ["Ice is hotter", "Ice is less dense than liquid water", "Ice has more mass", "Ice is a different element"], correct: 1, explain: "Ice has an open hexagonal crystal structure making it less dense than liquid water. This rare property is essential for life on Earth." },
+      { q: "What happens at the MELTING POINT of a substance?", opts: ["It turns to gas", "It freezes solid", "It changes from solid to liquid", "It explodes"], correct: 2, explain: "At the melting point, enough heat energy is added to overcome the forces holding particles in the solid structure, allowing them to flow as a liquid." },
+    ]
+  },
+  {
+    id: "natural_indicators",
+    name: "Natural Indicators",
+    icon: "🌺",
+    color: "#D4537E",
+    bg: "rgba(212,83,126,0.1)",
+    subject: "Chemistry · Plant Dyes & pH",
+    hint: "Mix plant extracts with acids and bases",
+    unlockAt: 50,
+    theory: [
+      { heading: "Natural pH indicators", body: "Many plants contain pigments called anthocyanins that change colour depending on pH. These natural dyes have been used for centuries and are found in flowers, berries, and roots.", formula: "Anthocyanin + H⁺ → colour change" },
+      { heading: "Hibiscus flowers", body: "Hibiscus tea gets its deep red colour from anthocyanins. In acidic solution it turns pink/red; in neutral solution it stays deep red/purple; in alkaline solution it turns green — a dramatic colour change!" },
+      { heading: "Turmeric", body: "Turmeric contains curcumin, which turns yellow in neutral/acidic solution and bright red-brown in alkaline solution. It's used in cooking and traditional medicine across Africa and Asia." }
+    ],
+    objectives: [
+      { id: "obj_hib_acid", text: "Test hibiscus extract with an acid" },
+      { id: "obj_hib_base", text: "Test hibiscus extract with a base" },
+      { id: "obj_turmeric_base", text: "See turmeric change colour in a base" },
+      { id: "obj_compare", text: "Compare two indicators on the same substance" },
+      { id: "obj_rainbow", text: "Create a full pH colour spectrum" },
+    ],
+    reagents: [
+      { id: "hibiscus", name: "Hibiscus extract", color: "#D4537E", ph: 5 },
+      { id: "turmeric", name: "Turmeric solution", color: "#EF9F27", ph: 6 },
+      { id: "red_cabbage", name: "Red cabbage juice", color: "#993556", ph: 7 },
+      { id: "acid_hcl", name: "Dilute HCl (acid)", color: "#F5C4B3", ph: 2 },
+      { id: "naoh", name: "NaOH solution (base)", color: "#9FE1CB", ph: 13 },
+      { id: "baking_soda", name: "Baking soda solution", color: "#C0DD97", ph: 8.5 },
+    ],
+    reactions: {
+      "hibiscus|acid_hcl": { obs: "Hibiscus turns BRIGHT PINK in the strong acid!", fact: "In strongly acidic conditions, anthocyanins absorb longer wavelengths and reflect pink/red light.", color: "#EC4899", ph: 2, bubbles: false, score: 15, completes: ["obj_hib_acid"], icon: "🌸" },
+      "hibiscus|naoh": { obs: "Hibiscus turns GREEN in the strong base — incredible!", fact: "At very high pH (>10), anthocyanin structure changes to reflect green light. The same molecule — completely different colour!", color: "#3B6D11", ph: 13, bubbles: false, score: 20, completes: ["obj_hib_base"], icon: "🍃" },
+      "hibiscus|baking_soda": { obs: "Hibiscus turns blue-green in the mild base.", fact: "Baking soda (pH 8.5) causes a partial structural change in anthocyanins, producing a blue-green colour.", color: "#0F6E56", ph: 8.5, bubbles: false, score: 10, completes: [], icon: "🔵" },
+      "turmeric|naoh": { obs: "Turmeric turns deep red-brown in the strong base!", fact: "Curcumin in turmeric undergoes a structural change (tautomerisation) at high pH, changing colour from yellow to red-brown.", color: "#A32D2D", ph: 13, bubbles: false, score: 15, completes: ["obj_turmeric_base"], icon: "🟫" },
+      "turmeric|acid_hcl": { obs: "Turmeric stays yellow in acid — it's a better base indicator.", fact: "Curcumin doesn't change significantly at low pH. It only responds clearly in alkaline conditions above pH 8.", color: "#EF9F27", ph: 2, bubbles: false, score: 8, completes: [], icon: "🟡" },
+      "red_cabbage|acid_hcl": { obs: "Red cabbage juice turns bright RED in acid!", fact: "Red cabbage juice contains many anthocyanins and shows the full pH spectrum — it's one of the best natural indicators.", color: "#E24B4A", ph: 2, bubbles: false, score: 15, completes: [], icon: "🔴" },
+      "red_cabbage|naoh": { obs: "Red cabbage turns YELLOW-GREEN in the strong base!", fact: "At very high pH, cabbage anthocyanins degrade to yellow chalcone form, appearing green-yellow.", color: "#97C459", ph: 13, bubbles: false, score: 15, completes: [], icon: "💛" },
+      "red_cabbage|baking_soda": { obs: "Red cabbage turns blue-green in mild base.", fact: "Between pH 7–8.5, cabbage anthocyanins shift through green and blue, making it a good mid-range indicator.", color: "#1D9E75", ph: 8.5, bubbles: false, score: 10, completes: [], icon: "🟢" },
+      "hibiscus|turmeric": { obs: "The two indicators mix, creating a complex amber colour.", fact: "Different plant pigments interact! Both are pH-sensitive but respond differently across the scale.", color: "#BA7517", ph: 6, bubbles: false, score: 10, completes: ["obj_compare"], icon: "🎨" },
+      "turmeric|red_cabbage": { obs: "A deep purple-amber mixture — both indicators present!", fact: "Mixing indicators gives intermediate colours — this is why scientists prefer purified, single-compound indicators for precision.", color: "#7F77DD", ph: 6.5, bubbles: false, score: 10, completes: ["obj_rainbow"], icon: "🌈" },
+    },
+    quizzes: [
+      { q: "What plant pigments act as natural pH indicators?", opts: ["Chlorophyll", "Anthocyanins", "Carotenoids", "Melanin"], correct: 1, explain: "Anthocyanins are water-soluble pigments found in red, purple, and blue plants. Their structure changes with pH, causing colour changes." },
+      { q: "Hibiscus extract turns green in which type of solution?", opts: ["Strongly acidic", "Neutral", "Mildly acidic", "Strongly alkaline"], correct: 3, explain: "In strongly alkaline solution (high pH), hibiscus anthocyanins undergo structural change and reflect green light — one of the most dramatic natural indicator colour changes." },
+      { q: "What gives turmeric its yellow colour?", opts: ["Anthocyanin", "Curcumin", "Vitamin C", "Tannin"], correct: 1, explain: "Curcumin (C₂₁H₂₀O₆) is the active compound in turmeric. It's yellow at neutral/acidic pH and turns red-brown in alkaline conditions." },
+      { q: "Why is red cabbage a better indicator than turmeric?", opts: ["It smells better", "It shows more colour changes across the full pH range", "It is cheaper", "It is always red"], correct: 1, explain: "Red cabbage contains many different anthocyanins that respond across the whole pH 0–14 spectrum, showing red, purple, blue, green, and yellow at different pH values." },
+    ]
+  },
+  {
+    id: "plant_biology",
+    name: "Plant Biology",
+    icon: "🌱",
+    color: "#3B6D11",
+    bg: "rgba(59,109,17,0.1)",
+    subject: "Biology · Photosynthesis & Growth",
+    hint: "Vary conditions to see how plants respond",
+    unlockAt: 100,
+    theory: [
+      { heading: "Photosynthesis", body: "Plants make their own food using sunlight, water, and CO₂. Chlorophyll in leaves absorbs light energy and converts CO₂ and H₂O into glucose and oxygen.", formula: "6CO₂ + 6H₂O + light → C₆H₁₂O₆ + 6O₂" },
+      { heading: "Growth factors", body: "Plant growth depends on: light intensity, water availability, soil nutrients (especially nitrogen, phosphorus, potassium — NPK), CO₂ concentration, and temperature." },
+      { heading: "Osmosis", body: "Water moves from areas of high water concentration (dilute solution) to low water concentration (concentrated solution) through a semi-permeable membrane. This is how plant roots absorb water from soil." }
+    ],
+    objectives: [
+      { id: "obj_photo", text: "Observe oxygen production in photosynthesis" },
+      { id: "obj_fertiliser", text: "Apply fertiliser and compare plant growth" },
+      { id: "obj_osmosis", text: "Demonstrate osmosis with plant cells" },
+      { id: "obj_no_light", text: "Test a plant in darkness to observe etiolation" },
+      { id: "obj_co2", text: "Add CO₂ to boost photosynthesis rate" },
+    ],
+    reagents: [
+      { id: "plant", name: "Aquatic plant (Elodea)", color: "#3B6D11", ph: 7 },
+      { id: "light", name: "Bright light source", color: "#FAC775", ph: 7 },
+      { id: "co2_water", name: "CO₂-rich water", color: "#B5D4F4", ph: 6 },
+      { id: "fertiliser", name: "NPK Fertiliser", color: "#BA7517", ph: 7 },
+      { id: "salt_water", name: "Salt water (concentrated)", color: "#9FE1CB", ph: 7 },
+      { id: "plain_water", name: "Fresh water", color: "#85B7EB", ph: 7 },
+    ],
+    reactions: {
+      "plant|light": { obs: "Bubbles! The plant produces oxygen as it photosynthesises.", fact: "Elodea (aquatic plant) releases visible O₂ bubbles in light. You can count them to measure the photosynthesis rate!", color: "#97C459", ph: 7.5, bubbles: true, score: 15, completes: ["obj_photo"], icon: "☀️" },
+      "plant|co2_water": { obs: "More bubbles — extra CO₂ boosts the photosynthesis rate!", fact: "CO₂ is a reactant in photosynthesis. More CO₂ = faster rate (up to a point, after which light becomes the limiting factor).", color: "#5DCAA5", ph: 6.5, bubbles: true, score: 15, completes: ["obj_co2"], icon: "⬆️" },
+      "plant|light|co2_water": { obs: "Maximum bubbling! Both light AND CO₂ are supplied — high photosynthesis rate.", fact: "When both limiting factors are removed, the plant photosynthesises at its maximum rate. Temperature now becomes the next limiting factor.", color: "#639922", ph: 7.8, bubbles: true, score: 20, completes: [], icon: "🚀" },
+      "plant|fertiliser": { obs: "The plant shows greener, more vigorous growth with NPK fertiliser.", fact: "Nitrogen (N) builds proteins, Phosphorus (P) builds DNA and cell membranes, Potassium (K) controls water movement in cells.", color: "#3B6D11", ph: 7, bubbles: false, score: 10, completes: ["obj_fertiliser"], icon: "🌿" },
+      "plant|salt_water": { obs: "The plant wilts! Salt water draws water OUT of cells via osmosis.", fact: "Concentrated salt solution has lower water potential than plant cells. Water leaves cells by osmosis → cells become flaccid → plant wilts.", color: "#B4B2A9", ph: 7, bubbles: false, score: 10, completes: ["obj_osmosis"], icon: "😢" },
+      "plant|plain_water": { obs: "Plant cells absorb water and become turgid — the plant stands upright.", fact: "Fresh water has higher water potential than cells. Water enters by osmosis → cells become turgid → plant is supported. This is why plants wilt when dehydrated.", color: "#5DCAA5", ph: 7, bubbles: false, score: 8, completes: [], icon: "💧" },
+      "fertiliser|plain_water": { obs: "Fertiliser dissolves in water, ready to be absorbed by plant roots.", fact: "Mineral ions from fertiliser dissolve in soil water. Plant roots absorb them by active transport against the concentration gradient.", color: "#C0DD97", ph: 7, bubbles: false, score: 5, completes: [], icon: "🌊" },
+      "heat|plant": { obs: "The plant wilts in excess heat — enzymes are denatured above 45°C.", fact: "High temperatures denature the enzymes (including RuBisCO) that drive photosynthesis, halting the reaction even in bright light.", color: "#E24B4A", ph: 7, bubbles: false, score: 10, temp: 55, completes: ["obj_no_light"], icon: "🥵" },
+    },
+    quizzes: [
+      { q: "What is the correct equation for photosynthesis?", opts: ["O₂ + H₂O → CO₂ + glucose", "CO₂ + H₂O + light → glucose + O₂", "Glucose + O₂ → CO₂ + H₂O", "CO₂ + O₂ → glucose + H₂O"], correct: 1, explain: "Photosynthesis takes in CO₂ and water, uses light energy, and produces glucose (food) and oxygen as a by-product." },
+      { q: "What does the N in NPK fertiliser stand for?", opts: ["Nickel", "Neon", "Nitrogen", "Sodium"], correct: 2, explain: "NPK = Nitrogen, Phosphorus, Potassium. Nitrogen is essential for building amino acids and proteins, driving leafy green growth." },
+      { q: "What happens to a plant cell placed in CONCENTRATED salt water?", opts: ["It swells and bursts", "It stays the same", "It loses water and shrinks (plasmolysis)", "It photosynthesises faster"], correct: 2, explain: "By osmosis, water moves out of the cell into the higher concentration salt solution. The cell becomes plasmolysed (shrunken) — the plant wilts." },
+      { q: "Which gas do plants release during photosynthesis?", opts: ["Carbon dioxide", "Nitrogen", "Hydrogen", "Oxygen"], correct: 3, explain: "Oxygen is the by-product of splitting water molecules (photolysis) during the light-dependent stage of photosynthesis." },
+    ]
+  },
+  {
+    id: "food_tests",
+    name: "Food Tests",
+    icon: "🥗",
+    color: "#854F0B",
+    bg: "rgba(133,79,11,0.1)",
+    subject: "Biology · Macronutrients",
+    hint: "Use test reagents to identify food contents",
+    unlockAt: 160,
+    theory: [
+      { heading: "Why test food?", body: "Scientists test food to identify macronutrients: carbohydrates (starch and sugars), proteins, and fats (lipids). Each has a specific test with a known colour change." },
+      { heading: "Benedict's test for sugars", body: "Benedict's reagent (blue) turns orange-red when heated with a reducing sugar like glucose. The colour change indicates the presence of sugars in the food.", formula: "Blue → Green → Yellow → Orange → Brick red (more sugar)" },
+      { heading: "Biuret test for protein", body: "Biuret reagent turns from blue to purple/violet in the presence of peptide bonds (protein). The intensity of purple indicates how much protein is present." },
+      { heading: "Iodine test for starch", body: "Iodine solution (orange-brown) turns dark blue-black in the presence of starch. This is one of the most reliable food tests." }
+    ],
+    objectives: [
+      { id: "obj_benedict", text: "Use Benedict's test to detect a reducing sugar" },
+      { id: "obj_iodine", text: "Detect starch using iodine solution" },
+      { id: "obj_biuret", text: "Detect protein using Biuret reagent" },
+      { id: "obj_emulsion", text: "Test for fat using the emulsion test" },
+      { id: "obj_negative", text: "Record a negative result for any test" },
+    ],
+    reagents: [
+      { id: "benedicts", name: "Benedict's reagent", color: "#378ADD", ph: 9 },
+      { id: "iodine", name: "Iodine solution", color: "#BA7517", ph: 7 },
+      { id: "biuret_r", name: "Biuret reagent", color: "#7F77DD", ph: 11 },
+      { id: "glucose_sol", name: "Glucose solution", color: "#FAC775", ph: 6 },
+      { id: "starch_sol", name: "Starch solution", color: "#D3D1C7", ph: 7 },
+      { id: "egg_white", name: "Egg white (albumin)", color: "#F1EFE8", ph: 8 },
+      { id: "oil_emulsion", name: "Oil in water", color: "#EF9F27", ph: 7 },
+      { id: "water_f", name: "Water (control)", color: "#85B7EB", ph: 7 },
+    ],
+    reactions: {
+      "benedicts|glucose_sol": { obs: "HEAT required — the Benedict's turns brick RED! Glucose (reducing sugar) detected.", fact: "Glucose reduces Cu²⁺ in Benedict's reagent to Cu₂O (copper(I) oxide), which is the brick-red precipitate.", color: "#D85A30", ph: 9, bubbles: true, score: 20, completes: ["obj_benedict"], icon: "🟠" },
+      "benedicts|starch_sol": { obs: "Benedict's stays BLUE — no reducing sugar in starch!", fact: "Starch is a non-reducing sugar and does NOT react with Benedict's. To test starch, use iodine.", color: "#378ADD", ph: 9, bubbles: false, score: 10, completes: ["obj_negative"], icon: "🔵" },
+      "benedicts|water_f": { obs: "Benedict's stays blue — water contains no sugar. Negative result.", fact: "A negative Benedict's result (blue) confirms the absence of reducing sugars. Recording negatives is as important as positives in science.", color: "#378ADD", ph: 9, bubbles: false, score: 5, completes: [], icon: "🔵" },
+      "iodine|starch_sol": { obs: "Iodine turns DARK BLUE-BLACK — starch confirmed!", fact: "Starch has a helical structure. Iodine molecules fit inside the helix, forming a complex that absorbs all light except dark blue-black.", color: "#26215C", ph: 7, bubbles: false, score: 20, completes: ["obj_iodine"], icon: "⬛" },
+      "iodine|glucose_sol": { obs: "Iodine stays orange-brown — glucose is NOT starch. Negative result.", fact: "Glucose is a monosaccharide with no helical structure for iodine to enter. No colour change = no starch present.", color: "#BA7517", ph: 7, bubbles: false, score: 8, completes: [], icon: "🟠" },
+      "iodine|water_f": { obs: "Iodine stays orange in water — no starch present.", fact: "Pure water produces no colour change with iodine. This is your negative control result.", color: "#BA7517", ph: 7, bubbles: false, score: 5, completes: [], icon: "🟠" },
+      "biuret_r|egg_white": { obs: "Biuret reagent turns PURPLE — protein detected! (Albumin in egg white)", fact: "Biuret reagent contains NaOH and CuSO₄. Cu²⁺ forms a purple complex with the peptide bonds (–CO–NH–) in proteins.", color: "#7F77DD", ph: 11, bubbles: false, score: 20, completes: ["obj_biuret"], icon: "🟣" },
+      "biuret_r|glucose_sol": { obs: "Biuret stays blue — glucose is a sugar, not a protein.", fact: "Sugars have no peptide bonds, so they don't react with Biuret reagent. Negative result recorded.", color: "#534AB7", ph: 11, bubbles: false, score: 8, completes: [], icon: "🔵" },
+      "biuret_r|starch_sol": { obs: "Biuret stays blue — starch is a carbohydrate, not a protein.", fact: "Starch is made of glucose units joined by glycosidic bonds, not peptide bonds — so Biuret gives a negative result.", color: "#534AB7", ph: 11, bubbles: false, score: 5, completes: [], icon: "🔵" },
+      "oil_emulsion|water_f": { obs: "Oil and water form a milky white emulsion — fat test is positive!", fact: "The emulsion test: dissolve food in ethanol, pour into water. If fat is present, a cloudy white emulsion forms as oil droplets disperse.", color: "#F1EFE8", ph: 7, bubbles: false, score: 15, completes: ["obj_emulsion"], icon: "🥛" },
+    },
+    quizzes: [
+      { q: "What colour does Benedict's reagent turn in the presence of glucose?", opts: ["Purple", "Dark blue-black", "Brick red/orange", "Green"], correct: 2, explain: "Benedict's turns from blue → green → yellow → orange → brick red depending on sugar concentration. Brick red = high sugar content." },
+      { q: "Which reagent tests for the presence of STARCH?", opts: ["Benedict's", "Biuret", "Iodine solution", "Ethanol"], correct: 2, explain: "Iodine solution (orange-brown) turns dark blue-black in the presence of starch due to the iodine-starch complex formed inside the starch helix." },
+      { q: "What colour indicates a POSITIVE Biuret test for protein?", opts: ["Orange", "Yellow", "Blue-black", "Purple/violet"], correct: 3, explain: "Biuret reagent turns purple when Cu²⁺ ions form a complex with the peptide (–CO–NH–) bonds in proteins." },
+      { q: "A food sample is tested with Benedict's reagent and it stays blue. What does this tell you?", opts: ["The food contains a lot of sugar", "The food contains no reducing sugar", "The food is acidic", "The food contains protein"], correct: 1, explain: "A blue colour after heating with Benedict's is a NEGATIVE result, meaning no reducing sugars are present. Scientists always record negative results — they are valid scientific findings." },
+    ]
+  }
+];
+
+const ACHIEVEMENTS = [
+  { id: "first_reaction", icon: "⚗️", name: "First Reaction", desc: "Complete your first experiment", condition: s => s.totalReactions >= 1 },
+  { id: "acid_master", icon: "🔴", name: "Acid Master", desc: "Discover all acid reactions", condition: s => s.expComplete["acid_base"] },
+  { id: "bubble_hunter", icon: "🫧", name: "Bubble Hunter", desc: "Trigger 5 fizzing reactions", condition: s => s.bubbleCount >= 5 },
+  { id: "scientist", icon: "🔬", name: "Field Scientist", desc: "Earn 100 points", condition: s => s.totalScore >= 100 },
+  { id: "quiz_ace", icon: "🧠", name: "Quiz Ace", desc: "Answer 5 quiz questions correctly", condition: s => s.quizCorrect >= 5 },
+  { id: "green_thumb", icon: "🌿", name: "Green Thumb", desc: "Complete the Plant Biology module", condition: s => s.expComplete["plant_biology"] },
+  { id: "food_scientist", icon: "🥗", name: "Food Scientist", desc: "Complete all food tests", condition: s => s.expComplete["food_tests"] },
+  { id: "polymath", icon: "🏆", name: "Polymath", desc: "Complete all 5 experiments", condition: s => Object.keys(s.expComplete).length >= 5 },
+];
+
+/* ═══════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════ */
+const STATE = {
+  studentName: "Scientist",
+  score: 0,
+  xp: 0,
+  level: 1,
+  currentExp: null,
+  vessels: { A: [], B: [] },
+  logEntries: [],
+  completedReactions: {},
+  completedObjectives: {},
+  expComplete: {},
+  achievements: [],
+  totalReactions: 0,
+  bubbleCount: 0,
+  quizCorrect: 0,
+  totalScore: 0,
+  quizState: { idx: 0, answered: false },
+  activeNbTab: "log",
+  activeObsTab: "observation",
+  currentTemp: 25,
+  currentPh: 7,
+};
+
+function save() {
+  try { localStorage.setItem("queenspa_lab", JSON.stringify(STATE)); } catch(e) {}
+}
+function load() {
+  try {
+    const d = localStorage.getItem("queenspa_lab");
+    if (d) Object.assign(STATE, JSON.parse(d));
+  } catch(e) {}
+}
+
+/* ═══════════════════════════════════════════════
+   INTRO SCREEN
+═══════════════════════════════════════════════ */
+function buildIntroCards() {
+  const c = document.getElementById("introModCards");
+  EXPERIMENTS.forEach(e => {
+    const d = document.createElement("div");
+    d.className = "intro-mod-card";
+    d.innerHTML = `<div class="mod-icon">${e.icon}</div><div class="mod-name">${e.name}</div><div class="mod-count">${Object.keys(e.reactions).length} reactions</div>`;
+    d.onclick = () => { document.getElementById("nameInput").focus(); };
+    c.appendChild(d);
+  });
+}
+
+function startGame() {
+  const name = document.getElementById("nameInput").value.trim();
+  if (!name) { document.getElementById("nameInput").focus(); return; }
+  STATE.studentName = name;
+  load();
+  STATE.studentName = name;
+  document.getElementById("screen-intro").classList.remove("active");
+  document.getElementById("screen-game").classList.add("active");
+  document.getElementById("hudName").textContent = name;
+  document.getElementById("nbDate").textContent = new Date().toLocaleDateString("en-GB", { day:"2-digit", month:"short", year:"numeric" });
+  buildExpNav();
+  buildAchievementBubbles();
+  loadExperiment(EXPERIMENTS[0].id);
+  updateHUD();
+}
+
+document.getElementById("nameInput").addEventListener("keydown", e => { if (e.key === "Enter") startGame(); });
+
+/* ═══════════════════════════════════════════════
+   EXPERIMENT NAV
+═══════════════════════════════════════════════ */
+function buildExpNav() {
+  const list = document.getElementById("expList");
+  list.innerHTML = "";
+  EXPERIMENTS.forEach(exp => {
+    const locked = STATE.totalScore < exp.unlockAt;
+    const done = exp.objectives.filter(o => STATE.completedObjectives[o.id]).length;
+    const total = exp.objectives.length;
+    const pct = total ? Math.round(done / total * 100) : 0;
+
+    const div = document.createElement("div");
+    div.className = `exp-item${STATE.currentExp === exp.id ? " active" : ""}${locked ? " locked" : ""}`;
+    div.dataset.id = exp.id;
+    div.innerHTML = `
+      <div class="exp-icon" style="background:${exp.bg};">${exp.icon}</div>
+      <div class="exp-meta">
+        <div class="exp-name">${exp.name}</div>
+        <div class="exp-progress">${locked ? `🔒 Unlock at ${exp.unlockAt}pts` : `${done}/${total} objectives`}</div>
+        ${!locked ? `<div class="exp-progress-bar"><div class="exp-progress-fill" style="width:${pct}%;background:${exp.color};"></div></div>` : ""}
+      </div>
+    `;
+    if (!locked) div.onclick = () => loadExperiment(exp.id);
+    list.appendChild(div);
+  });
+}
+
+/* ═══════════════════════════════════════════════
+   LOAD EXPERIMENT
+═══════════════════════════════════════════════ */
+function loadExperiment(id) {
+  STATE.currentExp = id;
+  const exp = EXPERIMENTS.find(e => e.id === id);
+  if (!exp) return;
+
+  // Reset vessels
+  STATE.vessels = { A: [], B: [] };
+  clearVisualVessel("A"); clearVisualVessel("B");
+  document.getElementById("resultZone").classList.remove("visible");
+  setObservation("🔬", "Select reagents from the shelf above, then choose an action.", null);
+
+  // Banner
+  document.getElementById("bannerIcon").textContent = exp.icon;
+  document.getElementById("bannerIcon").style.background = exp.bg;
+  document.getElementById("bannerTitle").textContent = exp.name;
+  document.getElementById("bannerSub").textContent = exp.subject;
+  document.getElementById("bannerHint").textContent = exp.hint;
+
+  // Reagent shelf
+  buildReagentShelf(exp);
+
+  // Instruments
+  updatePh(7); updateTemp(25);
+
+  // Reaction counter
+  buildRxnCounter(exp);
+
+  // Notebook tabs
+  renderObjectives(exp);
+  renderTheory(exp);
+  renderLog();
+
+  // Quiz
+  STATE.quizState = { idx: 0, answered: false };
+  renderQuiz(exp);
+
+  // Update nav
+  buildExpNav();
+  save();
+}
+
+/* ═══════════════════════════════════════════════
+   REAGENT SHELF
+═══════════════════════════════════════════════ */
+function buildReagentShelf(exp) {
+  const grid = document.getElementById("reagentGrid");
+  grid.innerHTML = "";
+  exp.reagents.forEach(r => {
+    const chip = document.createElement("div");
+    chip.className = "reagent-chip";
+    chip.draggable = true;
+    chip.dataset.reagentId = r.id;
+    chip.innerHTML = `<div class="reagent-dot" style="background:${r.color}"></div>${r.name}`;
+    chip.addEventListener("dragstart", e => {
+      e.dataTransfer.setData("reagentId", r.id);
+      chip.classList.add("dragging");
+    });
+    chip.addEventListener("dragend", () => chip.classList.remove("dragging"));
+    chip.addEventListener("click", () => addReagentToVessel("A", r.id));
+    grid.appendChild(chip);
+  });
+
+  // Setup drop zones
+  ["A","B"].forEach(slot => {
+    const el = document.getElementById(`beaker${slot}`);
+    el.ondragover = e => { e.preventDefault(); el.classList.add("drag-over"); };
+    el.ondragleave = () => el.classList.remove("drag-over");
+    el.ondrop = e => {
+      e.preventDefault();
+      el.classList.remove("drag-over");
+      const rid = e.dataTransfer.getData("reagentId");
+      if (rid) addReagentToVessel(slot, rid);
+    };
+  });
+}
+
+function addReagentToVessel(slot, reagentId) {
+  const exp = EXPERIMENTS.find(e => e.id === STATE.currentExp);
+  if (!exp) return;
+  const reagent = exp.reagents.find(r => r.id === reagentId);
+  if (!reagent) return;
+  if (STATE.vessels[slot].includes(reagentId)) { showToast("Already added", `${reagent.name} is already in Beaker ${slot}`, "score"); return; }
+  if (STATE.vessels[slot].length >= 3) { showToast("Beaker full", "Max 3 reagents per beaker. Clear to add more.", ""); return; }
+
+  STATE.vessels[slot].push(reagentId);
+  updateVesselVisual(slot, exp);
+}
+
+function updateVesselVisual(slot, exp) {
+  const contents = STATE.vessels[slot];
+  const fill = document.getElementById(`fill${slot}`);
+  const surface = document.getElementById(`surface${slot}`);
+  const contentsEl = document.getElementById(`contents${slot}`);
+
+  if (contents.length === 0) {
+    fill.style.height = "0";
+    fill.style.background = "transparent";
+    surface.style.background = "transparent";
+    contentsEl.innerHTML = "";
+    return;
+  }
+
+  const lastR = exp.reagents.find(r => r.id === contents[contents.length - 1]);
+  const col = lastR ? lastR.color : "#85B7EB";
+  fill.style.height = Math.min(30 + contents.length * 28, 110) + "px";
+  fill.style.background = col + "55";
+  surface.style.background = col;
+
+  contentsEl.innerHTML = contents.map(id => {
+    const r = exp.reagents.find(x => x.id === id);
+    return r ? `<div class="content-tag"><div class="cdot" style="background:${r.color}"></div>${r.name.split(" ")[0]}</div>` : "";
+  }).join("");
+}
+
+function clearVisualVessel(slot) {
+  const fill = document.getElementById(`fill${slot}`);
+  const surface = document.getElementById(`surface${slot}`);
+  const contentsEl = document.getElementById(`contents${slot}`);
+  if (fill) { fill.style.height = "0"; fill.style.background = "transparent"; }
+  if (surface) surface.style.background = "transparent";
+  if (contentsEl) contentsEl.innerHTML = "";
+}
+
+function clearVessel(slot) {
+  STATE.vessels[slot] = [];
+  clearVisualVessel(slot);
+  const exp = EXPERIMENTS.find(e => e.id === STATE.currentExp);
+  if (exp) buildRxnCounter(exp);
+}
+
+/* ═══════════════════════════════════════════════
+   ACTIONS
+═══════════════════════════════════════════════ */
+function doAction(action) {
+  if (action === "reset") { resetBench(); return; }
+  const exp = EXPERIMENTS.find(e => e.id === STATE.currentExp);
+  if (!exp) return;
+
+  const all = [...STATE.vessels.A, ...STATE.vessels.B];
+  if (all.length === 0) { setObservation("⚠️", "Add at least one reagent to the beakers first.", null); return; }
+
+  let rxnKey = null;
+  let rxn = null;
+
+  if (action === "heat") {
+    const primary = STATE.vessels.A[0] || STATE.vessels.B[0];
+    const candidates = [
+      `heat|${primary}`,
+      `heat|${[...STATE.vessels.A].sort().join("|")}`,
+      `heat|${all.join("|")}`,
+    ];
+    for (const c of candidates) {
+      if (exp.reactions[c]) { rxnKey = c; rxn = exp.reactions[c]; break; }
+    }
+    if (!rxn) {
+      const baseKey = `heat|${primary}`;
+      setObservation("🌡️", "Nothing changes noticeably when heated under lab conditions.", "Some substances require extreme temperatures to change state or react.");
+      animateTemp(50, 30);
+      return;
+    }
+  } else if (action === "mix" || action === "filter") {
+    const sorted = [...all].sort();
+    const variants = [
+      sorted.join("|"),
+      all.join("|"),
+      [...STATE.vessels.A].sort().join("|") + "|" + [...STATE.vessels.B].sort().join("|"),
+    ];
+    for (const v of variants) {
+      if (exp.reactions[v]) { rxnKey = v; rxn = exp.reactions[v]; break; }
+    }
+    if (!rxn) {
+      for (const key of Object.keys(exp.reactions)) {
+        const parts = key.split("|").filter(p => p !== "heat");
+        if (parts.length > 0 && parts.every(p => all.includes(p))) {
+          rxnKey = key; rxn = exp.reactions[key]; break;
+        }
+      }
+    }
+    if (!rxn) {
+      setObservation("🔬", "No visible reaction. Try a different combination of reagents.", "Not all combinations produce a reaction — that's a valid scientific observation too!");
+      return;
+    }
+  }
+
+  if (!rxn) return;
+  triggerReaction(rxnKey, rxn, exp, action);
+}
+
+function triggerReaction(key, rxn, exp, action) {
+  const isNew = !STATE.completedReactions[STATE.currentExp + "|" + key];
+  let pts = isNew ? rxn.score : Math.floor(rxn.score * 0.3);
+  if (isNew) {
+    STATE.completedReactions[STATE.currentExp + "|" + key] = true;
+    STATE.totalReactions++;
+  }
+  if (rxn.bubbles) STATE.bubbleCount++;
+
+  // Update score & XP
+  STATE.score += pts;
+  STATE.totalScore = STATE.score;
+  addXP(pts * 2);
+  updateHUD();
+
+  // pH and temp
+  updatePh(rxn.ph || 7);
+  if (action === "heat") animateTemp(rxn.temp || 80, 25);
+
+  // Objectives
+  (rxn.completes || []).forEach(oid => {
+    if (!STATE.completedObjectives[oid]) {
+      STATE.completedObjectives[oid] = true;
+      showToast("Objective complete!", exp.objectives.find(o=>o.id===oid)?.text || "", "score");
+    }
+  });
+
+  // Check exp completion
+  const allDone = exp.objectives.every(o => STATE.completedObjectives[o.id]);
+  if (allDone && !STATE.expComplete[exp.id]) {
+    STATE.expComplete[exp.id] = true;
+    setTimeout(() => showCompletionModal(exp), 800);
+  }
+
+  // Observation
+  setObservation(rxn.icon || "⚗️", rxn.obs, rxn.fact);
+
+  // Result beaker
+  showResult(rxn, pts);
+
+  // Animations
+  flashBeakers(rxn);
+  if (rxn.bubbles) addBubbles("beakerR", 10);
+  if (action === "heat") addSteam("beakerR");
+
+  // Log
+  addLogEntry(rxn.obs, pts, isNew);
+
+  // Achievements
+  checkAchievements();
+
+  // Score toast for big pts
+  if (pts >= 15) showToast(`+${pts} pts`, isNew ? "New reaction discovered!" : "Reaction repeated", "score");
+
+  buildRxnCounter(exp);
+  renderObjectives(exp);
+  buildExpNav();
+  save();
+}
+
+function showResult(rxn, pts) {
+  const zone = document.getElementById("resultZone");
+  const fill = document.getElementById("fillR");
+  const surface = document.getElementById("surfaceR");
+  const badge = document.getElementById("resultBadge");
+
+  zone.classList.add("visible");
+  fill.style.height = "100px";
+  fill.style.background = rxn.color + "66";
+  surface.style.background = rxn.color;
+
+  badge.textContent = rxn.obs.split("—")[0].replace("!", "").trim().slice(0, 30);
+  badge.className = "result-badge " + (rxn.score >= 15 ? "success" : rxn.score >= 10 ? "neutral" : "neutral");
+
+  if (rxn.bubbles) addBubbles("beakerR", 12);
+}
+
+function flashBeakers(rxn) {
+  ["beakerA", "beakerB"].forEach(id => {
+    const el = document.getElementById(id);
+    el.classList.add("react-flash");
+    setTimeout(() => el.classList.remove("react-flash"), 600);
+  });
+}
+
+function addBubbles(containerId, count) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  el.querySelectorAll(".bubble").forEach(b => b.remove());
+  for (let i = 0; i < count; i++) {
+    setTimeout(() => {
+      const b = document.createElement("div");
+      b.className = "bubble";
+      const size = 4 + Math.random() * 7;
+      b.style.cssText = `width:${size}px;height:${size}px;left:${8+Math.random()*70}%;bottom:${Math.random()*50}%;--dur:${0.8+Math.random()*0.8}s;--delay:${Math.random()*0.4}s;`;
+      el.appendChild(b);
+      setTimeout(() => b.remove(), 3000);
+    }, i * 120);
+  }
+}
+
+function addSteam(containerId) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  for (let i = 0; i < 6; i++) {
+    setTimeout(() => {
+      const s = document.createElement("div");
+      s.className = "smoke";
+      const size = 8 + Math.random() * 8;
+      s.style.cssText = `width:${size}px;height:${size}px;left:${20+Math.random()*60}%;bottom:90%;animation-duration:${1.5+Math.random()}s;`;
+      el.appendChild(s);
+      setTimeout(() => s.remove(), 2500);
+    }, i * 200);
+  }
+}
+
+function resetBench() {
+  STATE.vessels = { A: [], B: [] };
+  clearVisualVessel("A"); clearVisualVessel("B");
+  document.getElementById("resultZone").classList.remove("visible");
+  document.getElementById("fillR").style.height = "0";
+  setObservation("🔬", "Bench reset. Select new reagents to begin.", null);
+  updatePh(7); updateTemp(25);
+}
+
+/* ═══════════════════════════════════════════════
+   INSTRUMENTS
+═══════════════════════════════════════════════ */
+function updatePh(ph) {
+  STATE.currentPh = ph;
+  const pct = (ph / 14) * 100;
+  document.getElementById("phIndicator").style.left = pct + "%";
+  document.getElementById("phVal").textContent = ph.toFixed(1);
+}
+
+function updateTemp(t) {
+  STATE.currentTemp = t;
+  const pct = Math.min((t / 200) * 100, 100);
+  document.getElementById("gaugeBar").style.width = pct + "%";
+  document.getElementById("gaugeVal").textContent = Math.round(t) + "°C";
+}
+
+function animateTemp(target, resetTo) {
+  let current = 25;
+  const step = (target - 25) / 20;
+  const interval = setInterval(() => {
+    current += step;
+    if (current >= target) { clearInterval(interval); updateTemp(target); setTimeout(() => animateTemp2(target, resetTo), 1200); }
+    else updateTemp(Math.round(current));
+  }, 50);
+}
+
+function animateTemp2(from, to) {
+  let current = from;
+  const interval = setInterval(() => {
+    current -= 2;
+    if (current <= to) { clearInterval(interval); updateTemp(to); }
+    else updateTemp(Math.round(current));
+  }, 80);
+}
+
+function buildRxnCounter(exp) {
+  const el = document.getElementById("rxnCounter");
+  const total = Object.keys(exp.reactions).length;
+  const done = Object.keys(exp.reactions).filter(k => STATE.completedReactions[STATE.currentExp + "|" + k]).length;
+  el.innerHTML = "";
+  for (let i = 0; i < total; i++) {
+    const dot = document.createElement("div");
+    dot.className = "rxn-dot" + (i < done ? " done" : "");
+    el.appendChild(dot);
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   OBSERVATION PANEL
+═══════════════════════════════════════════════ */
+function setObservation(icon, text, fact) {
+  document.getElementById("obsIcon").textContent = icon;
+  document.getElementById("obsText").textContent = text;
+  const factEl = document.getElementById("obsFact");
+  if (fact) { factEl.textContent = "💡 " + fact; factEl.style.display = "block"; }
+  else factEl.style.display = "none";
+}
+
+function switchObsTab(tab, el) {
+  STATE.activeObsTab = tab;
+  document.querySelectorAll(".obs-tab").forEach(t => t.classList.remove("active"));
+  el.classList.add("active");
+  document.getElementById("obsObservation").classList.toggle("hidden", tab !== "observation");
+  document.getElementById("obsQuiz").classList.toggle("hidden", tab !== "quiz");
+}
+
+/* ═══════════════════════════════════════════════
+   QUIZ
+═══════════════════════════════════════════════ */
+function renderQuiz(exp) {
+  const el = document.getElementById("quizContainer");
+  if (!exp.quizzes || exp.quizzes.length === 0) { el.innerHTML = "<div style='color:var(--text3);font-size:13px;'>No quiz for this module yet.</div>"; return; }
+  const q = exp.quizzes[STATE.quizState.idx % exp.quizzes.length];
+  el.innerHTML = `
+    <div class="quiz-card">
+      <div class="quiz-q">Q${(STATE.quizState.idx % exp.quizzes.length) + 1}/${exp.quizzes.length}: ${q.q}</div>
+      <div class="quiz-options" id="quizOpts">
+        ${q.opts.map((o,i) => `<div class="quiz-opt" data-idx="${i}" onclick="answerQuiz(${i})">${String.fromCharCode(65+i)}. ${o}</div>`).join("")}
+      </div>
+      <div class="quiz-feedback" id="quizFeedback" style="display:none;"></div>
+    </div>
+  `;
+  STATE.quizState.answered = false;
+}
+
+function answerQuiz(idx) {
+  if (STATE.quizState.answered) return;
+  STATE.quizState.answered = true;
+  const exp = EXPERIMENTS.find(e => e.id === STATE.currentExp);
+  const q = exp.quizzes[STATE.quizState.idx % exp.quizzes.length];
+  const opts = document.querySelectorAll(".quiz-opt");
+  opts.forEach((o, i) => { o.style.pointerEvents = "none"; if (i === q.correct) o.classList.add("correct"); else if (i === idx && idx !== q.correct) o.classList.add("wrong"); });
+  const correct = idx === q.correct;
+  if (correct) { STATE.score += 5; STATE.totalScore = STATE.score; STATE.quizCorrect++; addXP(10); updateHUD(); showToast("Correct! +5pts", "Well done!", "score"); }
+  const fb = document.getElementById("quizFeedback");
+  fb.style.display = "block";
+  fb.innerHTML = `<strong style="color:${correct ? "var(--accent)" : "var(--danger)"}">${correct ? "✓ Correct!" : "✗ Incorrect."}</strong><br>${q.explain}<br><button class="quiz-next-btn" onclick="nextQuiz()">Next Question →</button>`;
+  checkAchievements(); save();
+}
+
+function nextQuiz() {
+  STATE.quizState.idx++;
+  const exp = EXPERIMENTS.find(e => e.id === STATE.currentExp);
+  renderQuiz(exp);
+}
+
+/* ═══════════════════════════════════════════════
+   NOTEBOOK
+═══════════════════════════════════════════════ */
+function addLogEntry(obs, pts, isNew) {
+  const now = new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+  STATE.logEntries.unshift({ time: now, text: obs, pts, isNew });
+  if (STATE.logEntries.length > 50) STATE.logEntries.pop();
+  renderLog();
+}
+
+function renderLog() {
+  const el = document.getElementById("nbLog");
+  if (STATE.logEntries.length === 0) { el.innerHTML = "<div style='color:var(--text3);font-size:12px;font-style:italic;padding:8px 0;'>No entries yet...</div>"; return; }
+  el.innerHTML = STATE.logEntries.map(e => `
+    <div class="log-entry">
+      <div class="log-time">${e.time}</div>
+      <div class="log-text">${e.text}</div>
+      <div class="log-pts">${e.isNew ? "+" : ""}${e.pts}</div>
+    </div>
+  `).join("");
+}
+
+function renderObjectives(exp) {
+  const el = document.getElementById("nbObjectives");
+  el.innerHTML = exp.objectives.map(o => `
+    <div class="obj-item${STATE.completedObjectives[o.id] ? " done" : ""}">
+      <div class="obj-check">${STATE.completedObjectives[o.id] ? "✓" : ""}</div>
+      <div class="obj-text">${o.text}</div>
+    </div>
+  `).join("");
+}
+
+function renderTheory(exp) {
+  const el = document.getElementById("nbTheory");
+  el.innerHTML = exp.theory.map(t => `
+    <div class="theory-block">
+      <h4>${t.heading}</h4>
+      <p>${t.body}</p>
+      ${t.formula ? `<div class="formula">${t.formula}</div>` : ""}
+    </div>
+  `).join("");
+}
+
+function renderStats() {
+  const el = document.getElementById("nbStats");
+  const totalRxns = Object.keys(STATE.completedReactions).length;
+  const totalObj = Object.keys(STATE.completedObjectives).length;
+  const allObj = EXPERIMENTS.reduce((a,e) => a + e.objectives.length, 0);
+  const expDone = Object.keys(STATE.expComplete).length;
+
+  const masteries = EXPERIMENTS.map(exp => {
+    const total = Object.keys(exp.reactions).length;
+    const done = Object.keys(exp.reactions).filter(k => STATE.completedReactions[exp.id+"|"+k]).length;
+    return { name: exp.name, icon: exp.icon, color: exp.color, pct: total ? Math.round(done/total*100) : 0 };
+  });
+
+  el.innerHTML = `
+    <div class="stats-grid">
+      <div class="stat-card"><div class="sv">${STATE.score}</div><div class="sk">TOTAL POINTS</div></div>
+      <div class="stat-card"><div class="sv">${STATE.level}</div><div class="sk">LEVEL</div></div>
+      <div class="stat-card"><div class="sv">${totalRxns}</div><div class="sk">REACTIONS</div></div>
+      <div class="stat-card"><div class="sv">${totalObj}/${allObj}</div><div class="sk">OBJECTIVES</div></div>
+    </div>
+    <div style="font-size:10px;font-family:var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:8px;">Module mastery</div>
+    ${masteries.map(m => `
+      <div class="mastery-row">
+        <span style="font-size:14px;margin-right:4px;">${m.icon}</span>
+        <span class="mastery-name">${m.name}</span>
+        <div class="mastery-bar-wrap"><div class="mastery-bar-fill" style="width:${m.pct}%;background:${m.color};"></div></div>
+        <span class="mastery-pct">${m.pct}%</span>
+      </div>
+    `).join("")}
+  `;
+}
+
+function switchNbTab(tab, el) {
+  STATE.activeNbTab = tab;
+  document.querySelectorAll(".nb-tab").forEach(t => t.classList.remove("active"));
+  el.classList.add("active");
+  ["log","objectives","theory","stats"].forEach(t => {
+    document.getElementById("nb" + t.charAt(0).toUpperCase() + t.slice(1)).classList.toggle("hidden", t !== tab);
+  });
+  if (tab === "stats") renderStats();
+}
+
+/* ═══════════════════════════════════════════════
+   HUD
+═══════════════════════════════════════════════ */
+function updateHUD() {
+  document.getElementById("hudScore").textContent = STATE.score;
+  document.getElementById("hudLevel").textContent = STATE.level;
+  const xpForLevel = STATE.level * 100;
+  const pct = Math.min((STATE.xp / xpForLevel) * 100, 100);
+  document.getElementById("xpFill").style.width = pct + "%";
+}
+
+function addXP(amount) {
+  STATE.xp += amount;
+  const threshold = STATE.level * 100;
+  if (STATE.xp >= threshold) {
+    STATE.xp -= threshold;
+    STATE.level++;
+    showToast("Level up! 🎉", `You are now Level ${STATE.level}`, "achievement");
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   ACHIEVEMENTS
+═══════════════════════════════════════════════ */
+function checkAchievements() {
+  ACHIEVEMENTS.forEach(ach => {
+    if (!STATE.achievements.includes(ach.id) && ach.condition(STATE)) {
+      STATE.achievements.push(ach.id);
+      showToast(`${ach.icon} ${ach.name}`, ach.desc, "achievement");
+      buildAchievementBubbles();
+    }
+  });
+}
+
+function buildAchievementBubbles() {
+  const el = document.getElementById("achBubbles");
+  el.innerHTML = ACHIEVEMENTS.map(a => `
+    <div class="ach-bubble${STATE.achievements.includes(a.id) ? " earned" : ""}" data-tip="${a.name}: ${a.desc}">${a.icon}</div>
+  `).join("");
+}
+
+/* ═══════════════════════════════════════════════
+   TOASTS
+═══════════════════════════════════════════════ */
+function showToast(title, sub, type) {
+  const container = document.getElementById("toastContainer");
+  const toast = document.createElement("div");
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `<div class="toast-icon">${type === "achievement" ? "🏆" : type === "score" ? "⭐" : "ℹ️"}</div><div class="toast-body"><div class="toast-title">${title}</div><div class="toast-sub">${sub}</div></div>`;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.classList.add("hide");
+    setTimeout(() => toast.remove(), 400);
+  }, 3000);
+}
+
+/* ═══════════════════════════════════════════════
+   COMPLETION MODAL
+═══════════════════════════════════════════════ */
+function showCompletionModal(exp) {
+  document.getElementById("modalTitle").textContent = exp.name + " Complete!";
+  document.getElementById("modalDesc").textContent = `You've mastered all objectives in "${exp.name}"!`;
+  document.getElementById("modalScore").textContent = STATE.score;
+  document.getElementById("completionModal").classList.add("open");
+  showToast(`${exp.icon} Module complete!`, "All objectives done!", "achievement");
+  addXP(50);
+}
+
+function closeModal() { document.getElementById("completionModal").classList.remove("open"); }
+
+function nextExperiment() {
+  closeModal();
+  const idx = EXPERIMENTS.findIndex(e => e.id === STATE.currentExp);
+  if (idx < EXPERIMENTS.length - 1) {
+    const next = EXPERIMENTS[idx + 1];
+    if (STATE.totalScore >= next.unlockAt) loadExperiment(next.id);
+    else showToast("Locked!", `Need ${next.unlockAt} pts to unlock ${next.name}`, "");
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   UTILITIES
+═══════════════════════════════════════════════ */
+function goHome() {
+  save();
+  document.getElementById("screen-game").classList.remove("active");
+  document.getElementById("screen-intro").classList.add("active");
+}
+
+function toggleFullscreen() {
+  if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {});
+  else document.exitFullscreen();
+}
+
+/* ═══════════════════════════════════════════════
+   BOOT
+═══════════════════════════════════════════════ */
+buildIntroCards();
+load();
+</script>
+</body>
+</html>

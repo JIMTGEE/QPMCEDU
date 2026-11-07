@@ -1,0 +1,1410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Word Search Adventure — Ghana Edition</title>
+    <script src="https://cdn.jsdelivr.net/npm/js-confetti@0.12.0/dist/js-confetti.browser.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #FF6B35;
+            --primary-dark: #E55A2B;
+            --secondary: #0F172A;
+            --surface: #1E293B;
+            --surface-light: #334155;
+            --text: #F1F5F9;
+            --text-muted: #94A3B8;
+            --accent-gold: #F59E0B;
+            --accent-green: #10B981;
+            --accent-red: #EF4444;
+            --accent-blue: #3B82F6;
+            --accent-purple: #8B5CF6;
+            --glass-bg: rgba(30, 41, 59, 0.8);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --radius: 20px;
+            --radius-sm: 12px;
+            --shadow-lg: 0 25px 50px rgba(0,0,0,0.5);
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--secondary);
+            font-family: 'Nunito', sans-serif;
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .bg-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+            animation: float 8s ease-in-out infinite;
+        }
+        .bg-orb:nth-child(1) {
+            width: 400px; height: 400px;
+            background: var(--accent-purple);
+            top: -10%; left: -10%;
+            animation-delay: 0s;
+        }
+        .bg-orb:nth-child(2) {
+            width: 300px; height: 300px;
+            background: var(--primary);
+            bottom: -10%; right: -10%;
+            animation-delay: -4s;
+        }
+        .bg-orb:nth-child(3) {
+            width: 250px; height: 250px;
+            background: var(--accent-blue);
+            top: 50%; left: 50%;
+            animation-delay: -2s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(50px, -50px) scale(1.1); }
+            50% { transform: translate(-30px, 30px) scale(0.9); }
+            75% { transform: translate(-50px, -30px) scale(1.05); }
+        }
+
+        /* Main Container */
+        .main-container {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .game-wrapper {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 30px;
+            padding: 2.5rem;
+            max-width: 1000px;
+            width: 100%;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-wrapper::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #FF6B35, #F59E0B, #10B981, #3B82F6, #8B5CF6);
+        }
+
+        /* Typography */
+        .game-title {
+            font-family: 'Fredoka One', cursive;
+            font-size: clamp(2rem, 4vw, 3rem);
+            background: linear-gradient(135deg, #FF6B35, #F59E0B, #10B981);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .game-subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            font-family: 'Nunito', sans-serif;
+            font-weight: 800;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 0; height: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:hover::after {
+            width: 300px; height: 300px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #FF6B35, #FF8C42);
+            color: white;
+            box-shadow: 0 5px 20px rgba(255,107,53,0.4);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(255,107,53,0.6);
+        }
+
+        .btn-secondary {
+            background: var(--surface-light);
+            color: var(--text);
+            border: 1px solid var(--glass-border);
+        }
+        .btn-secondary:hover {
+            background: var(--surface);
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #10B981, #059669);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #EF4444, #DC2626);
+            color: white;
+        }
+
+        /* Select Styling */
+        .custom-select {
+            background: var(--surface);
+            border: 2px solid var(--glass-border);
+            border-radius: 50px;
+            padding: 0.75rem 1.5rem;
+            color: var(--text);
+            font-family: 'Nunito', sans-serif;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            outline: none;
+            transition: var(--transition);
+            width: 100%;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+        }
+
+        .custom-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(255,107,53,0.1);
+        }
+
+        /* 3D Cube Container */
+        .cube-scene {
+            perspective: 1200px;
+            width: 450px;
+            height: 450px;
+            margin: 2rem auto;
+            position: relative;
+        }
+
+        .cube-wrapper {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: grab;
+        }
+
+        .cube-wrapper:active {
+            cursor: grabbing;
+        }
+
+        .cube-face {
+            position: absolute;
+            width: 450px;
+            height: 450px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(4, 1fr);
+            gap: 4px;
+            padding: 4px;
+            background: var(--surface);
+            border: 2px solid var(--glass-border);
+            border-radius: 12px;
+            backface-visibility: hidden;
+        }
+
+        .cube-face.front  { transform: rotateY(0deg) translateZ(225px); }
+        .cube-face.back   { transform: rotateY(180deg) translateZ(225px); }
+        .cube-face.right  { transform: rotateY(90deg) translateZ(225px); }
+        .cube-face.left   { transform: rotateY(-90deg) translateZ(225px); }
+        .cube-face.top    { transform: rotateX(90deg) translateZ(225px); }
+        .cube-face.bottom { transform: rotateX(-90deg) translateZ(225px); }
+
+        /* Grid Cells */
+        .cell {
+            background: var(--surface-light);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            font-weight: 900;
+            font-family: 'Fredoka One', cursive;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+            color: var(--text);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cell::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .cell:hover::before {
+            opacity: 1;
+        }
+
+        .cell:hover {
+            transform: scale(1.08);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            z-index: 10;
+        }
+
+        .cell.selected {
+            background: var(--primary) !important;
+            color: white !important;
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(255,107,53,0.5);
+            animation: cellPulse 0.5s ease;
+        }
+
+        .cell.found {
+            background: var(--accent-green) !important;
+            color: white !important;
+            animation: foundBounce 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @keyframes cellPulse {
+            0%, 100% { transform: scale(1.1); }
+            50% { transform: scale(1.15); }
+        }
+
+        @keyframes foundBounce {
+            0% { transform: scale(1); }
+            30% { transform: scale(1.3); }
+            60% { transform: scale(0.9); }
+            100% { transform: scale(1); }
+        }
+
+        /* Stats Bar */
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-sm);
+            padding: 1rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+        }
+
+        .stat-card.score::before { background: var(--accent-gold); }
+        .stat-card.words::before { background: var(--accent-green); }
+        .stat-card.streak::before { background: var(--accent-red); }
+        .stat-card.timer::before { background: var(--accent-blue); }
+
+        .stat-value {
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.8rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            background: var(--surface-light);
+            border-radius: 50px;
+            height: 12px;
+            margin: 1rem 0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #FF6B35, #F59E0B, #10B981);
+            border-radius: 50px;
+            transition: width 0.5s ease;
+            position: relative;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* Word List */
+        .word-list-container {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-sm);
+            padding: 1rem;
+            margin: 1rem 0;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .word-list-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        .word-list-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .word-list-container::-webkit-scrollbar-thumb {
+            background: var(--surface-light);
+            border-radius: 3px;
+        }
+
+        .word-tag {
+            display: inline-block;
+            padding: 0.4rem 0.8rem;
+            margin: 0.3rem;
+            background: var(--surface-light);
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            transition: var(--transition);
+            cursor: default;
+        }
+
+        .word-tag.found {
+            background: var(--accent-green);
+            color: white;
+            text-decoration: line-through;
+            opacity: 0.7;
+            animation: wordFound 0.5s ease;
+        }
+
+        @keyframes wordFound {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        /* Feedback Toast */
+        .feedback-toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--surface);
+            border: 2px solid var(--glass-border);
+            border-radius: 50px;
+            padding: 1rem 2rem;
+            font-weight: 800;
+            font-size: 1rem;
+            z-index: 1000;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .feedback-toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .feedback-toast.success {
+            border-color: var(--accent-green);
+            background: rgba(16, 185, 129, 0.2);
+        }
+
+        .feedback-toast.error {
+            border-color: var(--accent-red);
+            background: rgba(239, 68, 68, 0.2);
+        }
+
+        /* Rotation Controls */
+        .rotation-controls {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 1.5rem;
+        }
+
+        .rotate-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--surface);
+            border: 2px solid var(--glass-border);
+            color: var(--text);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .rotate-btn:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+            transform: scale(1.1);
+            box-shadow: 0 5px 20px rgba(255,107,53,0.4);
+        }
+
+        /* Dark Mode Toggle */
+        .dark-mode-toggle {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            z-index: 100;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--surface);
+            border: 2px solid var(--glass-border);
+            color: var(--text);
+            font-size: 1.3rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .dark-mode-toggle:hover {
+            transform: scale(1.1) rotate(15deg);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+
+        /* Achievement Popup */
+        .achievement-popup {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            z-index: 1000;
+            background: linear-gradient(135deg, var(--accent-gold), #F59E0B);
+            color: #1a1a2e;
+            padding: 1rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 800;
+            font-family: 'Fredoka One', cursive;
+            box-shadow: 0 10px 40px rgba(245, 158, 11, 0.5);
+            animation: slideIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), slideOut 0.5s 2.5s forwards;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(120%); }
+            to { transform: translateX(0); }
+        }
+
+        @keyframes slideOut {
+            from { transform: translateX(0); }
+            to { transform: translateX(120%); }
+        }
+
+        /* High Scores */
+        .score-item {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-sm);
+            padding: 1rem 1.5rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: var(--transition);
+        }
+
+        .score-item:hover {
+            transform: translateX(5px);
+            border-color: var(--accent-gold);
+        }
+
+        .score-rank {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.2rem;
+        }
+
+        .score-rank.gold { background: linear-gradient(135deg, #F59E0B, #D97706); color: white; }
+        .score-rank.silver { background: linear-gradient(135deg, #94A3B8, #64748B); color: white; }
+        .score-rank.bronze { background: linear-gradient(135deg, #B45309, #92400E); color: white; }
+
+        @media (max-width: 768px) {
+            .game-wrapper { padding: 1.5rem; }
+            .cube-scene { width: 320px; height: 320px; }
+            .cube-face { 
+                width: 320px; height: 320px; 
+            }
+            .cube-face.front  { transform: rotateY(0deg) translateZ(160px); }
+            .cube-face.back   { transform: rotateY(180deg) translateZ(160px); }
+            .cube-face.right  { transform: rotateY(90deg) translateZ(160px); }
+            .cube-face.left   { transform: rotateY(-90deg) translateZ(160px); }
+            .cube-face.top    { transform: rotateX(90deg) translateZ(160px); }
+            .cube-face.bottom { transform: rotateX(-90deg) translateZ(160px); }
+            .cell { font-size: 1.1rem; }
+            .stats-bar { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 480px) {
+            .cube-scene { width: 260px; height: 260px; }
+            .cube-face { 
+                width: 260px; height: 260px; 
+            }
+            .cube-face.front  { transform: rotateY(0deg) translateZ(130px); }
+            .cube-face.back   { transform: rotateY(180deg) translateZ(130px); }
+            .cube-face.right  { transform: rotateY(90deg) translateZ(130px); }
+            .cube-face.left   { transform: rotateY(-90deg) translateZ(130px); }
+            .cube-face.top    { transform: rotateX(90deg) translateZ(130px); }
+            .cube-face.bottom { transform: rotateX(-90deg) translateZ(130px); }
+            .cell { font-size: 0.9rem; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Animation -->
+    <div class="bg-animation">
+        <div class="bg-orb"></div>
+        <div class="bg-orb"></div>
+        <div class="bg-orb"></div>
+    </div>
+
+    <!-- Dark Mode Toggle -->
+    <button class="dark-mode-toggle" onclick="toggleDarkMode()" title="Toggle Dark Mode">🌙</button>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Menu Screen -->
+        <div id="menu-screen" class="game-wrapper">
+            <h1 class="game-title">🔍 3D Word Search</h1>
+            <p class="game-subtitle">Explore the cube! Find hidden words inspired by Ghanaian learning themes.</p>
+            
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display:block;font-weight:700;margin-bottom:0.5rem;color:var(--text-muted);">Select Theme</label>
+                <select id="theme-select" class="custom-select">
+                    <option value="science">🔬 Science Vocabulary</option>
+                    <option value="english">📖 English Terms</option>
+                    <option value="history">🏛️ Ghanaian History</option>
+                    <option value="wellbeing">🧘 Wellbeing Concepts</option>
+                </select>
+            </div>
+
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem;margin-bottom:1.5rem;">
+                <button onclick="startGame('easy')" class="btn btn-success">
+                    🌱 Easy<br><small style="font-size:0.7rem;">5 Words</small>
+                </button>
+                <button onclick="startGame('medium')" class="btn btn-primary">
+                    ⚡ Medium<br><small style="font-size:0.7rem;">10 Words</small>
+                </button>
+                <button onclick="startGame('hard')" class="btn btn-danger">
+                    🔥 Hard<br><small style="font-size:0.7rem;">15 Words</small>
+                </button>
+            </div>
+
+            <div style="display:flex;gap:0.75rem;">
+                <button onclick="showHighScores()" class="btn btn-secondary" style="flex:1;">
+                    🏆 High Scores
+                </button>
+                <button onclick="showInstructions()" class="btn btn-secondary" style="flex:1;">
+                    📖 How to Play
+                </button>
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="game-screen" class="game-wrapper" style="display:none;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem;">
+                <h2 style="font-family:'Fredoka One',cursive;font-size:1.5rem;">
+                    <span id="current-theme-icon"></span> <span id="current-theme"></span>
+                </h2>
+                <span class="btn btn-secondary" style="font-size:0.8rem;padding:0.4rem 1rem;">
+                    <span id="current-difficulty"></span>
+                </span>
+            </div>
+
+            <!-- Stats Bar -->
+            <div class="stats-bar">
+                <div class="stat-card score">
+                    <div class="stat-value" id="score" style="color:var(--accent-gold);">0</div>
+                    <div class="stat-label">Points</div>
+                </div>
+                <div class="stat-card words">
+                    <div class="stat-value" id="words-found" style="color:var(--accent-green);">0/<span id="total-words">5</span></div>
+                    <div class="stat-label">Words Found</div>
+                </div>
+                <div class="stat-card streak">
+                    <div class="stat-value" id="streak" style="color:var(--accent-red);">0</div>
+                    <div class="stat-label">Streak 🔥</div>
+                </div>
+                <div class="stat-card timer">
+                    <div class="stat-value" id="timer" style="color:var(--accent-blue);">180</div>
+                    <div class="stat-label">Seconds</div>
+                </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="progress-container">
+                <div class="progress-fill" id="progress-fill" style="width:0%;"></div>
+            </div>
+
+            <!-- Word List -->
+            <div class="word-list-container" id="word-list"></div>
+
+            <!-- 3D Cube -->
+            <div class="cube-scene" id="cube-scene">
+                <div class="cube-wrapper" id="cube">
+                    <div class="cube-face front" id="face-front"></div>
+                    <div class="cube-face back" id="face-back"></div>
+                    <div class="cube-face right" id="face-right"></div>
+                    <div class="cube-face left" id="face-left"></div>
+                    <div class="cube-face top" id="face-top"></div>
+                    <div class="cube-face bottom" id="face-bottom"></div>
+                </div>
+            </div>
+
+            <!-- Rotation Controls -->
+            <div class="rotation-controls">
+                <button class="rotate-btn" onclick="rotateCube('y', -90)" title="Rotate Left">↩️</button>
+                <button class="rotate-btn" onclick="rotateCube('x', 90)" title="Rotate Up">⬆️</button>
+                <button class="rotate-btn" onclick="resetRotation()" title="Reset View">🎯</button>
+                <button class="rotate-btn" onclick="rotateCube('x', -90)" title="Rotate Down">⬇️</button>
+                <button class="rotate-btn" onclick="rotateCube('y', 90)" title="Rotate Right">↪️</button>
+            </div>
+
+            <div style="display:flex;gap:0.75rem;margin-top:1rem;justify-content:center;">
+                <button onclick="backToMenu()" class="btn btn-secondary">
+                    ↩️ Back to Menu
+                </button>
+                <button onclick="shuffleCube()" class="btn btn-secondary">
+                    🎲 Shuffle Cube
+                </button>
+            </div>
+        </div>
+
+        <!-- High Scores Screen -->
+        <div id="scores-screen" class="game-wrapper" style="display:none;">
+            <h1 class="game-title">🏆 High Scores</h1>
+            <div id="scores-list" style="margin:1.5rem 0;"></div>
+            <button onclick="backToMenu()" class="btn btn-secondary" style="width:100%;">
+                ↩️ Back to Menu
+            </button>
+        </div>
+    </div>
+
+    <!-- Feedback Toast -->
+    <div class="feedback-toast" id="feedback-toast"></div>
+
+    <script>
+        const confetti = new JSConfetti();
+        
+        // Game State
+        let grid = [], words = [], selectedCells = [], foundWords = 0, score = 0, streak = 0;
+        let timeLeft = 180, totalWords = 5, timerInterval;
+        let currentTheme = 'science', currentDifficulty = 'easy';
+        let rotationX = -20, rotationY = 45;
+        let isDragging = false, dragStartX = 0, dragStartY = 0;
+        let achievements = [];
+
+        // Enhanced Word Bank
+        const wordBank = {
+            science: [
+                'PHOTOSYNTHESIS', 'EVAPORATION', 'GRAVITY', 'ATOM', 'DNA', 'ECOSYSTEM', 'VOLCANO', 'MAGNETISM',
+                'CELL', 'CIRCUIT', 'FRICTION', 'HABITAT', 'INERTIA', 'JUPITER', 'KINETIC', 'LIGHTYEAR',
+                'MOLECULE', 'NEURON', 'OSMOSIS', 'QUASAR', 'RESPIRATION', 'SOLARSYSTEM', 'TECTONIC', 'UNIVERSE',
+                'BIOLOGY', 'CHEMISTRY', 'PHYSICS', 'ASTRONOMY', 'GEOLOGY', 'ECOLOGY', 'GENETICS', 'QUANTUM'
+            ],
+            english: [
+                'METAPHOR', 'SIMILE', 'ALLITERATION', 'ONOMATOPOEIA', 'HYPERBOLE', 'PERSONIFICATION', 'IDIOM',
+                'SYNONYM', 'ANTONYM', 'HOMOPHONE', 'NOUN', 'VERB', 'ADJECTIVE', 'ADVERB', 'PRONOUN',
+                'PREPOSITION', 'CONJUNCTION', 'INTERJECTION', 'SUBJECT', 'PREDICATE', 'CLAUSE', 'PHRASE',
+                'SENTENCE', 'PARAGRAPH', 'ESSAY', 'NOVEL', 'POEM', 'DRAMA', 'FICTION', 'NONFICTION', 'IRONY', 'PUN'
+            ],
+            history: [
+                'ASHANTI', 'NKRUMAH', 'INDEPENDENCE', 'GOLDCOAST', 'ACCRA', 'KENTE', 'ANANSE', 'YAAASANTEWAA',
+                'COCOA', 'LAKEVOLTA', 'BLACKSTAR', 'PANAFRICANISM', 'AKUAPEM', 'EWE', 'FANTE', 'GA', 'DAGOMBA',
+                'ADINKRA', 'SANKOFA', 'OSAGYEFO', 'AKOSOMBODAM', 'CAPECOAST', 'ELMINACASTLE', 'MOLEPARK',
+                'GHANAEMPIRE', 'SONGHAI', 'COLONIALISM', 'BIGSIX', 'HIGHLIFE', 'JOLLOFRICE', 'FUFU', 'BANKU'
+            ],
+            wellbeing: [
+                'MINDFULNESS', 'MEDITATION', 'YOGA', 'GRATITUDE', 'RESILIENCE', 'EMPATHY', 'SELFCARE',
+                'STRESSMANAGEMENT', 'POSITIVITY', 'EMOTIONAL', 'NUTRITION', 'EXERCISE', 'HYDRATION',
+                'CONNECTIONS', 'BOUNDARIES', 'JOURNALING', 'BREATHING', 'RELAXATION', 'ASSERTIVENESS',
+                'FORGIVENESS', 'CREATIVITY', 'LEARNING', 'GOALSETTING', 'TIMEMANAGEMENT', 'COMPASSION',
+                'BALANCE', 'PATIENCE', 'ADAPTABILITY', 'CONFIDENCE', 'INTEGRITY', 'PERSEVERANCE', 'OPTIMISM'
+            ]
+        };
+
+        // Theme Facts
+        const themeFacts = {
+            science: {
+                'PHOTOSYNTHESIS': '🌿 Plants convert sunlight into energy through this process!',
+                'GRAVITY': '🌍 The force that keeps us grounded on Earth!',
+                'ATOM': '⚛️ The smallest unit of matter!',
+                'DNA': '🧬 The blueprint of life in every cell!'
+            },
+            english: {
+                'METAPHOR': '📝 A comparison without using "like" or "as"!',
+                'SIMILE': '📝 A comparison using "like" or "as"!',
+                'ONOMATOPOEIA': '💥 Words that imitate sounds!'
+            },
+            history: {
+                'ASHANTI': '👑 A powerful Ghanaian kingdom known for gold!',
+                'NKRUMAH': '🇬🇭 Led Ghana to independence in 1957!',
+                'KENTE': '👘 Traditional handwoven cloth of the Ashanti!'
+            },
+            wellbeing: {
+                'MINDFULNESS': '🧘 Staying present and aware in the moment!',
+                'MEDITATION': '🧘‍♀️ A practice for calming the mind!',
+                'GRATITUDE': '🙏 Appreciating the good things in life!'
+            }
+        };
+
+        const themeIcons = {
+            science: '🔬',
+            english: '📖',
+            history: '🏛️',
+            wellbeing: '🧘'
+        };
+
+        // Start Game
+        function startGame(difficulty) {
+            currentDifficulty = difficulty;
+            currentTheme = document.getElementById('theme-select').value;
+            
+            foundWords = 0;
+            score = 0;
+            streak = 0;
+            timeLeft = difficulty === 'easy' ? 180 : difficulty === 'medium' ? 150 : 120;
+            totalWords = difficulty === 'easy' ? 5 : difficulty === 'medium' ? 10 : 15;
+            
+            document.getElementById('menu-screen').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'block';
+            document.getElementById('scores-screen').style.display = 'none';
+            
+            document.getElementById('current-theme').textContent = currentTheme.charAt(0).toUpperCase() + currentTheme.slice(1);
+            document.getElementById('current-theme-icon').textContent = themeIcons[currentTheme];
+            document.getElementById('current-difficulty').textContent = difficulty.toUpperCase();
+            document.getElementById('total-words').textContent = totalWords;
+            
+            rotationX = -20;
+            rotationY = 45;
+            
+            setupGame();
+            startTimer();
+            updateCubeRotation();
+        }
+
+        function setupGame() {
+            grid = createGrid();
+            words = selectWords();
+            placeWords();
+            fillGrid();
+            renderAllFaces();
+            updateWordList();
+            updateStats();
+            addEventListeners();
+        }
+
+        function createGrid() {
+            const g = [];
+            for (let z = 0; z < 4; z++) {
+                g[z] = [];
+                for (let y = 0; y < 4; y++) {
+                    g[z][y] = [];
+                    for (let x = 0; x < 4; x++) {
+                        g[z][y][x] = { letter: '', found: false };
+                    }
+                }
+            }
+            return g;
+        }
+
+        function selectWords() {
+            const pool = wordBank[currentTheme];
+            return shuffleArray([...pool]).slice(0, totalWords).map(word => ({
+                word,
+                found: false,
+                positions: []
+            }));
+        }
+
+        function shuffleArray(arr) {
+            const a = [...arr];
+            for (let i = a.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [a[i], a[j]] = [a[j], a[i]];
+            }
+            return a;
+        }
+
+        function placeWords() {
+            const directions = [
+                [1,0,0], [-1,0,0], [0,1,0], [0,-1,0], [0,0,1], [0,0,-1],
+                [1,1,0], [1,-1,0], [-1,1,0], [-1,-1,0],
+                [1,0,1], [1,0,-1], [-1,0,1], [-1,0,-1],
+                [0,1,1], [0,1,-1], [0,-1,1], [0,-1,-1]
+            ];
+
+            words.forEach(wordObj => {
+                let placed = false;
+                let attempts = 0;
+                while (!placed && attempts < 200) {
+                    const x = Math.floor(Math.random() * 4);
+                    const y = Math.floor(Math.random() * 4);
+                    const z = Math.floor(Math.random() * 4);
+                    const dir = directions[Math.floor(Math.random() * directions.length)];
+                    
+                    if (canPlaceWord(wordObj.word, x, y, z, dir)) {
+                        placeWord(wordObj, x, y, z, dir);
+                        placed = true;
+                    }
+                    attempts++;
+                }
+            });
+        }
+
+        function canPlaceWord(word, x, y, z, dir) {
+            for (let i = 0; i < word.length; i++) {
+                const nx = x + i * dir[0];
+                const ny = y + i * dir[1];
+                const nz = z + i * dir[2];
+                if (nx < 0 || nx >= 4 || ny < 0 || ny >= 4 || nz < 0 || nz >= 4) return false;
+                if (grid[nz][ny][nx].letter && grid[nz][ny][nx].letter !== word[i]) return false;
+            }
+            return true;
+        }
+
+        function placeWord(wordObj, x, y, z, dir) {
+            wordObj.positions = [];
+            for (let i = 0; i < wordObj.word.length; i++) {
+                const nx = x + i * dir[0];
+                const ny = y + i * dir[1];
+                const nz = z + i * dir[2];
+                grid[nz][ny][nx].letter = wordObj.word[i];
+                wordObj.positions.push({ x: nx, y: ny, z: nz });
+            }
+            wordObj.placed = true;
+        }
+
+        function fillGrid() {
+            const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            for (let z = 0; z < 4; z++) {
+                for (let y = 0; y < 4; y++) {
+                    for (let x = 0; x < 4; x++) {
+                        if (!grid[z][y][x].letter) {
+                            grid[z][y][x].letter = letters[Math.floor(Math.random() * letters.length)];
+                        }
+                    }
+                }
+            }
+        }
+
+        function renderAllFaces() {
+            const faces = {
+                front: { z: 0, face: 'front' },
+                back: { z: 3, face: 'back' },
+                right: { x: 3, face: 'right' },
+                left: { x: 0, face: 'left' },
+                top: { y: 0, face: 'top' },
+                bottom: { y: 3, face: 'bottom' }
+            };
+
+            Object.entries(faces).forEach(([faceName, config]) => {
+                const faceEl = document.getElementById(`face-${faceName}`);
+                faceEl.innerHTML = '';
+
+                for (let y = 0; y < 4; y++) {
+                    for (let x = 0; x < 4; x++) {
+                        let cellData;
+                        if (config.z !== undefined) {
+                            cellData = grid[config.z][y][x];
+                        } else if (config.x !== undefined) {
+                            cellData = grid[y][x][config.x];
+                        } else if (config.y !== undefined) {
+                            cellData = grid[config.y][y][x];
+                        }
+
+                        const cell = document.createElement('div');
+                        cell.className = 'cell';
+                        cell.textContent = cellData.letter;
+                        cell.dataset.face = faceName;
+                        cell.dataset.x = x;
+                        cell.dataset.y = y;
+                        
+                        if (config.z !== undefined) cell.dataset.z = config.z;
+                        else if (config.x !== undefined) cell.dataset.z = y;
+                        else cell.dataset.z = config.y;
+
+                        if (cellData.found) cell.classList.add('found');
+                        faceEl.appendChild(cell);
+                    }
+                }
+            });
+
+            updateCubeRotation();
+        }
+
+        function addEventListeners() {
+            const cubeScene = document.getElementById('cube-scene');
+            const cells = document.querySelectorAll('.cell');
+
+            // Mouse events for word selection
+            cells.forEach(cell => {
+                cell.addEventListener('mousedown', handleCellDown);
+                cell.addEventListener('mouseenter', handleCellEnter);
+                cell.addEventListener('mouseup', handleCellUp);
+                cell.addEventListener('touchstart', handleTouchStart);
+                cell.addEventListener('touchmove', handleTouchMove);
+                cell.addEventListener('touchend', handleCellUp);
+            });
+
+            document.addEventListener('mouseup', handleCellUp);
+            document.addEventListener('touchend', handleCellUp);
+
+            // Mouse drag for cube rotation
+            cubeScene.addEventListener('mousedown', (e) => {
+                if (e.target.classList.contains('cell')) return;
+                isDragging = true;
+                dragStartX = e.clientX;
+                dragStartY = e.clientY;
+                cubeScene.style.cursor = 'grabbing';
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                const dx = e.clientX - dragStartX;
+                const dy = e.clientY - dragStartY;
+                rotationY += dx * 0.5;
+                rotationX -= dy * 0.5;
+                dragStartX = e.clientX;
+                dragStartY = e.clientY;
+                updateCubeRotation();
+            });
+
+            document.addEventListener('mouseup', () => {
+                isDragging = false;
+                document.getElementById('cube-scene').style.cursor = 'grab';
+            });
+
+            // Touch drag for mobile
+            cubeScene.addEventListener('touchstart', (e) => {
+                if (e.target.classList.contains('cell')) return;
+                isDragging = true;
+                dragStartX = e.touches[0].clientX;
+                dragStartY = e.touches[0].clientY;
+            });
+
+            document.addEventListener('touchmove', (e) => {
+                if (!isDragging) return;
+                const dx = e.touches[0].clientX - dragStartX;
+                const dy = e.touches[0].clientY - dragStartY;
+                rotationY += dx * 0.5;
+                rotationX -= dy * 0.5;
+                dragStartX = e.touches[0].clientX;
+                dragStartY = e.touches[0].clientY;
+                updateCubeRotation();
+            });
+
+            document.addEventListener('touchend', () => {
+                isDragging = false;
+            });
+        }
+
+        function handleCellDown(e) {
+            e.preventDefault();
+            const cell = e.target;
+            if (!cell.classList.contains('cell') || cell.classList.contains('found')) return;
+            
+            clearSelection();
+            selectedCells = [{
+                face: cell.dataset.face,
+                x: parseInt(cell.dataset.x),
+                y: parseInt(cell.dataset.y),
+                z: parseInt(cell.dataset.z)
+            }];
+            cell.classList.add('selected');
+        }
+
+        function handleCellEnter(e) {
+            if (selectedCells.length === 0) return;
+            const cell = e.target;
+            if (!cell.classList.contains('cell') || cell.classList.contains('found')) return;
+            
+            const newCell = {
+                face: cell.dataset.face,
+                x: parseInt(cell.dataset.x),
+                y: parseInt(cell.dataset.y),
+                z: parseInt(cell.dataset.z)
+            };
+
+            if (canAddToSelection(newCell)) {
+                selectedCells.push(newCell);
+                cell.classList.add('selected');
+            }
+        }
+
+        function handleTouchStart(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const element = document.elementFromPoint(touch.clientX, touch.clientY);
+            if (element && element.classList.contains('cell')) {
+                handleCellDown({ target: element, preventDefault: () => {} });
+            }
+        }
+
+        function handleTouchMove(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const element = document.elementFromPoint(touch.clientX, touch.clientY);
+            if (element && element.classList.contains('cell')) {
+                handleCellEnter({ target: element });
+            }
+        }
+
+        function handleCellUp() {
+            if (selectedCells.length === 0) return;
+            checkSelection();
+            clearSelection();
+        }
+
+        function canAddToSelection(newCell) {
+            if (selectedCells.length === 0) return true;
+            
+            const last = selectedCells[selectedCells.length - 1];
+            const dx = newCell.x - last.x;
+            const dy = newCell.y - last.y;
+            const dz = (newCell.z || 0) - (last.z || 0);
+            
+            const isAdjacent = (Math.abs(dx) + Math.abs(dy) + Math.abs(dz)) === 1;
+            
+            if (selectedCells.length > 1) {
+                const first = selectedCells[0];
+                const dirX = last.x - first.x;
+                const dirY = last.y - first.y;
+                const dirZ = (last.z || 0) - (first.z || 0);
+                const steps = Math.max(Math.abs(dirX), Math.abs(dirY), Math.abs(dirZ));
+                
+                const expDx = steps > 0 ? Math.sign(dirX) : 0;
+                const expDy = steps > 0 ? Math.sign(dirY) : 0;
+                const expDz = steps > 0 ? Math.sign(dirZ) : 0;
+                
+                return isAdjacent && (dx === expDx || dx === 0) && (dy === expDy || dy === 0) && (dz === expDz || dz === 0);
+            }
+            
+            return isAdjacent;
+        }
+
+        function clearSelection() {
+            document.querySelectorAll('.cell.selected').forEach(cell => {
+                if (!cell.classList.contains('found')) {
+                    cell.classList.remove('selected');
+                }
+            });
+            selectedCells = [];
+        }
+
+        function checkSelection() {
+            const selectedWord = selectedCells.map(cell => {
+                const z = cell.z;
+                return grid[z][cell.y][cell.x].letter;
+            }).join('');
+
+            const reversedWord = selectedWord.split('').reverse().join('');
+            const wordObj = words.find(w => !w.found && (w.word === selectedWord || w.word === reversedWord));
+
+            if (wordObj) {
+                // Word found!
+                wordObj.found = true;
+                foundWords++;
+                score += 10 + (streak * 5);
+                streak++;
+                timeLeft += 15;
+
+                // Mark cells as found
+                selectedCells.forEach(cell => {
+                    grid[cell.z][cell.y][cell.x].found = true;
+                });
+
+                renderAllFaces();
+                updateWordList();
+                updateStats();
+                showFeedback(`🎉 Found "${wordObj.word}"! ${getFact(wordObj.word)}`, 'success');
+                confetti.addConfetti({ emojis: ['🧠', '📚', '⭐', '🎯'], confettiNumber: 80 });
+
+                // Check achievements
+                checkAchievements();
+
+                // Win condition
+                if (foundWords >= totalWords) {
+                    setTimeout(() => {
+                        clearInterval(timerInterval);
+                        confetti.addConfetti({ particleCount: 200, spread: 100 });
+                        alert(`🏆 Congratulations! You found all words!\n\nFinal Score: ${score}\nBest Streak: ${streak}`);
+                        saveHighScore();
+                        backToMenu();
+                    }, 1000);
+                }
+            } else if (selectedCells.length >= 2) {
+                streak = 0;
+                timeLeft = Math.max(0, timeLeft - 5);
+                updateStats();
+                showFeedback('❌ Not a valid word. Try again!', 'error');
+            }
+        }
+
+        function getFact(word) {
+            const facts = themeFacts[currentTheme] || {};
+            return facts[word] || 'Great discovery! Keep exploring! 🔍';
+        }
+
+        function checkAchievements() {
+            if (streak === 3) {
+                showAchievement('🔥 Hot Streak!', '3 words in a row!');
+            } else if (streak === 5) {
+                showAchievement('⚡ Unstoppable!', '5 consecutive words!');
+            }
+            
+            if (foundWords === Math.floor(totalWords / 2)) {
+                showAchievement('🎯 Halfway There!', `${foundWords} of ${totalWords} words found!`);
+            }
+        }
+
+        function showAchievement(title, message) {
+            const popup = document.createElement('div');
+            popup.className = 'achievement-popup';
+            popup.innerHTML = `<div style="font-size:0.8rem;">🏆 Achievement!</div><div>${title}</div>`;
+            document.body.appendChild(popup);
+            
+            setTimeout(() => popup.remove(), 3000);
+        }
+
+        function showFeedback(message, type) {
+            const toast = document.getElementById('feedback-toast');
+            toast.textContent = message;
+            toast.className = `feedback-toast ${type} show`;
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2500);
+        }
+
+        function updateWordList() {
+            const list = document.getElementById('word-list');
+            list.innerHTML = words.map(w => 
+                `<span class="word-tag ${w.found ? 'found' : ''}">${w.found ? '✅' : '🔍'} ${w.word}</span>`
+            ).join('');
+        }
+
+        function updateStats() {
+            document.getElementById('score').textContent = score;
+            document.getElementById('words-found').textContent = foundWords;
+            document.getElementById('streak').textContent = streak;
+            document.getElementById('timer').textContent = timeLeft;
+            
+            const progress = (foundWords / totalWords) * 100;
+            document.getElementById('progress-fill').style.width = progress + '%';
+            
+            if (timeLeft <= 30) {
+                document.getElementById('timer').style.color = '#EF4444';
+                document.getElementById('timer').style.animation = 'pulse 0.5s infinite alternate';
+            }
+        }
+
+        function rotateCube(axis, deg) {
+            if (axis === 'x') rotationX += deg;
+            else rotationY += deg;
+            updateCubeRotation();
+        }
+
+        function resetRotation() {
+            rotationX = -20;
+            rotationY = 45;
+            updateCubeRotation();
+        }
+
+        function shuffleCube() {
+            setupGame();
+            showFeedback('🎲 Cube shuffled! New words await!', 'success');
+        }
+
+        function updateCubeRotation() {
+            const cube = document.getElementById('cube');
+            cube.style.transform = `rotateX(${rotationX}deg) rotateY(${rotationY}deg)`;
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateStats();
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    alert(`⏰ Time's up!\n\nFinal Score: ${score}\nWords Found: ${foundWords}/${totalWords}`);
+                    saveHighScore();
+                    backToMenu();
+                }
+            }, 1000);
+        }
+
+        function saveHighScore() {
+            const scores = JSON.parse(localStorage.getItem('wordSearchScoresV2') || '[]');
+            scores.push({
+                score,
+                theme: currentTheme,
+                difficulty: currentDifficulty,
+                wordsFound: foundWords,
+                totalWords,
+                date: new Date().toLocaleDateString()
+            });
+            scores.sort((a, b) => b.score - a.score);
+            localStorage.setItem('wordSearchScoresV2', JSON.stringify(scores.slice(0, 10)));
+        }
+
+        function showHighScores() {
+            document.getElementById('menu-screen').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'none';
+            document.getElementById('scores-screen').style.display = 'block';
+            
+            const scores = JSON.parse(localStorage.getItem('wordSearchScoresV2') || '[]');
+            const list = document.getElementById('scores-list');
+            
+            if (scores.length === 0) {
+                list.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:2rem;">No scores yet! Start playing to set records! 🎮</p>';
+                return;
+            }
+            
+            list.innerHTML = scores.slice(0, 10).map((s, i) => {
+                const rankClass = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
+                return `
+                    <div class="score-item">
+                        <div style="display:flex;align-items:center;gap:1rem;">
+                            <div class="score-rank ${rankClass}">${i + 1}</div>
+                            <div>
+                                <div style="font-weight:800;">${s.score} points</div>
+                                <div style="font-size:0.85rem;color:var(--text-muted);">
+                                    ${themeIcons[s.theme]} ${s.theme} · ${s.difficulty} · ${s.wordsFound}/${s.totalWords} words
+                                </div>
+                            </div>
+                        </div>
+                        <div style="color:var(--text-muted);font-size:0.85rem;">${s.date}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function showInstructions() {
+            alert(`📖 How to Play:\n\n` +
+                  `1. Click and drag across letters to form words\n` +
+                  `2. Words can go in ANY direction in 3D space\n` +
+                  `3. Rotate the cube by dragging outside the grid\n` +
+                  `4. Use rotation buttons to explore all faces\n` +
+                  `5. Find all words before time runs out!\n\n` +
+                  `🔥 Streaks give bonus points!\n` +
+                  `⏰ Finding words adds 15 seconds!\n` +
+                  `🎯 Words can wrap around cube edges!`);
+        }
+
+        function toggleDarkMode() {
+            document.body.style.background = document.body.style.background === 'white' ? 
+                'linear-gradient(135deg, #0F172A, #1E293B)' : 'white';
+        }
+
+        function backToMenu() {
+            clearInterval(timerInterval);
+            document.getElementById('menu-screen').style.display = 'block';
+            document.getElementById('game-screen').style.display = 'none';
+            document.getElementById('scores-screen').style.display = 'none';
+            resetGame();
+        }
+
+        function resetGame() {
+            grid = [];
+            words = [];
+            selectedCells = [];
+            foundWords = 0;
+            score = 0;
+            streak = 0;
+            timeLeft = 180;
+        }
+
+        // Initialize
+        document.getElementById('cube-scene').style.cursor = 'grab';
+        console.log('🚀 3D Word Search Adventure Ready!');
+        console.log('🎮 Features: 3D cube rotation, drag selection, achievements');
+        console.log('📚 4 Themes: Science, English, History, Wellbeing');
+        console.log('🎯 3 Difficulty levels with adaptive gameplay');
+    </script>
+</body>
+</html>

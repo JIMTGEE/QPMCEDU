@@ -1,0 +1,1446 @@
+hey, i am working on a school management system, it is complete but we have changed the url from qpmsedu.com to qpmcedu.com. right now i need your help updating and enhancing some pages.
+avoid these 30 things 
+The "Vibe Coded" Checklist
+Harsh gradients
+
+Lucide icons (or any overly generic icon set)
+
+Pure white background
+
+Rainbow coloring (multiple bright, mismatched colours)
+
+Drop shadows (heavy, everywhere)
+
+3 feature cards in a row
+
+Emojis used as design elements
+
+Liquid glass / frosted glass effect
+
+Em dashes (—) used excessively
+
+Inter, Geist, or Space Grotesk font (the AI holy trinity)
+
+Colored left stripe on cards or sections
+
+Fake testimonials (“Sarah from London says…”)
+
+Bento grids
+
+Terminal window embedded in the page
+
+“It’s not X, it’s Y” taglines
+
+Checkmark bullet points
+
+3 pricing tiers
+
+No real product demos (just mockups or placeholders)
+
+Soft corner radius everywhere (border-radius: 16px+)
+
+Purple and black colour scheme (very common)
+
+No skeleton loading states
+
+Radial orbs / glowing circles in the background
+
+Dot grid backgrounds
+
+Sparkle icons
+
+Animated arrows
+
+No Terms of Service page
+
+No Privacy Policy page
+
+Hover animations on everything
+
+Neon colours
+
+Basic pastel colours (especially for call-to-action buttons)
+localhost:3306/qpmceduc_db/t/		https://cpanel.qpmcedu.com/cpsess1240990639/3rdparty/phpMyAdmin/index.php?route=/database/sql&db=qpmceduc_db
+
+   Showing rows 0 - 499 (1253 total, Query took 0.3697 seconds.) [TABLE_NAME: ACADEMIC_CALENDAR... - FEE_PAYMENT_SCHEDULE...]
+
+
+SELECT 
+    t.TABLE_NAME, 
+    c.COLUMN_NAME, 
+    c.DATA_TYPE,
+    c.COLUMN_TYPE,
+    c.IS_NULLABLE,
+    c.COLUMN_DEFAULT,
+    c.CHARACTER_MAXIMUM_LENGTH,
+    k.CONSTRAINT_TYPE
+FROM 
+    INFORMATION_SCHEMA.COLUMNS c
+JOIN 
+    INFORMATION_SCHEMA.TABLES t
+ON 
+    c.TABLE_NAME = t.TABLE_NAME
+LEFT JOIN 
+    INFORMATION_SCHEMA.KEY_COLUMN_USAGE ku 
+ON 
+    c.TABLE_NAME = ku.TABLE_NAME AND c.COLUMN_NAME = ku.COLUMN_NAME
+LEFT JOIN 
+    INFORMATION_SCHEMA.TABLE_CONSTRAINTS k
+ON 
+    ku.TABLE_NAME = k.TABLE_NAME AND ku.CONSTRAINT_NAME = k.CONSTRAINT_NAME
+WHERE 
+    t.TABLE_SCHEMA = 'qpmceduc_db'
+ORDER BY 
+    t.TABLE_NAME, c.ORDINAL_POSITION;
+
+
+TABLE_NAME   	COLUMN_NAME	DATA_TYPE	COLUMN_TYPE	IS_NULLABLE	COLUMN_DEFAULT	CHARACTER_MAXIMUM_LENGTH	CONSTRAINT_TYPE	
+academic_calendar	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+academic_calendar	year	varchar	varchar(9)	NO	NULL	9	NULL	
+academic_calendar	term_name	varchar	varchar(255)	NO	NULL	255	NULL	
+academic_calendar	start_date	date	date	NO	NULL	NULL	NULL	
+academic_calendar	end_date	date	date	NO	NULL	NULL	NULL	
+academic_calendar	created_at	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+academic_progress_entries	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+academic_progress_entries	student_id	int	int(11)	NO	NULL	NULL	NULL	
+academic_progress_entries	teacher_id	int	int(11)	NO	NULL	NULL	NULL	
+academic_progress_entries	class_id	int	int(11)	NO	NULL	NULL	NULL	
+academic_progress_entries	subject_id	int	int(11)	NO	NULL	NULL	NULL	
+academic_progress_entries	term_id	int	int(11)	NO	NULL	NULL	NULL	
+academic_progress_entries	mock_number	tinyint	tinyint(2) unsigned	YES	0	NULL	NULL	
+academic_progress_entries	academic_year	varchar	varchar(9)	NO	NULL	9	NULL	
+academic_progress_entries	entry_period	enum	enum('weekly','bi-weekly')	NO	NULL	9	NULL	
+academic_progress_entries	period_start_date	date	date	NO	NULL	NULL	NULL	
+academic_progress_entries	period_end_date	date	date	NO	NULL	NULL	NULL	
+academic_progress_entries	class_practices_raw	decimal	decimal(5,2)	YES	0.00	NULL	NULL	
+academic_progress_entries	class_practices_max	decimal	decimal(5,2)	YES	0.00	NULL	NULL	
+academic_progress_entries	assignments_raw	decimal	decimal(5,2)	YES	0.00	NULL	NULL	
+academic_progress_entries	assignments_max	decimal	decimal(5,2)	YES	0.00	NULL	NULL	
+academic_progress_entries	cat_raw	decimal	decimal(5,2)	YES	0.00	NULL	NULL	
+academic_progress_entries	cat_max	decimal	decimal(5,2)	YES	0.00	NULL	NULL	
+academic_progress_entries	group_project_raw	decimal	decimal(5,2)	YES	0.00	NULL	NULL	
+academic_progress_entries	group_project_max	decimal	decimal(5,2)	YES	0.00	NULL	NULL	
+academic_progress_entries	scaled_scores	longtext	longtext	YES	NULL	4294967295	NULL	
+academic_progress_entries	total_scaled	decimal	decimal(5,2)	YES	NULL	NULL	NULL	
+academic_progress_entries	comments	text	text	YES	NULL	65535	NULL	
+academic_progress_entries	status	enum	enum('draft','submitted','reviewed')	YES	'draft'	9	NULL	
+academic_progress_entries	bulk_max_input	tinyint	tinyint(1)	YES	0	NULL	NULL	
+academic_progress_entries	created_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+academic_progress_entries	updated_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+academic_progress_entries	academic_year_id	int	int(11)	YES	NULL	NULL	NULL	
+academic_progress_logs	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+academic_progress_logs	entry_id	int	int(11)	NO	NULL	NULL	NULL	
+academic_progress_logs	changed_by	int	int(11)	NO	NULL	NULL	NULL	
+academic_progress_logs	old_scores	longtext	longtext	YES	NULL	4294967295	NULL	
+academic_progress_logs	new_scores	longtext	longtext	YES	NULL	4294967295	NULL	
+academic_progress_logs	change_reason	text	text	YES	NULL	65535	NULL	
+academic_progress_logs	changed_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+academic_terms	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+academic_terms	academic_year_id	int	int(11)	NO	NULL	NULL	UNIQUE	
+academic_terms	term_name	varchar	varchar(50)	NO	NULL	50	NULL	
+academic_terms	term_number	int	int(11)	NO	NULL	NULL	UNIQUE	
+academic_terms	start_date	date	date	NO	NULL	NULL	NULL	
+academic_terms	end_date	date	date	NO	NULL	NULL	NULL	
+academic_terms	is_active	tinyint	tinyint(1)	YES	1	NULL	NULL	
+academic_terms	created_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+academic_terms	updated_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+academic_years	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+academic_years	year_label	varchar	varchar(20)	NO	NULL	20	UNIQUE	
+academic_years	start_date	date	date	NO	NULL	NULL	NULL	
+academic_years	end_date	date	date	NO	NULL	NULL	NULL	
+academic_years	is_active	tinyint	tinyint(1)	YES	1	NULL	NULL	
+academic_years	created_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+academic_years	updated_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+access_logs	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+access_logs	user_id	int	int(11)	NO	NULL	NULL	FOREIGN KEY	
+access_logs	scan_type	enum	enum('entry','exit')	NO	'entry'	5	NULL	
+access_logs	scanned_at	datetime	datetime	NO	current_timestamp()	NULL	NULL	
+access_logs	decision	enum	enum('allowed','denied','overridden')	NO	'denied'	10	NULL	
+access_logs	auto_reason	varchar	varchar(255)	YES	NULL	255	NULL	
+access_logs	overridden_by	int	int(11)	YES	NULL	NULL	FOREIGN KEY	
+access_logs	override_reason	text	text	YES	NULL	65535	NULL	
+access_logs	qr_code	varchar	varchar(100)	YES	NULL	100	NULL	
+access_logs	location	varchar	varchar(100)	YES	'Main Gate'	100	NULL	
+activity_log	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+activity_log	user_id	int	int(11)	NO	NULL	NULL	NULL	
+activity_log	activity	text	text	YES	NULL	65535	NULL	
+activity_log	timestamp	datetime	datetime	YES	current_timestamp()	NULL	NULL	
+activity_logs	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+activity_logs	user_id	int	int(11)	NO	NULL	NULL	NULL	
+activity_logs	action	varchar	varchar(100)	NO	NULL	100	NULL	
+activity_logs	description	text	text	NO	NULL	65535	NULL	
+activity_logs	created_at	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+activity_logs	updated_at	timestamp	timestamp	YES	NULL	NULL	NULL	
+admissions	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+admissions	full_name	varchar	varchar(100)	NO	NULL	100	NULL	
+admissions	email	varchar	varchar(255)	NO	NULL	255	UNIQUE	
+admissions	student_phone	varchar	varchar(20)	NO	NULL	20	NULL	
+admissions	gender	enum	enum('male','female','other')	NO	'male'	6	NULL	
+admissions	address	text	text	NO	NULL	65535	NULL	
+admissions	date_of_birth	date	date	YES	NULL	NULL	NULL	
+admissions	nationality	varchar	varchar(100)	YES	NULL	100	NULL	
+admissions	previous_school	varchar	varchar(200)	YES	NULL	200	NULL	
+admissions	allergy	text	text	YES	NULL	65535	NULL	
+admissions	special_child	enum	enum('yes','no')	YES	'no'	3	NULL	
+admissions	father_name	varchar	varchar(100)	NO	NULL	100	NULL	
+admissions	father_email	varchar	varchar(255)	NO	NULL	255	NULL	
+admissions	father_phone	varchar	varchar(20)	NO	NULL	20	NULL	
+admissions	father_national_id	varchar	varchar(100)	YES	NULL	100	NULL	
+admissions	father_occupation	varchar	varchar(150)	YES	NULL	150	NULL	
+admissions	father_office_location	varchar	varchar(200)	YES	NULL	200	NULL	
+admissions	mother_name	varchar	varchar(100)	NO	NULL	100	NULL	
+admissions	mother_email	varchar	varchar(255)	NO	NULL	255	NULL	
+admissions	mother_phone	varchar	varchar(20)	NO	NULL	20	NULL	
+admissions	mother_national_id	varchar	varchar(100)	YES	NULL	100	NULL	
+admissions	mother_occupation	varchar	varchar(150)	YES	NULL	150	NULL	
+admissions	mother_office_location	varchar	varchar(200)	YES	NULL	200	NULL	
+admissions	guardian_name	varchar	varchar(100)	YES	NULL	100	NULL	
+admissions	guardian_relationship	varchar	varchar(50)	YES	NULL	50	NULL	
+admissions	guardian_phone	varchar	varchar(20)	YES	NULL	20	NULL	
+admissions	guardian_email	varchar	varchar(255)	YES	NULL	255	NULL	
+admissions	guardian_address	text	text	YES	NULL	65535	NULL	
+admissions	preferred_contact	enum	enum('father','mother','guardian')	YES	'father'	8	NULL	
+admissions	office_address	text	text	YES	NULL	65535	NULL	
+admissions	residential_address	text	text	YES	NULL	65535	NULL	
+admissions	emergency_contact_name	varchar	varchar(100)	YES	NULL	100	NULL	
+admissions	emergency_contact_phone	varchar	varchar(20)	YES	NULL	20	NULL	
+admissions	class_id	int	int(11)	NO	NULL	NULL	NULL	
+admissions	academic_year	varchar	varchar(9)	NO	NULL	9	NULL	
+admissions	academic_year_id	int	int(11)	YES	NULL	NULL	NULL	
+admissions	admission_date	date	date	YES	NULL	NULL	NULL	
+admissions	department	varchar	varchar(100)	YES	NULL	100	NULL	
+admissions	department_id	int	int(11)	YES	NULL	NULL	NULL	
+admissions	advisor_id	int	int(11)	YES	NULL	NULL	NULL	
+admissions	profile_picture	varchar	varchar(255)	YES	NULL	255	NULL	
+admissions	status	enum	enum('pending','accepted','rejected','cancelled')	NO	'pending'	9	NULL	
+admissions	admin_notes	text	text	YES	NULL	65535	NULL	
+admissions	accepted_by	int	int(11)	YES	NULL	NULL	NULL	
+admissions	accepted_at	datetime	datetime	YES	NULL	NULL	NULL	
+admissions	created_at	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+admissions	updated_at	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+advisor_appointments	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+advisor_appointments	user_id	int	int(11)	YES	NULL	NULL	NULL	
+advisor_appointments	advisor_id	int	int(11)	YES	NULL	NULL	NULL	
+advisor_appointments	appointment_date	datetime	datetime	NO	NULL	NULL	NULL	
+advisor_appointments	purpose	text	text	YES	NULL	65535	NULL	
+advisor_appointments	status	enum	enum('pending','approved','cancelled','completed')	YES	'pending'	9	NULL	
+advisor_appointments	created_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+advisor_appointments	updated_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+ai_chat_sessions	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+ai_chat_sessions	user_id	int	int(11)	NO	NULL	NULL	UNIQUE	
+ai_chat_sessions	session_id	varchar	varchar(64)	NO	NULL	64	UNIQUE	
+ai_chat_sessions	title	varchar	varchar(255)	YES	'New Chat'	255	NULL	
+ai_chat_sessions	created_at	datetime	datetime	YES	current_timestamp()	NULL	NULL	
+ai_chat_sessions	updated_at	datetime	datetime	YES	current_timestamp()	NULL	NULL	
+ai_chat_sessions	message_count	int	int(11)	YES	0	NULL	NULL	
+ai_file_attachments	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+ai_file_attachments	user_id	int	int(11)	NO	NULL	NULL	NULL	
+ai_file_attachments	chat_id	int	int(11)	NO	NULL	NULL	NULL	
+ai_file_attachments	filename	varchar	varchar(255)	YES	NULL	255	NULL	
+ai_file_attachments	filepath	varchar	varchar(500)	YES	NULL	500	NULL	
+ai_file_attachments	mime_type	varchar	varchar(100)	YES	NULL	100	NULL	
+ai_file_attachments	file_size	int	int(11)	YES	NULL	NULL	NULL	
+ai_file_attachments	created_at	datetime	datetime	YES	current_timestamp()	NULL	NULL	
+ai_usage_limits	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+ai_usage_limits	user_id	int	int(11)	NO	NULL	NULL	UNIQUE	
+ai_usage_limits	request_count	int	int(11)	YES	0	NULL	NULL	
+ai_usage_limits	window_start	datetime	datetime	NO	NULL	NULL	UNIQUE	
+annual_plans	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+annual_plans	teacher_id	int	int(11)	NO	NULL	NULL	NULL	
+annual_plans	class_id	int	int(11)	NO	NULL	NULL	NULL	
+annual_plans	subject_id	int	int(11)	NO	NULL	NULL	NULL	
+annual_plans	department_id	int	int(11)	NO	NULL	NULL	NULL	
+annual_plans	week	int	int(11)	NO	NULL	NULL	NULL	
+annual_plans	term_1	text	text	YES	NULL	65535	NULL	
+annual_plans	term_2	text	text	YES	NULL	65535	NULL	
+annual_plans	term_3	text	text	YES	NULL	65535	NULL	
+annual_plans	created_at	datetime	datetime	NO	current_timestamp()	NULL	NULL	
+annual_plans	updated_at	datetime	datetime	YES	NULL	NULL	NULL	
+annual_plans	format	enum	enum('oxford','ges')	NO	'oxford'	6	NULL	
+application_form	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+application_form	first_name	varchar	varchar(255)	NO	NULL	255	NULL	
+application_form	last_name	varchar	varchar(255)	NO	NULL	255	NULL	
+application_form	email	varchar	varchar(255)	NO	NULL	255	UNIQUE	
+application_form	phone_number	varchar	varchar(20)	NO	NULL	20	NULL	
+application_form	date_of_birth	date	date	NO	NULL	NULL	NULL	
+application_form	gender	enum	enum('Male','Female','Other')	NO	NULL	6	NULL	
+application_form	address	text	text	YES	NULL	65535	NULL	
+application_form	department	varchar	varchar(255)	NO	NULL	255	NULL	
+application_form	position_applied	varchar	varchar(255)	NO	NULL	255	NULL	
+application_form	status	enum	enum('Pending','Accepted','Rejected')	YES	'Pending'	8	NULL	
+application_form	application_date	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+application_form	user_id	int	int(11)	YES	NULL	NULL	NULL	
+archived_students	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+archived_students	student_id	int	int(11)	NO	NULL	NULL	NULL	
+archived_students	name	varchar	varchar(255)	YES	NULL	255	NULL	
+archived_students	archived_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+assignments	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+assignments	class_id	int	int(11)	NO	NULL	NULL	NULL	
+assignments	subject_id	int	int(11)	NO	NULL	NULL	NULL	
+assignments	teacher_id	int	int(11)	NO	NULL	NULL	NULL	
+assignments	term_id	int	int(11)	NO	NULL	NULL	NULL	
+assignments	title	varchar	varchar(255)	NO	NULL	255	NULL	
+assignments	description	text	text	YES	NULL	65535	NULL	
+assignments	type	enum	enum('quiz','test','homework','classwork','group_w...	NO	NULL	15	NULL	
+assignments	questions	longtext	longtext	YES	NULL	4294967295	NULL	
+assignments	max_points	decimal	decimal(5,2)	NO	100.00	NULL	NULL	
+assignments	file_path	varchar	varchar(255)	YES	NULL	255	NULL	
+assignments	link_url	varchar	varchar(500)	YES	NULL	500	NULL	
+assignments	is_group_assignment	tinyint	tinyint(1)	NO	0	NULL	NULL	
+assignments	group_id	int	int(11)	YES	NULL	NULL	NULL	
+assignments	status	enum	enum('draft','published','closed')	NO	'draft'	9	NULL	
+assignments	is_graded	tinyint	tinyint(1)	NO	0	NULL	NULL	
+assignments	created_at	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+assignments	updated_at	timestamp	timestamp	YES	NULL	NULL	NULL	
+assignments	tags	varchar	varchar(255)	YES	NULL	255	NULL	
+assignments	due_date	date	date	YES	NULL	NULL	NULL	
+assignment_questions	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+assignment_questions	assignment_id	int	int(11)	NO	NULL	NULL	NULL	
+assignment_questions	question_text	text	text	NO	NULL	65535	NULL	
+assignment_questions	question_number	int	int(11)	NO	NULL	NULL	NULL	
+assignment_submissions	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+assignment_submissions	assignment_id	int	int(11)	NO	NULL	NULL	UNIQUE	
+assignment_submissions	user_id	int	int(11)	NO	NULL	NULL	UNIQUE	
+assignment_submissions	group_id	int	int(11)	YES	NULL	NULL	NULL	
+assignment_submissions	answers	longtext	longtext	YES	NULL	4294967295	NULL	
+assignment_submissions	submission_text	text	text	YES	NULL	65535	NULL	
+assignment_submissions	file_paths	longtext	longtext	YES	NULL	4294967295	NULL	
+assignment_submissions	submission_date	datetime	datetime	YES	NULL	NULL	NULL	
+assignment_submissions	late_submission_reason	text	text	YES	NULL	65535	NULL	
+assignment_submissions	score	decimal	decimal(5,2)	YES	NULL	NULL	NULL	
+assignment_submissions	feedback	text	text	YES	NULL	65535	NULL	
+assignment_submissions	graded_by	int	int(11)	YES	NULL	NULL	NULL	
+assignment_submissions	graded_at	datetime	datetime	YES	NULL	NULL	NULL	
+assignment_submissions	status	enum	enum('pending','submitted','graded','late','return...	NO	'pending'	9	NULL	
+assignment_submissions	is_graded	tinyint	tinyint(1)	NO	0	NULL	NULL	
+assignment_submissions	created_at	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+assignment_submissions	updated_at	timestamp	timestamp	YES	NULL	NULL	NULL	
+attendance	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+attendance	class_id	int	int(11)	NO	NULL	NULL	UNIQUE	
+attendance	user_id	int	int(11)	NO	NULL	NULL	UNIQUE	
+attendance	date	date	date	NO	NULL	NULL	UNIQUE	
+attendance	status	enum	enum('present','absent','late')	NO	NULL	7	NULL	
+attendance	notes	varchar	varchar(255)	YES	NULL	255	NULL	
+attendance	created_at	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+attendance	updated_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+attendance	departure_time	datetime	datetime	YES	NULL	NULL	NULL	
+auto_login_tokens	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+auto_login_tokens	user_id	int	int(11)	NO	NULL	NULL	NULL	
+auto_login_tokens	token	varchar	varchar(128)	NO	NULL	128	UNIQUE	
+auto_login_tokens	created_at	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+auto_login_tokens	expires_at	timestamp	timestamp	NO	NULL	NULL	NULL	
+auto_login_tokens	used	tinyint	tinyint(1)	NO	0	NULL	NULL	
+auto_login_tokens	used_at	timestamp	timestamp	YES	NULL	NULL	NULL	
+auto_login_tokens	ip_address	varchar	varchar(45)	YES	NULL	45	NULL	
+auto_login_tokens	user_agent	text	text	YES	NULL	65535	NULL	
+badges	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+badges	name	varchar	varchar(100)	NO	NULL	100	NULL	
+badges	description	text	text	YES	NULL	65535	NULL	
+badges	icon	varchar	varchar(255)	YES	NULL	255	NULL	
+badges	points_required	int	int(11)	YES	0	NULL	NULL	
+badges	created_at	datetime	datetime	YES	current_timestamp()	NULL	NULL	
+behavior_comments	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+behavior_comments	class_id	int	int(11)	NO	NULL	NULL	UNIQUE	
+behavior_comments	user_id	int	int(11)	NO	NULL	NULL	UNIQUE	
+behavior_comments	term	varchar	varchar(50)	NO	NULL	50	UNIQUE	
+behavior_comments	comment	text	text	NO	NULL	65535	NULL	
+behavior_comments	created_at	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+behavior_comments	created_by	int	int(11)	NO	NULL	NULL	NULL	
+behavior_comments	is_read	tinyint	tinyint(1)	YES	0	NULL	NULL	
+books	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+books	title	varchar	varchar(255)	YES	NULL	255	NULL	
+books	author	varchar	varchar(255)	YES	NULL	255	NULL	
+books	genre	varchar	varchar(100)	YES	NULL	100	NULL	
+books	description	text	text	YES	NULL	65535	NULL	
+books	file_url	varchar	varchar(255)	YES	NULL	255	NULL	
+books	cover_image_url	varchar	varchar(255)	YES	NULL	255	NULL	
+books	uploaded_at	datetime	datetime	YES	current_timestamp()	NULL	NULL	
+books	source	varchar	varchar(50)	YES	'local'	50	NULL	
+books	uploaded_by	int	int(11)	NO	0	NULL	NULL	
+books	external_download_url	text	text	YES	NULL	65535	NULL	
+books	educational_level	varchar	varchar(50)	YES	NULL	50	NULL	
+books	subject	varchar	varchar(100)	YES	NULL	100	NULL	
+chat_groups	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+chat_groups	name	varchar	varchar(255)	NO	NULL	255	NULL	
+chat_groups	description	text	text	YES	NULL	65535	NULL	
+chat_groups	created_by	int	int(11)	NO	NULL	NULL	NULL	
+chat_groups	status	varchar	varchar(20)	YES	'active'	20	NULL	
+chat_groups	created_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+chat_history	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+chat_history	user_id	int	int(11)	NO	NULL	NULL	NULL	
+chat_history	session_id	varchar	varchar(50)	YES	NULL	50	NULL	
+chat_history	prompt	text	text	YES	NULL	65535	NULL	
+chat_history	response	text	text	YES	NULL	65535	NULL	
+chat_history	timestamp	datetime	datetime	YES	current_timestamp()	NULL	NULL	
+chat_messages	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+chat_messages	chat_session_id	int	int(11)	NO	NULL	NULL	NULL	
+chat_messages	user_id	int	int(11)	NO	NULL	NULL	NULL	
+chat_messages	message	longtext	longtext	YES	NULL	4294967295	NULL	
+chat_messages	read_status	enum	enum('unread','read')	YES	'unread'	6	NULL	
+chat_messages	message_media	varchar	varchar(255)	YES	NULL	255	NULL	
+chat_messages	is_active	tinyint	tinyint(1)	NO	0	NULL	NULL	
+chat_messages	last_activity	datetime	datetime	YES	NULL	NULL	NULL	
+chat_messages	created_at	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+chat_messages	updated_at	timestamp	timestamp	YES	NULL	NULL	NULL	
+chat_participants	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+chat_participants	chat_session_id	int	int(11)	NO	NULL	NULL	UNIQUE	
+chat_participants	user_id	int	int(11)	NO	NULL	NULL	UNIQUE	
+chat_participants	joined_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+chat_sessions	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+chat_sessions	assignment_id	int	int(11)	YES	NULL	NULL	NULL	
+chat_sessions	teacher_id	int	int(11)	NO	NULL	NULL	NULL	
+chat_sessions	class_id	int	int(11)	YES	NULL	NULL	NULL	
+chat_sessions	parent_id	int	int(11)	YES	NULL	NULL	NULL	
+chat_sessions	term_id	int	int(11)	YES	NULL	NULL	NULL	
+chat_sessions	session_token	varchar	varchar(64)	NO	NULL	64	NULL	
+chat_sessions	title	varchar	varchar(255)	NO	NULL	255	NULL	
+chat_sessions	group_picture	varchar	varchar(255)	YES	NULL	255	NULL	
+chat_sessions	status	enum	enum('draft','active','closed')	NO	'draft'	6	NULL	
+chat_sessions	message	longtext	longtext	YES	NULL	4294967295	NULL	
+chat_sessions	message_media	varchar	varchar(255)	YES	NULL	255	NULL	
+chat_sessions	created_at	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+chat_sessions	live_class_id	int	int(11)	YES	NULL	NULL	NULL	
+chat_sessions	updated_at	timestamp	timestamp	YES	NULL	NULL	NULL	
+chat_sessions	start_time	datetime	datetime	YES	NULL	NULL	NULL	
+chat_sessions	end_time	datetime	datetime	YES	NULL	NULL	NULL	
+chat_sessions	is_real_time	tinyint	tinyint(1)	NO	1	NULL	NULL	
+chat_sessions	recipient_id	int	int(11)	YES	NULL	NULL	NULL	
+classes	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+classes	class_name	varchar	varchar(255)	NO	NULL	255	NULL	
+classes	teacher_id	int	int(11)	YES	NULL	NULL	NULL	
+classes	subject_id	int	int(11)	YES	NULL	NULL	NULL	
+classes	description	text	text	YES	NULL	65535	NULL	
+classes	created_at	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+classes	updated_at	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+classes	class_teacher_id	int	int(11)	YES	NULL	NULL	NULL	
+classes	department_id	int	int(11)	NO	NULL	NULL	NULL	
+classes	department	varchar	varchar(50)	YES	'Primary'	50	NULL	
+class_assignments	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+class_assignments	assignment_id	int	int(11)	NO	NULL	NULL	NULL	
+class_assignments	student_id	int	int(11)	NO	NULL	NULL	NULL	
+class_assignments	submission_date	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+class_assignments	status	enum	enum('Pending','Submitted','Graded')	NO	NULL	9	NULL	
+class_assignments	grade	int	int(11)	YES	NULL	NULL	NULL	
+class_schedules	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+class_schedules	class_id	int	int(11)	NO	NULL	NULL	NULL	
+class_schedules	day_of_week	enum	enum('Monday','Tuesday','Wednesday','Thursday','Fr...	NO	NULL	9	NULL	
+class_schedules	start_time	time	time	NO	NULL	NULL	NULL	
+class_schedules	end_time	time	time	NO	NULL	NULL	NULL	
+class_schedules	created_at	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+class_schedules	updated_at	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+class_schedules	subject_id	int	int(11)	NO	NULL	NULL	NULL	
+class_schedules	term_id	int	int(11)	NO	NULL	NULL	NULL	
+class_schedules	department_id	int	int(11)	NO	NULL	NULL	NULL	
+class_schedules	teacher_id	int	int(11)	NO	NULL	NULL	NULL	
+class_schedules	academic_year	varchar	varchar(9)	NO	NULL	9	NULL	
+class_schedules	academic_year_id	int	int(11)	YES	NULL	NULL	NULL	
+class_stats_cache	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+class_stats_cache	term_id	int	int(11)	NO	NULL	NULL	NULL	
+class_stats_cache	class_id	int	int(11)	NO	NULL	NULL	NULL	
+class_stats_cache	user_id	int	int(11)	NO	NULL	NULL	NULL	
+class_stats_cache	student_total	float	float	NO	NULL	NULL	NULL	
+class_stats_cache	class_rank	int	int(11)	NO	NULL	NULL	NULL	
+class_stats_cache	total_students	int	int(11)	NO	NULL	NULL	NULL	
+class_stats_cache	class_highest	float	float	NO	NULL	NULL	NULL	
+class_stats_cache	class_average	float	float	NO	NULL	NULL	NULL	
+class_stats_cache	class_lowest	float	float	NO	NULL	NULL	NULL	
+class_stats_cache	cached_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+class_subjects	class_id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+class_subjects	subject_id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+clubs	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+clubs	name	varchar	varchar(255)	NO	NULL	255	NULL	
+clubs	description	text	text	YES	NULL	65535	NULL	
+clubs	advisor_id	int	int(11)	YES	NULL	NULL	NULL	
+clubs	created_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+clubs	updated_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+club_events	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+club_events	club_id	int	int(11)	YES	NULL	NULL	NULL	
+club_events	title	varchar	varchar(255)	NO	NULL	255	NULL	
+club_events	description	text	text	YES	NULL	65535	NULL	
+club_events	event_date	datetime	datetime	NO	NULL	NULL	NULL	
+club_events	location	varchar	varchar(255)	YES	NULL	255	NULL	
+club_events	created_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+club_events	updated_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+club_memberships	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+club_memberships	club_id	int	int(11)	YES	NULL	NULL	UNIQUE	
+club_memberships	user_id	int	int(11)	YES	NULL	NULL	UNIQUE	
+club_memberships	role	enum	enum('member','leader','co_leader')	YES	'member'	9	NULL	
+club_memberships	joined_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+club_memberships	status	enum	enum('active','inactive')	YES	'active'	8	NULL	
+course_enrollments	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+course_enrollments	user_id	int	int(11)	YES	NULL	NULL	UNIQUE	
+course_enrollments	course_id	int	int(11)	YES	NULL	NULL	UNIQUE	
+course_enrollments	term_id	int	int(11)	YES	NULL	NULL	UNIQUE	
+course_enrollments	status	enum	enum('pending','approved','waitlisted','rejected')	YES	'pending'	10	NULL	
+course_enrollments	enrolled_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+course_enrollments	updated_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+csrf_tokens	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+csrf_tokens	user_id	int	int(11)	NO	NULL	NULL	NULL	
+csrf_tokens	token	varchar	varchar(64)	NO	NULL	64	NULL	
+csrf_tokens	created_at	datetime	datetime	NO	current_timestamp()	NULL	NULL	
+csrf_tokens	expires_at	datetime	datetime	NO	NULL	NULL	NULL	
+debts	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+debts	user_id	int	int(11)	NO	NULL	NULL	NULL	
+debts	fee_id	int	int(11)	NO	NULL	NULL	NULL	
+debts	amount_due	decimal	decimal(10,2)	NO	NULL	NULL	NULL	
+debts	academic_year	varchar	varchar(9)	NO	NULL	9	NULL	
+debts	created_at	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+debts	updated_at	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+debts	term_id	int	int(11)	YES	NULL	NULL	NULL	
+debts	class_id	int	int(11)	NO	NULL	NULL	NULL	
+debts	academic_year_id	int	int(11)	YES	NULL	NULL	NULL	
+departments	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+departments	name	varchar	varchar(100)	NO	NULL	100	UNIQUE	
+diagnosis_criteria	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+diagnosis_criteria	category_id	int	int(11)	NO	NULL	NULL	FOREIGN KEY	
+diagnosis_criteria	name	varchar	varchar(255)	NO	NULL	255	NULL	
+diagnosis_criteria	description	text	text	YES	NULL	65535	NULL	
+diagnosis_criteria	min_score	decimal	decimal(5,2)	YES	0.00	NULL	NULL	
+diagnosis_criteria	max_score	decimal	decimal(5,2)	YES	100.00	NULL	NULL	
+diagnosis_criteria	weight	decimal	decimal(5,2)	YES	1.00	NULL	NULL	
+diagnosis_criteria	evaluation_type	enum	enum('numeric','scale','percentage','rating')	YES	'numeric'	10	NULL	
+diagnosis_criteria	sort_order	int	int(11)	YES	0	NULL	NULL	
+diagnosis_criteria	is_required	tinyint	tinyint(1)	YES	1	NULL	NULL	
+diagnosis_criteria	is_active	tinyint	tinyint(1)	YES	1	NULL	NULL	
+diagnosis_criteria	created_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+diagnosis_criteria_categories	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+diagnosis_criteria_categories	name	varchar	varchar(100)	NO	NULL	100	NULL	
+diagnosis_criteria_categories	description	text	text	YES	NULL	65535	NULL	
+diagnosis_criteria_categories	weight	decimal	decimal(5,2)	YES	1.00	NULL	NULL	
+diagnosis_criteria_categories	sort_order	int	int(11)	YES	0	NULL	NULL	
+diagnosis_criteria_categories	is_active	tinyint	tinyint(1)	YES	1	NULL	NULL	
+diagnosis_criteria_categories	created_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+diagnosis_history	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+diagnosis_history	diagnosis_id	int	int(11)	NO	NULL	NULL	FOREIGN KEY	
+diagnosis_history	action	enum	enum('created','updated','deleted','status_changed...	NO	NULL	14	NULL	
+diagnosis_history	old_data	longtext	longtext	YES	NULL	4294967295	NULL	
+diagnosis_history	new_data	longtext	longtext	YES	NULL	4294967295	NULL	
+diagnosis_history	changed_by	int	int(11)	NO	NULL	NULL	FOREIGN KEY	
+diagnosis_history	changed_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+evaluation_criteria	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+evaluation_criteria	name	varchar	varchar(255)	NO	NULL	255	NULL	
+evaluation_criteria	description	text	text	YES	NULL	65535	NULL	
+evaluation_scores	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+evaluation_scores	evaluation_id	int	int(11)	NO	NULL	NULL	NULL	
+evaluation_scores	criterion_id	int	int(11)	NO	NULL	NULL	NULL	
+evaluation_scores	score	int	int(11)	NO	NULL	NULL	NULL	
+event_rsvps	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+event_rsvps	event_id	int	int(11)	NO	NULL	NULL	NULL	
+event_rsvps	user_id	int	int(11)	NO	NULL	NULL	NULL	
+event_rsvps	created_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+exam_schedules	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+exam_schedules	class_id	int	int(11)	YES	NULL	NULL	NULL	
+exam_schedules	subject_id	int	int(11)	YES	NULL	NULL	NULL	
+exam_schedules	term_id	int	int(11)	YES	NULL	NULL	NULL	
+exam_schedules	exam_date	date	date	NO	NULL	NULL	NULL	
+exam_schedules	start_time	time	time	YES	NULL	NULL	NULL	
+exam_schedules	end_time	time	time	YES	NULL	NULL	NULL	
+exam_schedules	room	varchar	varchar(50)	YES	NULL	50	NULL	
+exam_schedules	instructions	text	text	YES	NULL	65535	NULL	
+exam_schedules	created_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+exam_schedules	updated_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+extracurricular_activities	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+extracurricular_activities	student_id	int	int(11)	NO	NULL	NULL	NULL	
+extracurricular_activities	term_id	int	int(11)	NO	NULL	NULL	NULL	
+extracurricular_activities	activity_name	varchar	varchar(255)	NO	NULL	255	NULL	
+extracurricular_activities	participation_date	date	date	NO	NULL	NULL	NULL	
+extracurricular_activities	details	text	text	YES	NULL	65535	NULL	
+extracurricular_activities	created_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+fees	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+fees	class_id	int	int(11)	YES	NULL	NULL	UNIQUE	
+fees	class_id	int	int(11)	YES	NULL	NULL	UNIQUE	
+fees	department	enum	enum('Pre-School','Kindergarten','Lower Primary','...	NO	NULL	13	NULL	
+fees	fee_type	varchar	varchar(50)	NO	NULL	50	UNIQUE	
+fees	fee_type	varchar	varchar(50)	NO	NULL	50	UNIQUE	
+fees	amount	decimal	decimal(10,2)	NO	NULL	NULL	NULL	
+fees	due_date	date	date	NO	NULL	NULL	NULL	
+fees	academic_year	varchar	varchar(9)	NO	NULL	9	UNIQUE	
+fees	term_id	int	int(11)	YES	NULL	NULL	UNIQUE	
+fees	created_at	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+fees	updated_at	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+fees	target_type	enum	enum('Class','Learner','School','Bulk Learners')	NO	NULL	13	NULL	
+fees	user_id	int	int(11)	YES	NULL	NULL	UNIQUE	
+fees	user_id	int	int(11)	YES	NULL	NULL	UNIQUE	
+fees	is_recurring	tinyint	tinyint(1)	YES	0	NULL	NULL	
+fees	scholarship_percentage	decimal	decimal(5,2)	YES	0.00	NULL	NULL	
+fees	original_amount	decimal	decimal(10,2)	YES	NULL	NULL	NULL	
+fees	academic_year_id	int	int(11)	YES	NULL	NULL	UNIQUE	
+fees	amount_paid	decimal	decimal(10,2)	NO	0.00	NULL	NULL	
+fees	net_balance	decimal	decimal(10,2)	YES	NULL	NULL	NULL	
+fees	student_id_ref	varchar	varchar(20)	YES	NULL	20	NULL	
+fees_extended_view	id	int	int(11)	YES	NULL	NULL	NULL	
+fees_extended_view	class_id	int	int(11)	YES	NULL	NULL	NULL	
+fees_extended_view	department	enum	enum('Pre-School','Kindergarten','Lower Primary','...	YES	NULL	13	NULL	
+fees_extended_view	fee_type	varchar	varchar(50)	YES	NULL	50	NULL	
+fees_extended_view	amount	decimal	decimal(10,2)	YES	NULL	NULL	NULL	
+fees_extended_view	due_date	date	date	YES	NULL	NULL	NULL	
+fees_extended_view	academic_year	varchar	varchar(9)	YES	NULL	9	NULL	
+fees_extended_view	term_id	int	int(11)	YES	NULL	NULL	NULL	
+fees_extended_view	created_at	timestamp	timestamp	YES	NULL	NULL	NULL	
+fees_extended_view	updated_at	timestamp	timestamp	YES	NULL	NULL	NULL	
+fees_extended_view	target_type	enum	enum('Class','Learner','School','Bulk Learners')	YES	NULL	13	NULL	
+fees_extended_view	user_id	int	int(11)	YES	NULL	NULL	NULL	
+fees_extended_view	is_recurring	tinyint	tinyint(1)	YES	NULL	NULL	NULL	
+fees_extended_view	academic_year_id	int	int(11)	YES	NULL	NULL	NULL	
+fees_extended_view	year_label	varchar	varchar(20)	YES	NULL	20	NULL	
+fees_extended_view	term_name	varchar	varchar(50)	YES	NULL	50	NULL	
+fees_extended_view	term_number	int	int(11)	YES	NULL	NULL	NULL	
+fees_extended_view	academic_period	varchar	varchar(39)	YES	NULL	39	NULL	
+fee_history	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+fee_history	fee_id	int	int(11)	NO	NULL	NULL	FOREIGN KEY	
+fee_history	action	enum	enum('created','updated','deleted','scholarship_ap...	NO	NULL	19	NULL	
+fee_history	old_data	longtext	longtext	YES	NULL	4294967295	NULL	
+fee_history	new_data	longtext	longtext	YES	NULL	4294967295	NULL	
+fee_history	changed_by	int	int(11)	NO	NULL	NULL	FOREIGN KEY	
+fee_history	change_reason	text	text	YES	NULL	65535	NULL	
+fee_history	created_at	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+fee_payment_schedule	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+localhost:3306/qpmceduc_db/t/		https://cpanel.qpmcedu.com/cpsess1240990639/3rdparty/phpMyAdmin/index.php?route=/database/sql&db=qpmceduc_db
+
+   Showing rows 500 - 999 (1253 total, Query took 0.3728 seconds.) [TABLE_NAME: FEE_PAYMENT_SCHEDULE... - STUDENT_FEEDBACK...]
+
+
+SELECT 
+    t.TABLE_NAME, 
+    c.COLUMN_NAME, 
+    c.DATA_TYPE,
+    c.COLUMN_TYPE,
+    c.IS_NULLABLE,
+    c.COLUMN_DEFAULT,
+    c.CHARACTER_MAXIMUM_LENGTH,
+    k.CONSTRAINT_TYPE
+FROM 
+    INFORMATION_SCHEMA.COLUMNS c
+JOIN 
+    INFORMATION_SCHEMA.TABLES t
+ON 
+    c.TABLE_NAME = t.TABLE_NAME
+LEFT JOIN 
+    INFORMATION_SCHEMA.KEY_COLUMN_USAGE ku 
+ON 
+    c.TABLE_NAME = ku.TABLE_NAME AND c.COLUMN_NAME = ku.COLUMN_NAME
+LEFT JOIN 
+    INFORMATION_SCHEMA.TABLE_CONSTRAINTS k
+ON 
+    ku.TABLE_NAME = k.TABLE_NAME AND ku.CONSTRAINT_NAME = k.CONSTRAINT_NAME
+WHERE 
+    t.TABLE_SCHEMA = 'qpmceduc_db'
+ORDER BY 
+    t.TABLE_NAME, c.ORDINAL_POSITION;
+
+
+TABLE_NAME   	COLUMN_NAME	DATA_TYPE	COLUMN_TYPE	IS_NULLABLE	COLUMN_DEFAULT	CHARACTER_MAXIMUM_LENGTH	CONSTRAINT_TYPE	
+fee_payment_schedule	week_number	int	int(11)	NO	NULL	NULL	UNIQUE	
+fee_payment_schedule	expected_percentage	decimal	decimal(5,2)	NO	NULL	NULL	NULL	
+fee_payment_schedule	description	varchar	varchar(255)	YES	NULL	255	NULL	
+fee_summaries_cache	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+fee_summaries_cache	academic_year	varchar	varchar(9)	NO	NULL	9	NULL	
+fee_summaries_cache	department_id	int	int(11)	YES	NULL	NULL	NULL	
+fee_summaries_cache	class_id	int	int(11)	YES	NULL	NULL	NULL	
+fee_summaries_cache	total_fees	decimal	decimal(10,2)	YES	0.00	NULL	NULL	
+fee_summaries_cache	total_paid	decimal	decimal(10,2)	YES	0.00	NULL	NULL	
+fee_summaries_cache	total_debts	decimal	decimal(10,2)	YES	0.00	NULL	NULL	
+fee_summaries_cache	paid_count	int	int(11)	YES	0	NULL	NULL	
+fee_summaries_cache	partial_count	int	int(11)	YES	0	NULL	NULL	
+fee_summaries_cache	unpaid_count	int	int(11)	YES	0	NULL	NULL	
+fee_summaries_cache	cached_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+forum_posts	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+forum_posts	thread_id	int	int(11)	YES	NULL	NULL	NULL	
+forum_posts	user_id	int	int(11)	YES	NULL	NULL	NULL	
+forum_posts	content	text	text	NO	NULL	65535	NULL	
+forum_posts	parent_post_id	int	int(11)	YES	NULL	NULL	NULL	
+forum_posts	created_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+forum_posts	updated_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+forum_reactions	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+forum_reactions	post_id	int	int(11)	YES	NULL	NULL	UNIQUE	
+forum_reactions	user_id	int	int(11)	YES	NULL	NULL	UNIQUE	
+forum_reactions	reaction_type	enum	enum('upvote','downvote')	NO	NULL	8	NULL	
+forum_reactions	created_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+forum_threads	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+forum_threads	class_id	int	int(11)	YES	NULL	NULL	NULL	
+forum_threads	subject_id	int	int(11)	YES	NULL	NULL	NULL	
+forum_threads	user_id	int	int(11)	YES	NULL	NULL	NULL	
+forum_threads	title	varchar	varchar(255)	NO	NULL	255	NULL	
+forum_threads	description	text	text	YES	NULL	65535	NULL	
+forum_threads	is_pinned	tinyint	tinyint(1)	YES	0	NULL	NULL	
+forum_threads	is_locked	tinyint	tinyint(1)	YES	0	NULL	NULL	
+forum_threads	created_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+forum_threads	updated_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+gallery_albums	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+gallery_albums	title	varchar	varchar(255)	NO	NULL	255	NULL	
+gallery_albums	description	text	text	YES	NULL	65535	NULL	
+gallery_albums	cover_image	varchar	varchar(255)	YES	NULL	255	NULL	
+gallery_albums	class_id	int	int(11)	YES	NULL	NULL	FOREIGN KEY	
+gallery_albums	department_id	int	int(11)	YES	NULL	NULL	FOREIGN KEY	
+gallery_albums	created_by	int	int(11)	NO	NULL	NULL	FOREIGN KEY	
+gallery_albums	is_published	tinyint	tinyint(1)	NO	1	NULL	NULL	
+gallery_albums	created_at	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+gallery_albums	updated_at	timestamp	timestamp	YES	NULL	NULL	NULL	
+gallery_comments	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+gallery_comments	media_id	int	int(11)	NO	NULL	NULL	FOREIGN KEY	
+gallery_comments	user_id	int	int(11)	NO	NULL	NULL	FOREIGN KEY	
+gallery_comments	parent_comment_id	int	int(11)	YES	NULL	NULL	FOREIGN KEY	
+gallery_comments	comment_text	text	text	NO	NULL	65535	NULL	
+gallery_comments	is_edited	tinyint	tinyint(1)	NO	0	NULL	NULL	
+gallery_comments	edited_at	timestamp	timestamp	YES	NULL	NULL	NULL	
+gallery_comments	created_at	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+gallery_comments	updated_at	timestamp	timestamp	YES	NULL	NULL	NULL	
+gallery_likes	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+gallery_likes	media_id	int	int(11)	NO	NULL	NULL	UNIQUE	
+gallery_likes	media_id	int	int(11)	NO	NULL	NULL	FOREIGN KEY	
+gallery_likes	user_id	int	int(11)	NO	NULL	NULL	UNIQUE	
+gallery_likes	user_id	int	int(11)	NO	NULL	NULL	FOREIGN KEY	
+gallery_likes	reaction_type	enum	enum('like','love','wow','sad','angry')	NO	'like'	5	NULL	
+gallery_likes	created_at	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+gallery_media	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+gallery_media	album_id	int	int(11)	YES	NULL	NULL	FOREIGN KEY	
+gallery_media	title	varchar	varchar(255)	NO	NULL	255	NULL	
+gallery_media	description	text	text	YES	NULL	65535	NULL	
+gallery_media	media_type	enum	enum('image','video')	NO	NULL	5	NULL	
+gallery_media	file_path	varchar	varchar(500)	NO	NULL	500	NULL	
+gallery_media	thumbnail_path	varchar	varchar(500)	YES	NULL	500	NULL	
+gallery_media	file_size	bigint	bigint(20)	YES	NULL	NULL	NULL	
+gallery_media	mime_type	varchar	varchar(100)	YES	NULL	100	NULL	
+gallery_media	video_duration	int	int(11)	YES	NULL	NULL	NULL	
+gallery_media	uploaded_by	int	int(11)	NO	NULL	NULL	FOREIGN KEY	
+gallery_media	is_approved	tinyint	tinyint(1)	NO	1	NULL	NULL	
+gallery_media	approved_by	int	int(11)	YES	NULL	NULL	FOREIGN KEY	
+gallery_media	approved_at	timestamp	timestamp	YES	NULL	NULL	NULL	
+gallery_media	view_count	int	int(11)	NO	0	NULL	NULL	
+gallery_media	like_count	int	int(11)	NO	0	NULL	NULL	
+gallery_media	comment_count	int	int(11)	NO	0	NULL	NULL	
+gallery_media	created_at	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+gallery_media	updated_at	timestamp	timestamp	YES	NULL	NULL	NULL	
+gallery_media_tags	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+gallery_media_tags	media_id	int	int(11)	NO	NULL	NULL	UNIQUE	
+gallery_media_tags	media_id	int	int(11)	NO	NULL	NULL	FOREIGN KEY	
+gallery_media_tags	tag_id	int	int(11)	NO	NULL	NULL	UNIQUE	
+gallery_media_tags	tag_id	int	int(11)	NO	NULL	NULL	FOREIGN KEY	
+gallery_media_tags	created_at	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+gallery_tags	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+gallery_tags	name	varchar	varchar(100)	NO	NULL	100	UNIQUE	
+gallery_tags	slug	varchar	varchar(100)	NO	NULL	100	UNIQUE	
+gallery_tags	created_at	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+games	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+games	title	varchar	varchar(100)	NO	NULL	100	NULL	
+games	description	text	text	NO	NULL	65535	NULL	
+games	image_url	varchar	varchar(255)	NO	NULL	255	NULL	
+games	game_url	varchar	varchar(255)	NO	NULL	255	NULL	
+games	category	varchar	varchar(50)	NO	NULL	50	NULL	
+games	created_at	datetime	datetime	YES	current_timestamp()	NULL	NULL	
+grades	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+grades	user_id	int	int(11)	NO	NULL	NULL	UNIQUE	
+grades	score	decimal	decimal(5,2)	NO	0.00	NULL	NULL	
+grades	class_id	int	int(11)	NO	NULL	NULL	UNIQUE	
+grades	subject_id	int	int(11)	NO	NULL	NULL	UNIQUE	
+grades	term_id	int	int(11)	NO	NULL	NULL	UNIQUE	
+grades	mid_term_exam	decimal	decimal(5,2)	YES	NULL	NULL	NULL	
+grades	end_term_exam	decimal	decimal(5,2)	YES	NULL	NULL	NULL	
+grades	total	decimal	decimal(5,2)	YES	NULL	NULL	NULL	
+grades	created_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+grades	updated_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+grades	report	text	text	YES	NULL	65535	NULL	
+grades	comment	text	text	YES	NULL	65535	NULL	
+grades	teacher_id	int	int(11)	YES	NULL	NULL	NULL	
+groups	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+groups	class_id	int	int(11)	NO	NULL	NULL	NULL	
+groups	name	varchar	varchar(100)	NO	NULL	100	NULL	
+groups	project_title	varchar	varchar(255)	NO	NULL	255	NULL	
+groups	description	text	text	YES	NULL	65535	NULL	
+groups	deadline	datetime	datetime	NO	NULL	NULL	NULL	
+groups	max_points	int	int(11)	NO	NULL	NULL	NULL	
+groups	status	enum	enum('active','archived')	NO	'active'	8	NULL	
+groups	created_at	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+group_chat_messages	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+group_chat_messages	group_id	int	int(11)	NO	NULL	NULL	NULL	
+group_chat_messages	user_id	int	int(11)	NO	NULL	NULL	NULL	
+group_chat_messages	message	text	text	YES	NULL	65535	NULL	
+group_chat_messages	message_media	varchar	varchar(500)	YES	NULL	500	NULL	
+group_chat_messages	reply_to_id	int	int(11)	YES	NULL	NULL	NULL	
+group_chat_messages	read_status	varchar	varchar(20)	YES	'unread'	20	NULL	
+group_chat_messages	created_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+group_members	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+group_members	id	int	int(11)	NO	NULL	NULL	UNIQUE	
+group_members	group_id	int	int(11)	NO	NULL	NULL	UNIQUE	
+group_members	group_id	int	int(11)	NO	NULL	NULL	UNIQUE	
+group_members	user_id	int	int(11)	NO	NULL	NULL	UNIQUE	
+group_members	role	enum	enum('leader','member')	YES	'member'	6	NULL	
+group_members	created_at	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+group_members	status	enum	enum('active','inactive')	YES	'active'	8	NULL	
+group_members	left_at	datetime	datetime	YES	NULL	NULL	NULL	
+help_tickets	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+help_tickets	user_id	int	int(11)	YES	NULL	NULL	NULL	
+help_tickets	subject	varchar	varchar(255)	NO	NULL	255	NULL	
+help_tickets	description	text	text	NO	NULL	65535	NULL	
+help_tickets	category	enum	enum('technical','academic','general','billing')	YES	'general'	9	NULL	
+help_tickets	priority	enum	enum('low','medium','high')	YES	'medium'	6	NULL	
+help_tickets	status	enum	enum('open','in_progress','resolved','closed')	YES	'open'	11	NULL	
+help_tickets	created_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+help_tickets	updated_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+learning_history	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+learning_history	user_id	int	int(11)	NO	NULL	NULL	NULL	
+learning_history	prompt	text	text	YES	NULL	65535	NULL	
+learning_history	response	text	text	YES	NULL	65535	NULL	
+learning_history	subject_id	int	int(11)	YES	NULL	NULL	NULL	
+learning_history	created_at	datetime	datetime	NO	current_timestamp()	NULL	NULL	
+learning_history	session_id	varchar	varchar(50)	YES	NULL	50	NULL	
+learning_history	question_type	enum	enum('user','generated')	YES	'user'	9	NULL	
+learning_history	is_correct	tinyint	tinyint(1)	YES	NULL	NULL	NULL	
+learning_history	explanation	text	text	YES	NULL	65535	NULL	
+learning_resources	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+learning_resources	title	varchar	varchar(255)	NO	NULL	255	NULL	
+learning_resources	description	text	text	YES	NULL	65535	NULL	
+learning_resources	resource_type	enum	enum('document','video','audio','link','interactiv...	NO	NULL	12	NULL	
+learning_resources	file_path	varchar	varchar(255)	YES	NULL	255	NULL	
+learning_resources	url	varchar	varchar(512)	YES	NULL	512	NULL	
+learning_resources	subject_id	int	int(11)	YES	NULL	NULL	NULL	
+learning_resources	class_id	int	int(11)	YES	NULL	NULL	NULL	
+learning_resources	teacher_id	int	int(11)	NO	NULL	NULL	NULL	
+learning_resources	term_id	int	int(11)	YES	NULL	NULL	NULL	
+learning_resources	academic_year	varchar	varchar(10)	YES	NULL	10	NULL	
+learning_resources	access_level	enum	enum('public','class','private')	NO	'class'	7	NULL	
+learning_resources	tags	varchar	varchar(255)	YES	NULL	255	NULL	
+learning_resources	is_approved	tinyint	tinyint(1)	NO	0	NULL	NULL	
+learning_resources	approved_by	int	int(11)	YES	NULL	NULL	NULL	
+learning_resources	approved_at	timestamp	timestamp	YES	NULL	NULL	NULL	
+learning_resources	created_by	int	int(11)	NO	NULL	NULL	NULL	
+learning_resources	created_at	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+learning_resources	updated_at	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+learning_resources	views_count	int	int(11)	NO	0	NULL	NULL	
+learning_resources	downloads_count	int	int(11)	NO	0	NULL	NULL	
+learning_resources	rating	decimal	decimal(3,2)	YES	0.00	NULL	NULL	
+learning_resources	rating_count	int	int(11)	YES	0	NULL	NULL	
+learning_resources	ghanaian_content	tinyint	tinyint(1)	NO	0	NULL	NULL	
+learning_resources	academic_year_id	int	int(11)	YES	NULL	NULL	NULL	
+lesson_observations	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+lesson_observations	teacher_id	int	int(11)	NO	NULL	NULL	NULL	
+lesson_observations	class_id	int	int(11)	NO	NULL	NULL	NULL	
+lesson_observations	subject_id	int	int(11)	NO	NULL	NULL	NULL	
+lesson_observations	term_id	int	int(11)	NO	NULL	NULL	NULL	
+lesson_observations	observation_date	date	date	NO	NULL	NULL	NULL	
+lesson_observations	lesson_topic	varchar	varchar(255)	NO	NULL	255	NULL	
+lesson_observations	score_1	int	int(11)	NO	0	NULL	NULL	
+lesson_observations	score_2	int	int(11)	NO	0	NULL	NULL	
+lesson_observations	score_3	int	int(11)	NO	0	NULL	NULL	
+lesson_observations	score_4	int	int(11)	NO	0	NULL	NULL	
+lesson_observations	score_5	int	int(11)	NO	0	NULL	NULL	
+lesson_observations	score_6	int	int(11)	NO	0	NULL	NULL	
+lesson_observations	score_7	int	int(11)	NO	0	NULL	NULL	
+lesson_observations	score_8	int	int(11)	NO	0	NULL	NULL	
+lesson_observations	score_9	int	int(11)	NO	0	NULL	NULL	
+lesson_observations	score_10	int	int(11)	NO	0	NULL	NULL	
+lesson_observations	remarks	text	text	YES	NULL	65535	NULL	
+lesson_observations	field_notes	text	text	YES	NULL	65535	NULL	
+lesson_observations	question_log	text	text	YES	NULL	65535	NULL	
+lesson_observations	interaction_map	text	text	YES	NULL	65535	NULL	
+lesson_observations	created_at	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+lesson_observations	updated_at	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+lesson_plans	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+lesson_plans	teacher_id	int	int(11)	NO	NULL	NULL	NULL	
+lesson_plans	subject_id	int	int(11)	NO	NULL	NULL	NULL	
+lesson_plans	class_id	int	int(11)	NO	NULL	NULL	NULL	
+lesson_plans	term_id	int	int(11)	NO	NULL	NULL	NULL	
+lesson_plans	topic	varchar	varchar(255)	NO	NULL	255	NULL	
+lesson_plans	objectives	text	text	NO	NULL	65535	NULL	
+lesson_plans	lesson_date	date	date	NO	NULL	NULL	NULL	
+lesson_plans	created_at	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+lesson_plans	updated_at	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+lesson_plans	status	enum	enum('draft','published')	YES	'draft'	9	NULL	
+lesson_plans	resources	text	text	YES	NULL	65535	NULL	
+library_books	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+library_books	title	varchar	varchar(255)	NO	NULL	255	NULL	
+library_books	author	varchar	varchar(255)	YES	NULL	255	NULL	
+library_books	isbn	varchar	varchar(13)	YES	NULL	13	UNIQUE	
+library_books	publisher	varchar	varchar(255)	YES	NULL	255	NULL	
+library_books	publication_year	year	year(4)	YES	NULL	NULL	NULL	
+library_books	category	varchar	varchar(255)	YES	NULL	255	NULL	
+library_books	total_copies	int	int(11)	NO	1	NULL	NULL	
+library_books	available_copies	int	int(11)	NO	1	NULL	NULL	
+library_books	created_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+library_books	updated_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+library_fines	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+library_fines	loan_id	int	int(11)	YES	NULL	NULL	NULL	
+library_fines	user_id	int	int(11)	YES	NULL	NULL	NULL	
+library_fines	amount	decimal	decimal(10,2)	NO	NULL	NULL	NULL	
+library_fines	reason	varchar	varchar(255)	NO	NULL	255	NULL	
+library_fines	issued_at	date	date	NO	NULL	NULL	NULL	
+library_fines	paid_at	timestamp	timestamp	YES	NULL	NULL	NULL	
+library_fines	status	enum	enum('pending','paid')	YES	'pending'	7	NULL	
+library_fines	created_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+library_fines	updated_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+library_loans	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+library_loans	user_id	int	int(11)	YES	NULL	NULL	NULL	
+library_loans	book_id	int	int(11)	YES	NULL	NULL	NULL	
+library_loans	loan_date	date	date	NO	NULL	NULL	NULL	
+library_loans	due_date	date	date	NO	NULL	NULL	NULL	
+library_loans	return_date	date	date	YES	NULL	NULL	NULL	
+library_loans	status	enum	enum('active','returned','overdue')	YES	'active'	8	NULL	
+library_loans	created_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+library_loans	updated_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+live_classes	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+live_classes	class_id	int	int(11)	NO	NULL	NULL	NULL	
+live_classes	title	varchar	varchar(255)	NO	NULL	255	NULL	
+live_classes	description	text	text	YES	NULL	65535	NULL	
+live_classes	start_time	datetime	datetime	NO	NULL	NULL	NULL	
+live_classes	duration	int	int(11)	NO	NULL	NULL	NULL	
+live_classes	meeting_link	varchar	varchar(255)	YES	NULL	255	NULL	
+live_classes	recording_link	varchar	varchar(255)	YES	NULL	255	NULL	
+live_classes	created_at	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+live_classes	recording_url	varchar	varchar(255)	YES	NULL	255	NULL	
+live_classes	chat_log	text	text	YES	NULL	65535	NULL	
+login_logs	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+login_logs	user_id	int	int(11)	NO	NULL	NULL	NULL	
+login_logs	ip_address	varchar	varchar(45)	YES	NULL	45	NULL	
+login_logs	user_agent	text	text	YES	NULL	65535	NULL	
+login_logs	success	tinyint	tinyint(1)	YES	0	NULL	NULL	
+login_logs	login_time	datetime	datetime	YES	current_timestamp()	NULL	NULL	
+mock_entries	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+mock_entries	student_id	int	int(11)	NO	NULL	NULL	NULL	
+mock_entries	teacher_id	int	int(11)	NO	NULL	NULL	NULL	
+mock_entries	class_id	int	int(11)	NO	NULL	NULL	NULL	
+mock_entries	subject_id	int	int(11)	NO	NULL	NULL	NULL	
+mock_entries	term_id	int	int(11)	NO	NULL	NULL	NULL	
+mock_entries	mock_number	tinyint	tinyint(2) unsigned	NO	NULL	NULL	NULL	
+mock_entries	academic_year	varchar	varchar(9)	NO	NULL	9	NULL	
+mock_entries	exam_date	date	date	NO	NULL	NULL	NULL	
+mock_entries	mock_raw	decimal	decimal(5,2)	YES	0.00	NULL	NULL	
+mock_entries	mock_max	decimal	decimal(5,2)	YES	100.00	NULL	NULL	
+mock_entries	mock_grade	varchar	varchar(100)	YES	''	100	NULL	
+mock_entries	mock_comments	text	text	YES	NULL	65535	NULL	
+mock_entries	status	enum	enum('draft','submitted','reviewed')	YES	'draft'	9	NULL	
+mock_entries	created_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+mock_entries	updated_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+mock_entries	academic_year_id	int	int(11)	YES	NULL	NULL	NULL	
+notifications	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+notifications	user_id	int	int(11)	YES	NULL	NULL	NULL	
+notifications	target_role	varchar	varchar(50)	YES	NULL	50	NULL	
+notifications	title	varchar	varchar(255)	NO	NULL	255	NULL	
+notifications	message	text	text	NO	NULL	65535	NULL	
+notifications	type	varchar	varchar(50)	YES	'info'	50	NULL	
+notifications	is_read	tinyint	tinyint(1)	YES	0	NULL	NULL	
+notifications	link	varchar	varchar(255)	YES	NULL	255	NULL	
+notifications	created_at	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+notifications	category	enum	enum('academic','extracurricular','administrative'...	YES	'system'	15	NULL	
+parents	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+parents	user_id	int	int(11)	NO	NULL	NULL	NULL	
+parents	parent_name	varchar	varchar(255)	NO	NULL	255	NULL	
+parents	occupation	varchar	varchar(255)	YES	NULL	255	NULL	
+parents	office_location	varchar	varchar(255)	YES	NULL	255	NULL	
+parents	office_address	varchar	varchar(255)	YES	NULL	255	NULL	
+parents	residential_address	varchar	varchar(255)	YES	NULL	255	NULL	
+parents	phone_number	varchar	varchar(50)	YES	NULL	50	NULL	
+parents	email	varchar	varchar(255)	YES	NULL	255	NULL	
+parents	emergency_contact_name	varchar	varchar(255)	YES	NULL	255	NULL	
+parents	emergency_contact_phone	varchar	varchar(50)	YES	NULL	50	NULL	
+parents	created_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+parents	updated_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+parents	academic_year	varchar	varchar(20)	YES	NULL	20	NULL	
+parents	academic_year_id	int	int(11)	YES	NULL	NULL	NULL	
+parent_student_mapping	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+parent_student_mapping	parent_id	int	int(11)	NO	NULL	NULL	UNIQUE	
+parent_student_mapping	student_id	int	int(11)	NO	NULL	NULL	UNIQUE	
+parent_student_mapping	created_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+parent_student_mapping_backup	id	int	int(11)	NO	0	NULL	NULL	
+parent_student_mapping_backup	parent_id	int	int(11)	NO	NULL	NULL	NULL	
+parent_student_mapping_backup	student_id	int	int(11)	NO	NULL	NULL	NULL	
+parent_student_mapping_backup	created_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+payments	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+payments	user_id	int	int(11)	NO	NULL	NULL	NULL	
+payments	fee_id	int	int(11)	NO	NULL	NULL	NULL	
+payments	amount_paid	decimal	decimal(10,2)	NO	NULL	NULL	NULL	
+payments	payment_date	date	date	NO	NULL	NULL	NULL	
+payments	payment_method	varchar	varchar(50)	NO	NULL	50	NULL	
+payments	receipt_number	varchar	varchar(50)	YES	NULL	50	NULL	
+payments	created_at	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+payments	updated_at	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+payments	class_id	int	int(11)	NO	NULL	NULL	NULL	
+payments	recorded_by	int	int(11)	NO	NULL	NULL	NULL	
+private_chat_messages	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+private_chat_messages	chat_session_id	int	int(11)	NO	NULL	NULL	NULL	
+private_chat_messages	user_id	int	int(11)	NO	NULL	NULL	NULL	
+private_chat_messages	message	text	text	NO	NULL	65535	NULL	
+private_chat_messages	message_media	varchar	varchar(255)	YES	NULL	255	NULL	
+private_chat_messages	read_status	enum	enum('unread','read')	YES	'unread'	6	NULL	
+private_chat_messages	is_active	tinyint	tinyint(1)	YES	1	NULL	NULL	
+private_chat_messages	last_activity	datetime	datetime	YES	NULL	NULL	NULL	
+private_chat_messages	created_at	datetime	datetime	NO	NULL	NULL	NULL	
+private_chat_sessions	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+private_chat_sessions	sender_id	int	int(11)	NO	NULL	NULL	NULL	
+private_chat_sessions	recipient_id	int	int(11)	NO	NULL	NULL	NULL	
+private_chat_sessions	class_id	int	int(11)	YES	NULL	NULL	NULL	
+private_chat_sessions	term_id	int	int(11)	NO	NULL	NULL	NULL	
+private_chat_sessions	session_token	varchar	varchar(32)	NO	NULL	32	UNIQUE	
+private_chat_sessions	title	varchar	varchar(255)	NO	NULL	255	NULL	
+private_chat_sessions	status	enum	enum('active','closed')	YES	'active'	6	NULL	
+private_chat_sessions	start_time	datetime	datetime	NO	NULL	NULL	NULL	
+private_chat_sessions	end_time	datetime	datetime	YES	NULL	NULL	NULL	
+private_chat_sessions	created_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+private_chat_sessions	updated_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+promotion_logs	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+promotion_logs	user_id	int	int(11)	NO	NULL	NULL	NULL	
+promotion_logs	old_class_id	int	int(11)	NO	NULL	NULL	NULL	
+promotion_logs	new_class_id	int	int(11)	NO	NULL	NULL	NULL	
+promotion_logs	teacher_id	int	int(11)	NO	NULL	NULL	NULL	
+promotion_logs	academic_year	varchar	varchar(9)	NO	NULL	9	NULL	
+promotion_logs	created_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+promotion_logs	academic_year_id	int	int(11)	YES	NULL	NULL	NULL	
+quizzes	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+quizzes	assignment_id	int	int(11)	NO	NULL	NULL	NULL	
+quizzes	teacher_id	int	int(11)	NO	NULL	NULL	NULL	
+quizzes	class_id	int	int(11)	NO	NULL	NULL	NULL	
+quizzes	subject_id	int	int(11)	NO	NULL	NULL	NULL	
+quizzes	term_id	int	int(11)	NO	NULL	NULL	NULL	
+quizzes	session_token	varchar	varchar(64)	NO	NULL	64	NULL	
+quizzes	title	varchar	varchar(255)	NO	NULL	255	NULL	
+quizzes	status	enum	enum('draft','active','closed')	NO	'draft'	6	NULL	
+quizzes	question	longtext	longtext	YES	NULL	4294967295	NULL	
+quizzes	question_media	varchar	varchar(255)	YES	NULL	255	NULL	
+quizzes	question_type	enum	enum('text','multiple_choice','media')	NO	'text'	15	NULL	
+quizzes	options	longtext	longtext	YES	NULL	4294967295	NULL	
+quizzes	created_at	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+quizzes	updated_at	timestamp	timestamp	YES	NULL	NULL	NULL	
+quizzes	start_time	datetime	datetime	YES	NULL	NULL	NULL	
+quizzes	end_time	datetime	datetime	YES	NULL	NULL	NULL	
+quizzes	is_real_time	tinyint	tinyint(1)	NO	1	NULL	NULL	
+quiz_submissions	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+quiz_submissions	quiz_id	int	int(11)	NO	NULL	NULL	NULL	
+quiz_submissions	user_id	int	int(11)	NO	NULL	NULL	NULL	
+quiz_submissions	answer	longtext	longtext	YES	NULL	4294967295	NULL	
+quiz_submissions	answer_media	varchar	varchar(255)	YES	NULL	255	NULL	
+quiz_submissions	is_correct	tinyint	tinyint(1)	YES	NULL	NULL	NULL	
+quiz_submissions	score	decimal	decimal(5,2)	YES	NULL	NULL	NULL	
+quiz_submissions	submitted_at	datetime	datetime	YES	NULL	NULL	NULL	
+quiz_submissions	is_active	tinyint	tinyint(1)	NO	0	NULL	NULL	
+quiz_submissions	last_activity	datetime	datetime	YES	NULL	NULL	NULL	
+quiz_submissions	created_at	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+quiz_submissions	updated_at	timestamp	timestamp	YES	NULL	NULL	NULL	
+remarks	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+remarks	user_id	int	int(11)	NO	NULL	NULL	UNIQUE	
+remarks	user_id	int	int(11)	NO	NULL	NULL	FOREIGN KEY	
+remarks	term_id	int	int(11)	NO	NULL	NULL	UNIQUE	
+remarks	term_id	int	int(11)	NO	NULL	NULL	FOREIGN KEY	
+remarks	report_id	int	int(11)	NO	NULL	NULL	UNIQUE	
+remarks	report_id	int	int(11)	NO	NULL	NULL	FOREIGN KEY	
+remarks	class_id	int	int(11)	NO	NULL	NULL	FOREIGN KEY	
+remarks	teacher_remark	text	text	YES	NULL	65535	NULL	
+remarks	headmaster_remark	text	text	YES	NULL	65535	NULL	
+remarks	teacher_remark_status	enum	enum('pending','generated','edited','failed')	YES	'pending'	9	NULL	
+remarks	headmaster_remark_status	enum	enum('pending','generated','edited','failed')	YES	'pending'	9	NULL	
+remarks	teacher_remark_generated_at	datetime	datetime	YES	NULL	NULL	NULL	
+remarks	headmaster_remark_generated_at	datetime	datetime	YES	NULL	NULL	NULL	
+remarks	teacher_remark_edited_by	int	int(11)	YES	NULL	NULL	NULL	
+remarks	headmaster_remark_edited_by	int	int(11)	YES	NULL	NULL	NULL	
+remarks	teacher_remark_edited_at	datetime	datetime	YES	NULL	NULL	NULL	
+remarks	headmaster_remark_edited_at	datetime	datetime	YES	NULL	NULL	NULL	
+remarks	generation_attempts	int	int(11)	YES	0	NULL	NULL	
+remarks	last_generation_error	text	text	YES	NULL	65535	NULL	
+remarks	created_at	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+remarks	updated_at	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+report_summaries	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+report_summaries	report_id	int	int(11)	NO	NULL	NULL	NULL	
+report_summaries	user_id	int	int(11)	NO	NULL	NULL	NULL	
+report_summaries	term_id	int	int(11)	NO	NULL	NULL	NULL	
+report_summaries	summary	text	text	NO	NULL	65535	NULL	
+report_summaries	created_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+resource_feedback	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+resource_feedback	resource_id	int	int(11)	NO	NULL	NULL	NULL	
+resource_feedback	user_id	int	int(11)	NO	NULL	NULL	NULL	
+resource_feedback	rating	decimal	decimal(3,2)	NO	NULL	NULL	NULL	
+resource_feedback	comment	text	text	YES	NULL	65535	NULL	
+resource_feedback	created_at	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+response_cache	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+response_cache	user_id	int	int(11)	NO	NULL	NULL	NULL	
+response_cache	prompt_hash	varchar	varchar(64)	YES	NULL	64	NULL	
+response_cache	response	text	text	YES	NULL	65535	NULL	
+response_cache	created_at	datetime	datetime	NO	current_timestamp()	NULL	NULL	
+response_cache	expires_at	datetime	datetime	NO	NULL	NULL	NULL	
+school_events	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+school_events	title	varchar	varchar(255)	NO	NULL	255	NULL	
+school_events	description	text	text	YES	NULL	65535	NULL	
+school_events	event_type	enum	enum('sports','cultural','academic','holiday','oth...	NO	NULL	8	NULL	
+school_events	event_date	date	date	NO	NULL	NULL	NULL	
+school_events	start_time	time	time	YES	NULL	NULL	NULL	
+school_events	end_time	time	time	YES	NULL	NULL	NULL	
+school_events	location	varchar	varchar(255)	YES	NULL	255	NULL	
+school_events	rsvp_required	tinyint	tinyint(1)	YES	0	NULL	NULL	
+school_events	created_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+school_events	updated_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+staff_attendance_logs	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+staff_attendance_logs	user_id	int	int(11)	NO	NULL	NULL	FOREIGN KEY	
+staff_attendance_logs	clock_in	datetime	datetime	NO	current_timestamp()	NULL	NULL	
+staff_attendance_logs	clock_out	datetime	datetime	YES	NULL	NULL	NULL	
+staff_attendance_logs	date	date	date	NO	NULL	NULL	NULL	
+staff_attendance_logs	status	enum	enum('present','late','absent')	YES	'present'	7	NULL	
+staff_attendance_logs	notes	text	text	YES	NULL	65535	NULL	
+students	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+students	user_id	int	int(11)	NO	NULL	NULL	NULL	
+students	student_name	varchar	varchar(100)	NO	NULL	100	NULL	
+students	previous_school	varchar	varchar(200)	YES	NULL	200	NULL	
+students	date_of_birth	date	date	YES	NULL	NULL	NULL	
+students	nationality	varchar	varchar(100)	YES	NULL	100	NULL	
+students	allergy	mediumtext	mediumtext	YES	NULL	16777215	NULL	
+students	special_child	enum	enum('yes','no')	YES	'no'	3	NULL	
+students	parent_occupation	varchar	varchar(150)	YES	NULL	150	NULL	
+students	parent_office_location	varchar	varchar(200)	YES	NULL	200	NULL	
+students	office_address	mediumtext	mediumtext	YES	NULL	16777215	NULL	
+students	residential_address	mediumtext	mediumtext	YES	NULL	16777215	NULL	
+students	emergency_contact_name	varchar	varchar(100)	YES	NULL	100	NULL	
+students	emergency_contact_phone	varchar	varchar(20)	YES	NULL	20	NULL	
+students	created_at	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+students	updated_at	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+students	academic_year	varchar	varchar(9)	YES	NULL	9	NULL	
+students	academic_year_id	int	int(11)	YES	NULL	NULL	NULL	
+student_classes	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+student_classes	user_id	int	int(11)	NO	NULL	NULL	UNIQUE	
+student_classes	class_id	int	int(11)	YES	NULL	NULL	UNIQUE	
+student_classes	academic_year	varchar	varchar(10)	NO	NULL	10	UNIQUE	
+student_classes	created_at	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+student_classes	academic_year_id	int	int(11)	YES	NULL	NULL	NULL	
+student_classes_backup	id	int	int(11)	NO	0	NULL	NULL	
+student_classes_backup	user_id	int	int(11)	NO	NULL	NULL	NULL	
+student_classes_backup	class_id	int	int(11)	YES	NULL	NULL	NULL	
+student_classes_backup	academic_year	varchar	varchar(10)	NO	NULL	10	NULL	
+student_classes_backup	created_at	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+student_classes_backup	academic_year_id	int	int(11)	YES	NULL	NULL	NULL	
+student_diagnosis	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+student_diagnosis	student_id	int	int(11)	NO	NULL	NULL	FOREIGN KEY	
+student_diagnosis	teacher_id	int	int(11)	NO	NULL	NULL	FOREIGN KEY	
+student_diagnosis	class_id	int	int(11)	NO	NULL	NULL	FOREIGN KEY	
+student_diagnosis	subject_id	int	int(11)	YES	NULL	NULL	NULL	
+student_diagnosis	term_id	int	int(11)	NO	NULL	NULL	FOREIGN KEY	
+student_diagnosis	academic_year_id	int	int(11)	NO	NULL	NULL	FOREIGN KEY	
+student_diagnosis	diagnosis_date	date	date	NO	NULL	NULL	NULL	
+student_diagnosis	overall_status	enum	enum('excellent','good','average','needs_improveme...	NO	NULL	17	NULL	
+student_diagnosis	overall_score	decimal	decimal(5,2)	YES	NULL	NULL	NULL	
+student_diagnosis	academic_grade	varchar	varchar(2)	YES	NULL	2	NULL	
+student_diagnosis	comments	text	text	YES	NULL	65535	NULL	
+student_diagnosis	recommendations	text	text	YES	NULL	65535	NULL	
+student_diagnosis	created_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+student_diagnosis	updated_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+student_diagnosis_scores	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+student_diagnosis_scores	diagnosis_id	int	int(11)	NO	NULL	NULL	FOREIGN KEY	
+student_diagnosis_scores	criterion_id	int	int(11)	NO	NULL	NULL	FOREIGN KEY	
+student_diagnosis_scores	score	decimal	decimal(10,2)	YES	NULL	NULL	NULL	
+student_diagnosis_scores	remarks	text	text	YES	NULL	65535	NULL	
+student_diagnosis_scores	created_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+student_diagnosis_scores	updated_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+student_diagnosis_subject_tags	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+student_diagnosis_subject_tags	diagnosis_id	int	int(11)	NO	NULL	NULL	FOREIGN KEY	
+student_diagnosis_subject_tags	subject_id	int	int(11)	NO	NULL	NULL	FOREIGN KEY	
+student_diagnosis_subject_tags	tag_type	enum	enum('mastery','struggling')	NO	NULL	10	NULL	
+student_diagnosis_subject_tags	created_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+student_feedback	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+localhost:3306/qpmceduc_db/t/		https://cpanel.qpmcedu.com/cpsess1240990639/3rdparty/phpMyAdmin/index.php?route=/database/sql&db=qpmceduc_db
+
+   Showing rows 1000 - 1252 (1253 total, Query took 0.3626 seconds.) [TABLE_NAME: STUDENT_FEEDBACK... - V_TEACHER_DIAGNOSIS_STATS...]
+
+
+SELECT 
+    t.TABLE_NAME, 
+    c.COLUMN_NAME, 
+    c.DATA_TYPE,
+    c.COLUMN_TYPE,
+    c.IS_NULLABLE,
+    c.COLUMN_DEFAULT,
+    c.CHARACTER_MAXIMUM_LENGTH,
+    k.CONSTRAINT_TYPE
+FROM 
+    INFORMATION_SCHEMA.COLUMNS c
+JOIN 
+    INFORMATION_SCHEMA.TABLES t
+ON 
+    c.TABLE_NAME = t.TABLE_NAME
+LEFT JOIN 
+    INFORMATION_SCHEMA.KEY_COLUMN_USAGE ku 
+ON 
+    c.TABLE_NAME = ku.TABLE_NAME AND c.COLUMN_NAME = ku.COLUMN_NAME
+LEFT JOIN 
+    INFORMATION_SCHEMA.TABLE_CONSTRAINTS k
+ON 
+    ku.TABLE_NAME = k.TABLE_NAME AND ku.CONSTRAINT_NAME = k.CONSTRAINT_NAME
+WHERE 
+    t.TABLE_SCHEMA = 'qpmceduc_db'
+ORDER BY 
+    t.TABLE_NAME, c.ORDINAL_POSITION;
+
+
+TABLE_NAME   	COLUMN_NAME	DATA_TYPE	COLUMN_TYPE	IS_NULLABLE	COLUMN_DEFAULT	CHARACTER_MAXIMUM_LENGTH	CONSTRAINT_TYPE	
+student_feedback	user_id	int	int(11)	NO	NULL	NULL	NULL	
+student_feedback	class_id	int	int(11)	YES	NULL	NULL	NULL	
+student_feedback	assessment_id	int	int(11)	YES	NULL	NULL	NULL	
+student_feedback	feedback	text	text	NO	NULL	65535	NULL	
+student_feedback	rating	enum	enum('1','2','3','4','5')	NO	NULL	1	NULL	
+student_feedback	created_at	datetime	datetime	YES	current_timestamp()	NULL	NULL	
+student_fee_summary	user_id	int	int(11)	NO	NULL	NULL	NULL	
+student_fee_summary	student_name	varchar	varchar(100)	NO	NULL	100	NULL	
+student_fee_summary	email	varchar	varchar(255)	YES	NULL	255	NULL	
+student_fee_summary	class_name	varchar	varchar(255)	YES	NULL	255	NULL	
+student_fee_summary	department_name	varchar	varchar(100)	YES	NULL	100	NULL	
+student_fee_summary	academic_year	varchar	varchar(9)	YES	NULL	9	NULL	
+student_fee_summary	term_id	int	int(11)	YES	NULL	NULL	NULL	
+student_fee_summary	total_fee_items	bigint	bigint(21)	NO	0	NULL	NULL	
+student_fee_summary	total_fees	decimal	decimal(32,2)	NO	0.00	NULL	NULL	
+student_fee_summary	total_paid	decimal	decimal(32,2)	NO	0.00	NULL	NULL	
+student_fee_summary	balance	decimal	decimal(33,2)	NO	0.00	NULL	NULL	
+student_fee_summary	total_scholarship_discount	decimal	decimal(33,2)	NO	0.00	NULL	NULL	
+student_progress	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+student_progress	user_id	int	int(11)	NO	NULL	NULL	NULL	
+student_progress	assessment_id	int	int(11)	YES	NULL	NULL	NULL	
+student_progress	points_earned	int	int(11)	YES	0	NULL	NULL	
+student_progress	badge_id	int	int(11)	YES	NULL	NULL	NULL	
+student_progress	created_at	datetime	datetime	YES	current_timestamp()	NULL	NULL	
+student_progress	goal_description	text	text	YES	NULL	65535	NULL	
+student_reports	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+student_reports	user_id	int	int(11)	NO	NULL	NULL	UNIQUE	
+student_reports	class_id	int	int(11)	NO	NULL	NULL	UNIQUE	
+student_reports	term_id	int	int(11)	NO	NULL	NULL	UNIQUE	
+student_reports	attendance	int	int(11)	YES	NULL	NULL	NULL	
+student_reports	conduct	text	text	YES	NULL	65535	NULL	
+student_reports	attitude	text	text	YES	NULL	65535	NULL	
+student_reports	interest	text	text	YES	NULL	65535	NULL	
+student_reports	recommended_subjects	text	text	YES	NULL	65535	NULL	
+student_reports	encouragement	text	text	YES	NULL	65535	NULL	
+student_reports	reopening_date	date	date	YES	NULL	NULL	NULL	
+student_reports	teacher_remarks	text	text	YES	NULL	65535	NULL	
+student_reports	headmaster_remarks	text	text	YES	NULL	65535	NULL	
+student_reports	admin_comment	text	text	YES	NULL	65535	NULL	
+student_reports	promoted_to_class_id	int	int(11)	YES	NULL	NULL	NULL	
+student_reports	created_at	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+student_reports	updated_at	timestamp	timestamp	YES	NULL	NULL	NULL	
+student_scholarships	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+student_scholarships	student_id	int	int(11)	NO	NULL	NULL	UNIQUE	
+student_scholarships	student_id	int	int(11)	NO	NULL	NULL	FOREIGN KEY	
+student_scholarships	fee_id	int	int(11)	YES	NULL	NULL	UNIQUE	
+student_scholarships	fee_id	int	int(11)	YES	NULL	NULL	FOREIGN KEY	
+student_scholarships	scholarship_percentage	decimal	decimal(5,2)	NO	0.00	NULL	NULL	
+student_scholarships	is_active	tinyint	tinyint(1)	NO	1	NULL	NULL	
+student_scholarships	notes	text	text	YES	NULL	65535	NULL	
+student_scholarships	created_by	int	int(11)	YES	NULL	NULL	NULL	
+student_scholarships	created_at	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+student_scholarships	updated_at	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+subjects	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+subjects	subject_name	varchar	varchar(100)	NO	NULL	100	NULL	
+subjects	subject_code	varchar	varchar(20)	NO	NULL	20	UNIQUE	
+subjects	teacher_id	int	int(11)	YES	NULL	NULL	NULL	
+subjects	description	text	text	YES	NULL	65535	NULL	
+subjects	status	enum	enum('Active','Inactive')	YES	'Active'	8	NULL	
+subjects	created_by	int	int(11)	YES	NULL	NULL	NULL	
+subjects	created_at	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+subjects	updated_at	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+subjects	department_id	int	int(11)	NO	NULL	NULL	NULL	
+subjects	updated_by	int	int(11)	YES	NULL	NULL	NULL	
+teachers	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+teachers	first_name	varchar	varchar(255)	NO	NULL	255	NULL	
+teachers	last_name	varchar	varchar(255)	NO	NULL	255	NULL	
+teachers	email	varchar	varchar(255)	NO	NULL	255	UNIQUE	
+teachers	phone_number	varchar	varchar(20)	YES	NULL	20	NULL	
+teachers	department	varchar	varchar(255)	YES	NULL	255	NULL	
+teachers	hire_date	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+teachers	status	enum	enum('active','inactive')	YES	'active'	8	NULL	
+teachers	created_at	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+teachers	updated_at	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+teacher_evaluations	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+teacher_evaluations	teacher_id	int	int(11)	NO	NULL	NULL	NULL	
+teacher_evaluations	class_id	int	int(11)	NO	NULL	NULL	NULL	
+teacher_evaluations	subject_id	int	int(11)	YES	NULL	NULL	NULL	
+teacher_evaluations	term_id	int	int(11)	NO	NULL	NULL	NULL	
+teacher_evaluations	lesson_plan_id	int	int(11)	YES	NULL	NULL	NULL	
+teacher_evaluations	score_1	int	int(11)	YES	NULL	NULL	NULL	
+teacher_evaluations	score_2	int	int(11)	YES	NULL	NULL	NULL	
+teacher_evaluations	score_3	int	int(11)	YES	NULL	NULL	NULL	
+teacher_evaluations	score_4	int	int(11)	YES	NULL	NULL	NULL	
+teacher_evaluations	score_5	int	int(11)	YES	NULL	NULL	NULL	
+teacher_evaluations	score_6	int	int(11)	YES	NULL	NULL	NULL	
+teacher_evaluations	score_7	int	int(11)	YES	NULL	NULL	NULL	
+teacher_evaluations	score_8	int	int(11)	YES	NULL	NULL	NULL	
+teacher_evaluations	score_9	int	int(11)	YES	NULL	NULL	NULL	
+teacher_evaluations	score_10	int	int(11)	YES	NULL	NULL	NULL	
+teacher_evaluations	score_11	int	int(11)	YES	NULL	NULL	NULL	
+teacher_evaluations	score_12	int	int(11)	YES	NULL	NULL	NULL	
+teacher_evaluations	score_13	int	int(11)	YES	NULL	NULL	NULL	
+teacher_evaluations	score_14	int	int(11)	YES	NULL	NULL	NULL	
+teacher_evaluations	score_15	int	int(11)	YES	NULL	NULL	NULL	
+teacher_evaluations	score_16	int	int(11)	YES	NULL	NULL	NULL	
+teacher_evaluations	score_17	int	int(11)	YES	NULL	NULL	NULL	
+teacher_evaluations	positive_notes	text	text	YES	NULL	65535	NULL	
+teacher_evaluations	negative_notes	text	text	YES	NULL	65535	NULL	
+teacher_evaluations	created_at	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+teacher_evaluations	updated_at	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+teacher_evaluations	cuas	varchar	varchar(100)	YES	NULL	100	NULL	
+teacher_evaluations	week	varchar	varchar(50)	YES	NULL	50	NULL	
+teacher_evaluations	is_read	tinyint	tinyint(4)	YES	0	NULL	NULL	
+teacher_evaluations	admin_id	int	int(11)	YES	NULL	NULL	NULL	
+teacher_evaluations	department_id	int	int(11)	YES	NULL	NULL	NULL	
+teacher_evaluations	attendance_status	enum	enum('Absent','Present','Late')	NO	'Present'	7	NULL	
+teacher_notes	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+teacher_notes	teacher_id	int	int(11)	NO	NULL	NULL	NULL	
+teacher_notes	created_at	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+teacher_notes	week	int	int(11)	NO	NULL	NULL	NULL	
+teacher_notes	class_id	int	int(11)	NO	NULL	NULL	NULL	
+teacher_notes	term_id	int	int(11)	NO	NULL	NULL	NULL	
+teacher_notes	strand	varchar	varchar(255)	YES	NULL	255	NULL	
+teacher_notes	sub_strand	varchar	varchar(255)	YES	NULL	255	NULL	
+teacher_notes	content_standard	text	text	YES	NULL	65535	NULL	
+teacher_notes	indicator	text	text	YES	NULL	65535	NULL	
+teacher_notes	objectives	text	text	YES	NULL	65535	NULL	
+teacher_notes	reference	text	text	NO	NULL	65535	NULL	
+teacher_notes	resources	text	text	NO	NULL	65535	NULL	
+teacher_notes	keywords	varchar	varchar(255)	NO	NULL	255	NULL	
+teacher_notes	starter	text	text	NO	NULL	65535	NULL	
+teacher_notes	presentation	mediumtext	mediumtext	NO	NULL	16777215	NULL	
+teacher_notes	summary	text	text	NO	NULL	65535	NULL	
+teacher_notes	subject_id	int	int(11)	NO	0	NULL	NULL	
+teacher_notes	format	enum	enum('oxford','ges')	NO	'oxford'	6	NULL	
+teacher_notes	unit	varchar	varchar(255)	YES	NULL	255	NULL	
+teacher_notes	topic	varchar	varchar(255)	YES	NULL	255	NULL	
+termly_plans	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+termly_plans	annual_plan_id	int	int(11)	YES	NULL	NULL	NULL	
+termly_plans	teacher_id	int	int(11)	NO	NULL	NULL	NULL	
+termly_plans	class_id	int	int(11)	NO	NULL	NULL	NULL	
+termly_plans	subject_id	int	int(11)	NO	NULL	NULL	NULL	
+termly_plans	department_id	int	int(11)	NO	NULL	NULL	NULL	
+termly_plans	term_number	int	int(11)	NO	NULL	NULL	NULL	
+termly_plans	term_id	int	int(11)	NO	NULL	NULL	NULL	
+termly_plans	week	int	int(11)	NO	NULL	NULL	NULL	
+termly_plans	unit	varchar	varchar(255)	NO	NULL	255	NULL	
+termly_plans	topic	varchar	varchar(255)	NO	NULL	255	NULL	
+termly_plans	lesson	text	text	NO	NULL	65535	NULL	
+termly_plans	created_at	datetime	datetime	NO	current_timestamp()	NULL	NULL	
+termly_plans	updated_at	datetime	datetime	YES	NULL	NULL	NULL	
+termly_plans	format	enum	enum('oxford','ges')	NO	'oxford'	6	NULL	
+transcript_requests	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+transcript_requests	student_id	int	int(11)	YES	NULL	NULL	NULL	
+transcript_requests	request_type	enum	enum('official','unofficial')	NO	NULL	10	NULL	
+transcript_requests	delivery_method	enum	enum('email','physical','pickup')	NO	NULL	8	NULL	
+transcript_requests	delivery_email	varchar	varchar(255)	YES	NULL	255	NULL	
+transcript_requests	delivery_address	text	text	YES	NULL	65535	NULL	
+transcript_requests	status	enum	enum('pending','processing','completed','rejected'...	YES	'pending'	10	NULL	
+transcript_requests	requested_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+transcript_requests	updated_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+users	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+users	name	varchar	varchar(100)	NO	NULL	100	NULL	
+users	email	varchar	varchar(255)	YES	NULL	255	UNIQUE	
+users	email	varchar	varchar(255)	YES	NULL	255	UNIQUE	
+users	password	varchar	varchar(255)	NO	NULL	255	NULL	
+users	role	enum	enum('admin','teacher','student','parent','securit...	NO	NULL	14	NULL	
+users	created_at	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+users	status	varchar	varchar(20)	NO	'active'	20	NULL	
+users	archived_at	datetime	datetime	YES	NULL	NULL	NULL	
+users	archived_by	int	int(11)	YES	NULL	NULL	NULL	
+users	archive_reason	text	text	YES	NULL	65535	NULL	
+users	profile_picture	varchar	varchar(255)	YES	NULL	255	NULL	
+users	phone_number	varchar	varchar(20)	YES	NULL	20	NULL	
+users	national_id	varchar	varchar(100)	YES	NULL	100	NULL	
+users	admission_date	date	date	YES	NULL	NULL	NULL	
+users	department	varchar	varchar(100)	YES	NULL	100	NULL	
+users	gender	enum	enum('male','female','other')	NO	'male'	6	NULL	
+users	phone	varchar	varchar(15)	NO	NULL	15	NULL	
+users	address	text	text	NO	NULL	65535	NULL	
+users	last_login	datetime	datetime	YES	NULL	NULL	NULL	
+users	last_ip	varchar	varchar(45)	YES	NULL	45	NULL	
+users	department_id	int	int(11)	YES	NULL	NULL	NULL	
+users	force_password_change	tinyint	tinyint(1)	YES	1	NULL	NULL	
+users	advisor_id	int	int(11)	YES	NULL	NULL	NULL	
+users	updated_at	datetime	datetime	YES	NULL	NULL	NULL	
+users	class_id	int	int(11)	YES	NULL	NULL	NULL	
+user_library	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+user_library	user_id	int	int(11)	YES	NULL	NULL	NULL	
+user_library	book_id	int	int(11)	YES	NULL	NULL	NULL	
+user_library	added_at	datetime	datetime	YES	current_timestamp()	NULL	NULL	
+user_logs	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+user_logs	user_id	int	int(11)	NO	NULL	NULL	NULL	
+user_logs	action	varchar	varchar(255)	NO	NULL	255	NULL	
+user_logs	description	text	text	YES	NULL	65535	NULL	
+user_logs	ip_address	varchar	varchar(45)	YES	NULL	45	NULL	
+user_logs	user_agent	text	text	YES	NULL	65535	NULL	
+user_logs	created_at	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+user_temp_passwords	id	int	int(11)	NO	NULL	NULL	PRIMARY KEY	
+user_temp_passwords	user_id	int	int(11)	NO	NULL	NULL	UNIQUE	
+user_temp_passwords	temp_password	varchar	varchar(50)	NO	NULL	50	NULL	
+user_temp_passwords	expires_at	datetime	datetime	NO	NULL	NULL	NULL	
+user_temp_passwords	created_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+v_student_diagnosis_scores	diagnosis_id	int	int(11)	NO	0	NULL	NULL	
+v_student_diagnosis_scores	student_id	int	int(11)	NO	NULL	NULL	NULL	
+v_student_diagnosis_scores	student_name	varchar	varchar(100)	NO	NULL	100	NULL	
+v_student_diagnosis_scores	overall_status	enum	enum('excellent','good','average','needs_improveme...	NO	NULL	17	NULL	
+v_student_diagnosis_scores	overall_score	decimal	decimal(5,2)	YES	NULL	NULL	NULL	
+v_student_diagnosis_scores	academic_grade	varchar	varchar(2)	YES	NULL	2	NULL	
+v_student_diagnosis_scores	category_name	varchar	varchar(100)	NO	NULL	100	NULL	
+v_student_diagnosis_scores	criterion_name	varchar	varchar(255)	NO	NULL	255	NULL	
+v_student_diagnosis_scores	score	decimal	decimal(10,2)	YES	NULL	NULL	NULL	
+v_student_diagnosis_scores	score_remarks	text	text	YES	NULL	65535	NULL	
+v_student_diagnosis_scores	diagnosis_date	date	date	NO	NULL	NULL	NULL	
+v_student_diagnosis_scores	term_name	varchar	varchar(50)	NO	NULL	50	NULL	
+v_student_diagnosis_scores	year_label	varchar	varchar(20)	NO	NULL	20	NULL	
+v_student_diagnosis_summary	diagnosis_id	int	int(11)	NO	0	NULL	NULL	
+v_student_diagnosis_summary	student_id	int	int(11)	NO	0	NULL	NULL	
+v_student_diagnosis_summary	student_name	varchar	varchar(100)	NO	NULL	100	NULL	
+v_student_diagnosis_summary	student_email	varchar	varchar(255)	YES	NULL	255	NULL	
+v_student_diagnosis_summary	class_id	int	int(11)	NO	0	NULL	NULL	
+v_student_diagnosis_summary	class_name	varchar	varchar(255)	NO	NULL	255	NULL	
+v_student_diagnosis_summary	department	varchar	varchar(50)	YES	'Primary'	50	NULL	
+v_student_diagnosis_summary	overall_status	enum	enum('excellent','good','average','needs_improveme...	NO	NULL	17	NULL	
+v_student_diagnosis_summary	overall_score	decimal	decimal(5,2)	YES	NULL	NULL	NULL	
+v_student_diagnosis_summary	academic_grade	varchar	varchar(2)	YES	NULL	2	NULL	
+v_student_diagnosis_summary	comments	text	text	YES	NULL	65535	NULL	
+v_student_diagnosis_summary	recommendations	text	text	YES	NULL	65535	NULL	
+v_student_diagnosis_summary	diagnosis_date	date	date	NO	NULL	NULL	NULL	
+v_student_diagnosis_summary	term_name	varchar	varchar(50)	NO	NULL	50	NULL	
+v_student_diagnosis_summary	term_number	int	int(11)	NO	NULL	NULL	NULL	
+v_student_diagnosis_summary	year_label	varchar	varchar(20)	NO	NULL	20	NULL	
+v_student_diagnosis_summary	created_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+v_student_diagnosis_summary	updated_at	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+v_student_diagnosis_summary	criteria_evaluated	bigint	bigint(21)	NO	0	NULL	NULL	
+v_student_diagnosis_summary	avg_criteria_score	decimal	decimal(10,1)	NO	0.0	NULL	NULL	
+v_student_fee_summary	Student ID	varchar	varchar(20)	YES	NULL	20	NULL	
+v_student_fee_summary	User ID	int	int(11)	YES	NULL	NULL	NULL	
+v_student_fee_summary	Department	enum	enum('Pre-School','Kindergarten','Lower Primary','...	NO	NULL	13	NULL	
+v_student_fee_summary	Fee Type	varchar	varchar(50)	NO	NULL	50	NULL	
+v_student_fee_summary	Academic Year	varchar	varchar(9)	NO	NULL	9	NULL	
+v_student_fee_summary	Total Billed	decimal	decimal(10,2)	NO	NULL	NULL	NULL	
+v_student_fee_summary	Total Paid	decimal	decimal(10,2)	NO	0.00	NULL	NULL	
+v_student_fee_summary	Net Balance	decimal	decimal(10,2)	YES	NULL	NULL	NULL	
+v_student_fee_summary	Payment Status	varchar	varchar(11)	YES	NULL	11	NULL	
+v_student_fee_summary	Debt Amount	decimal	decimal(10,2)	NO	0.00	NULL	NULL	
+v_student_fee_summary	Payment %	decimal	decimal(15,1)	YES	NULL	NULL	NULL	
+v_student_fee_summary	Debt ID	int	int(11)	YES	0	NULL	NULL	
+v_student_fee_summary	Due Date	date	date	NO	NULL	NULL	NULL	
+v_student_fee_summary	Fee Record Created	timestamp	timestamp	NO	current_timestamp()	NULL	NULL	
+v_teacher_diagnosis_stats	teacher_id	int	int(11)	NO	NULL	NULL	NULL	
+v_teacher_diagnosis_stats	teacher_name	varchar	varchar(100)	NO	NULL	100	NULL	
+v_teacher_diagnosis_stats	total_students_diagnosed	bigint	bigint(21)	NO	0	NULL	NULL	
+v_teacher_diagnosis_stats	excellent_count	decimal	decimal(23,0)	YES	NULL	NULL	NULL	
+v_teacher_diagnosis_stats	good_count	decimal	decimal(23,0)	YES	NULL	NULL	NULL	
+v_teacher_diagnosis_stats	average_count	decimal	decimal(23,0)	YES	NULL	NULL	NULL	
+v_teacher_diagnosis_stats	needs_improvement_count	decimal	decimal(23,0)	YES	NULL	NULL	NULL	
+v_teacher_diagnosis_stats	critical_count	decimal	decimal(23,0)	YES	NULL	NULL	NULL	
+v_teacher_diagnosis_stats	average_overall_score	decimal	decimal(5,1)	NO	0.0	NULL	NULL	
+v_teacher_diagnosis_stats	classes_diagnosed	bigint	bigint(21)	NO	0	NULL	NULL	
+v_teacher_diagnosis_stats	terms_covered	bigint	bigint(21)	NO	0	NULL	NULL	
+v_teacher_diagnosis_stats	last_diagnosis	timestamp	timestamp	YES	current_timestamp()	NULL	NULL	
+	
+
+also the classes in the school are not named normal classes, for the sake pf the ai, Esther 
+foundation is Creche, Sheba one is nursery one, sheba 2 is nursery 2, yaasant one is kg 1, yaasant 2 is
+ kg 2, cleopatra one is basic one and cleopatra 2 is basic 2, nefertiti one is basic 3 and nefertiti 2is basic 4, 
+ malika one is basic 5 and malika two is basic 6, makeda one is basic 7,
+ makeda 2 is basic 8, an majesty is basic 9
+we are gooing to use the db i have pasted here and make the udates and enhancements
+
+curl "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent" \
+  -H 'Content-Type: application/json' \
+  -H 'X-goog-api-key: $apiKey = getenv('GEMINI_API_KEY');
+  -X POST \
+  -d '{
+    "contents": [
+      {
+        "parts": [
+          {
+            "text": "Explain how AI works in a few words"
+          }
+        ]
+      }
+    ]
+  }'
+  
+  add a skeleton loader to all the pages as well and then if its loading show status and progress

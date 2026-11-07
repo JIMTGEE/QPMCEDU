@@ -1,0 +1,491 @@
+﻿Folder PATH listing
+Volume serial number is 30FF-9795
+C:\USERS\GOOD\DOCUMENTS\NEW DIRECTORY
+|   .htaccess
+|   .phcode.json
+|   about.php
+|   admissions.php
+|   admissions_data.csv
+|   admissions_log.txt
+|   android-chrome-192x192.png
+|   android-chrome-512x512.png
+|   apple-touch-icon.png
+|   application-form.php
+|   class_schedules.sql
+|   contact.php
+|   db.txt
+|   debts.php
+|   error.log
+|   error_log
+|   error_log.txt
+|   favicon-16x16.png
+|   favicon-32x32.png
+|   favicon.ico
+|   gallery.php
+|   index.php
+|   login.php
+|   login_form.php
+|   logout.php
+|   nerd.html
+|   news.php
+|   parents.php
+|   programs.php
+|   queenest pic front.jpg
+|   site.webmanifest
+|   students.php
+|   sw.js
+|   tables.txt
+|   testimonials.php
+|   test_db.php
+|   test_mail.php
+|   
++---.well-known
+|   \---acme-challenge
++---academics_head
+|       add_calendar_entry.php
+|       add_class.php
+|       add_fee.php
+|       add_mapping.php
+|       add_subject.php
+|       add_user.php
+|       admissions.php
+|       analysis.php
+|       archives.php
+|       assign_class.php
+|       attendance.php
+|       bulk_reminder.php
+|       bulk_upload.php
+|       calendar.php
+|       class_management.php
+|       class_progress.php
+|       class_schedule.php
+|       class_schedules.php
+|       cleanup_profile_pictures.php
+|       create_group.php
+|       dashboard.php
+|       delete_calendar_enry.php
+|       delete_calendar_entry.php
+|       delete_class.php
+|       delete_subject.php
+|       delete_user.php
+|       edit_calendar_entry.php
+|       edit_class.php
+|       edit_plan.php
+|       edit_profile.php
+|       edit_student.php
+|       edit_subject.php
+|       edit_user.php
+|       error.log
+|       error_log
+|       error_log.txt
+|       evaluate_teacher.php
+|       fees_payments.php
+|       get_subjects.php
+|       launchcards.php
+|       lesson_schedule.php
+|       live_chat.php
+|       lms_portal.php
+|       manage_assignments.php
+|       manage_group_members.php
+|       manage_student_classes.php
+|       manage_users.php
+|       mark_attendance.php
+|       mark_notifications_read.php
+|       migrate_profile_pictures.php
+|       notifications.php
+|       observe_lesson.php
+|       parent_student.php
+|       pay_fee.php
+|       print_report_grades.php
+|       promote_learners.php
+|       report_card.php
+|       school_progress.php
+|       send_reminder.php
+|       student_list.php
+|       student_progress.php
+|       student_statistics.php
+|       subject_management.php
+|       submit_grades.php
+|       user_logs.php
+|       user_management.php
+|       view_admissions.php
+|       view_attendance.php
+|       view_class.php
+|       view_classes.php
+|       view_debts.php
+|       view_evaluations.php
+|       view_fee.php
+|       view_lesson_plan.php
+|       view_lesson_plans.php
+|       view_mock_report.php
+|       view_payments.php
+|       view_progress.php
+|       view_report_card.php
+|       view_schedules.php
+|       view_student.php
+|       view_subject.php
+|       view_user.php
+|       
++---admin
+|       add_calendar_entry.php
+|       add_class.php
+|       add_fee.php
+|       add_mapping.php
+|       add_subject.php
+|       add_user.php
+|       admin_assignments.php
+|       admissions.php
+|       analysis.php
+|       archives.php
+|       assign_class.php
+|       attendance.php
+|       bulk_reminder.php
+|       bulk_upload.php
+|       calendar.php
+|       class_management.php
+|       class_progress.php
+|       class_schedule.php
+|       class_schedules.php
+|       cleanup_profile_pictures.php
+|       create_group.php
+|       dashboard.php
+|       delete_calendar_enry.php
+|       delete_calendar_entry.php
+|       delete_class.php
+|       delete_subject.php
+|       delete_user.php
+|       edit_calendar_entry.php
+|       edit_class.php
+|       edit_plan.php
+|       edit_profile.php
+|       edit_student.php
+|       edit_subject.php
+|       edit_user.php
+|       error.log
+|       error_log
+|       evaluate_teacher.php
+|       fees_payments.php
+|       fee_details.php
+|       gallery.php
+|       get_subjects.php
+|       launchcards.php
+|       lesson_schedule.php
+|       live_chat.php
+|       lms_portal.php
+|       manage_assignments.php
+|       manage_group_members.php
+|       manage_student_classes.php
+|       manage_users.php
+|       mark_attendance.php
+|       mark_notifications_read.php
+|       migrate_profile_pictures.php
+|       notifications.php
+|       observe_lesson.php
+|       parent_student.php
+|       pay_fee.php
+|       print_report_grades.php
+|       promote_learners.php
+|       report_card.php
+|       school_progress.php
+|       send_reminder.php
+|       student_list.php
+|       student_progress.php
+|       student_statistics.php
+|       subject_management.php
+|       submit_grades.php
+|       temp.php
+|       user_logs.php
+|       user_management.php
+|       view_admissions.php
+|       view_attendance.php
+|       view_class.php
+|       view_classes.php
+|       view_debts.php
+|       view_evaluations.php
+|       view_fee.php
+|       view_lesson_plan.php
+|       view_lesson_plans.php
+|       view_mock_report.php
+|       view_payments.php
+|       view_progress.php
+|       view_report_card.php
+|       view_schedules.php
+|       view_student.php
+|       view_subject.php
+|       view_user.php
+|       
++---api
+|       assignment_details.php
+|       club_details.php
+|       error.log
+|       error_log
+|       events.php
+|       get_groups.php
+|       get_submissions.php
+|       get_teacher_notifications.php
+|       get_teacher_schedule.php
+|       grades.php
+|       group_details.php
+|       log_error.php
+|       manage_submissions.php
+|       mark_all_notifications_read.php
+|       mark_notification_read.php
+|       search_books.php
+|       student_calendar.php
+|       submit_assignment.php
+|       unread_notifications.php
+|       update_session.php
+|       
++---app
++---assets
+|   |   default_avatar.png
+|   |   
+|   +---images
+|   |       academics.png
+|   |       GREEN SIGN.webp
+|   |       kgf.jpg
+|   |       kgf1.jpg
+|   |       lab.jpg
+|   |       lab1.jpg
+|   |       logo.png
+|   |       mbf1.jpg
+|   |       mbf2.jpg
+|   |       ORANGE SIGN.webp
+|   |       play1.jpg
+|   |       play2.jpg
+|   |       RED SIGN.png
+|   |       seal.png
+|   |       signature_head.png
+|   |       stamp.png
+|   |       
+|   \---uploads
+|       \---profiles
+|               231_1763137165.jpeg
+|               
++---cgi-bin
++---config
+|       db.php
+|       gemini.php
+|       
++---functions
+|       csrf.php
+|       gemini_api.php
+|       insights.php
+|       log_activity.php
+|       qr_helper.php
+|       
++---includes
+|       helpers.php
+|       
++---logs
+|       activity.log
+|       auth_errors.log
+|       bulk_reminder_errors.log
+|       debug.log
+|       error.log
+|       fee_errors.log
+|       payment_errors.log
+|       php_errors.log
+|       sms.log
+|       
++---parent
+|       assignments.php
+|       attendance.php
+|       behavior_comments.php
+|       dashboard.php
+|       error_log
+|       exams.php
+|       fees.php
+|       library.php
+|       mark_notification.php
+|       profile.php
+|       reports.php
+|       sidebar.php
+|       
++---routes
++---student
+|   |   attendance.php
+|   |   dashboard.php
+|   |   ebook.php
+|   |   edit_profile.php
+|   |   edubot.php
+|   |   error.log
+|   |   error_log
+|   |   exam_schedule.php
+|   |   games.php
+|   |   learning_resources.php
+|   |   live_chat.php
+|   |   manage_student_assignments.php
+|   |   notifications.php
+|   |   submit_feedback.php
+|   |   test_ai_grading.php
+|   |   view_assignments.php
+|   |   view_grades.php
+|   |   view_schedule.php
+|   |   view_submission_feedback.php
+|   |   
+|   +---games
+|   |       code-and-conquer.html
+|   |       french-quest.html
+|   |       lab-simulator.html
+|   |       language-quest.html
+|   |       math-quiz.html
+|   |       memory-match.html
+|   |       solar-system-quest.html
+|   |       word-search.html
+|   |       
+|   \---Uploads
++---teacher
+|   |   annual_plan.php
+|   |   annual_plan_ges.php
+|   |   annual_plan_oxford.php
+|   |   chat_debug.php
+|   |   class_schedule.php
+|   |   create_assignment.php
+|   |   create_exam.php
+|   |   create_group.php
+|   |   create_resource.php
+|   |   daily_plan.php
+|   |   dashboard.php
+|   |   debug.log
+|   |   edit_assignment.php
+|   |   edit_exam.php
+|   |   edit_plan.php
+|   |   edit_profile.php
+|   |   edit_schedule.php
+|   |   edit_user.php
+|   |   end_term_grades.php
+|   |   error.log
+|   |   error_log
+|   |   fetch_submissions.php
+|   |   get_subjects.php
+|   |   grade_assignment.php
+|   |   input_academic_comments.php
+|   |   input_academic_scores.php
+|   |   input_mock_scores.php
+|   |   lesson_plan.php
+|   |   lesson_plan_ges.php
+|   |   lesson_plan_oxford.php
+|   |   login.php
+|   |   manage_assignments.php
+|   |   manage_attendance.php
+|   |   manage_behavior_comments.php
+|   |   manage_chats.php
+|   |   manage_exam_schedules.php
+|   |   manage_group_members.php
+|   |   manage_resources.php
+|   |   manage_students.php
+|   |   mark_attendance.php
+|   |   mid_term_grades.php
+|   |   notifications.php
+|   |   nput_academic_comments.php
+|   |   student_list.php
+|   |   submit_grades.php
+|   |   termly_plan.php
+|   |   termly_plan_ges.php
+|   |   termly_plan_oxford.php
+|   |   view_annual_plan.php
+|   |   view_assessment.php
+|   |   view_attendance.php
+|   |   view_class.php
+|   |   view_classes.php
+|   |   view_evaluations.php
+|   |   view_ges_annual_plan.php
+|   |   view_lesson_plan.php
+|   |   view_mock_report.php
+|   |   view_progress.php
+|   |   view_report_card.php
+|   |   view_student_reports.php
+|   |   view_submissions.php
+|   |   weekly_plan_ges.php
+|   |   weekly_plan_oxford.php
+|   |   
+|   \---uploads
+|       \---chat_pics
+|               grp_1774531090_69c5321209d6e.png
+|               grp_1774531092_69c53214250b5.png
+|               grp_1774531174_69c532667b510.png
+|               
++---templates
+|       admin_footer.php
+|       admin_header.php
+|       admin_header1.php
+|       error.log
+|       footer.php
+|       head.php
+|       header.php
+|       parent_footer.php
+|       parent_header.php
+|       student_footer.php
+|       student_header.php
+|       teacher_footer.php
+|       teacher_header.php
+|       
+\---uploads
+    +---assessments
+    |       assess_68416eb9b1b99_FRENCH CLASS 6.docx
+    |       
+    +---Assignments
+    |       1750321302_ScreenShot_1713255048052.png
+    |       1751553766_1f56a1bb7c404f2e8436641435cb87d4.jpg
+    |       1752550025_2023 B6 End of Term 3 Exams - FRENCH (A).pdf
+    |       1752569800_2017 BECE JUNE û FRENCH 1 (Q&A).pdf
+    |       1752751583_2023 B6 End of Term 3 Exams - FRENCH (A).pdf
+    |       1752781865_2021 BECE FRENCH  PAPER 1.pdf
+    |       1752788298_2021 BECE FRENCH  PAPER 1.pdf
+    |       1764757630_7045667849b9513a.pdf
+    |       1774546028_e9c1a0c49f46a2a9.jpg
+    |       1776427057_bb4e51a34f245826.pdf
+    |       1779310997_72ba751df3674dd3.png
+    |       1779718216_d1e1213ac48340d4.png
+    |       683972676baba_th.jpg
+    |       68397411ed701_th.jpg
+    |       
+    +---chat
+    |       1753376129_unnamed.jpg
+    |       
+    +---gallery
+    |       gallery_6a183059314f4_1779970137.jpeg
+    |       thumb_gallery_6a183059314f4_1779970137.jpeg
+    |       
+    +---profiles
+    +---resources
+    |       1755963895_Copilot_20250823_154330.png
+    |       1757327350_0D017228-768F-4141-A45F-A37F9B180F74.jpeg
+    |       1763382416_islamonline-net-124870.pdf
+    |       1776426706_List_of_caliphs.pdf
+    |       res_684193f364855_HISTORY-B1-B6 (1).pdf
+    |       
+    \---submissions
+        |   1752775545_1cf01aba61bdeae7.jpg
+        |   1752775564_f2b65db945b07741.jpg
+        |   1752787019_470d2727eead03fc.pdf
+        |   1774554206_4dacb479a7ddc61a.jpg
+        |   
+        +---117
+        +---118
+        +---122
+        +---321
+        +---323
+        +---48
+        +---51
+        \---59
+
+
+
+
+
+/attendance/
+├── index.php                 ← Scanner UI (entry/exit, staff clock)
+├── admin_dashboard.php       ← Live admin view
+├── offline_worker.js         ← Service Worker (optional, but we'll include)
+├── api/
+│   ├── scan.php              ← Main scan endpoint (student entry/exit)
+│   ├── override.php          ← Force allow denied entry
+│   ├── staff_clock.php       ← Staff clock in/out
+│   ├── bulk_data.php         ← Bulk student data for offline preload
+│   ├── events.php            ← SSE feed for admin dashboard
+│   └── sync_queue.php        ← Receive offline queued scans
+└── includes/
+    ├── auth_check.php        ← Role‑based access gate
+    └── helpers.php           ← Shared functions (threshold, toggle, etc.)
